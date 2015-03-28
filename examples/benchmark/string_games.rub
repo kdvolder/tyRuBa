@@ -1,0 +1,25 @@
+string_pend :: =String, =String, =String
+MODES 
+  (B,B,F) IS SEMIDET
+  (F,F,B) IS NONDET
+  (B,F,B) IS SEMIDET
+  (F,B,B) IS SEMIDET
+END
+
+string_pend(?x,?y,?xy) :- string_append(?x,?y,?xy), NOT( equals(?x,"") ), NOT( equals(?y,"") ).
+
+splatter :: =String, [=String]
+MODES
+  (B,F) IS NONDET 
+  (F,B) REALLY IS SEMIDET
+END
+
+splatter(?string,[?string]).
+splatter(?string,[?first|?rest]) :- string_pend(?first,?x,?string),splatter(?x,?rest).
+
+test :: =String
+MODES (B) IS NONDET END
+
+test(?x) :- BOUND ?x : splatter(?x,?zzz),splatter(?y,?zzz),false().
+
+//:- test(?x).

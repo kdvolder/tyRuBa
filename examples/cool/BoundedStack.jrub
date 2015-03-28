@@ -1,0 +1,10 @@
+#library "gen_initfile.rub"
+#include "layered.rub"
+#include "coolCodegenerator.rub" 
+#include "variations.rub"
+#include "BoundedStack.rub"
+
+//#generate BoundedStack
+
+classpath(".").  // to tell file generator where files should go
+:- genfiles .

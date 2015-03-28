@@ -1,0 +1,86 @@
+/**************************************************************************\
+ * termmatcher.rub
+ *
+ * A matching machine for terms
+ *
+\************************************************************************
+
+term_matcher_class(?cls,?AbstractTerm,?package) :- term_package(?package),
+    package_class(?package,TermMatcher,?cls),
+    term_abstract_class(?AbstractTerm,?).
+
+class_(?TermMatcher) 
+    :- term_matcher_class(?TermMatcher,?AbstractTerm,?package).
+public_(?TermMatcher).
+    :- term_matcher_class(?TermMatcher,?AbstractTerm,?package).
+    //implements_(?TermMatcher,java.lang.Cloneable).
+
+stack_class(?Stack,?AbstractTerm) :- 
+       term_matcher_class(?TermMatcher,?AbstractTerm,?package),
+       package_class(?package,TermStack,?Stack),
+       term_abstract_class(?AbstractTerm,?).
+
+var_(?TermMatcher,TermStack,stack).
+    :- term_matcher_class(?TermMatcher,?AbstractTerm,?package).
+var_(?TermMatcher,boolean,failed,{false})
+    :- term_matcher_class(?TermMatcher,?AbstractTerm,?package).
+    
+constructor_(?TermMatcher,[?AbstractTerm],[term], {
+        stack.push(term);})
+    :- term_matcher_class(?TermMatcher,?AbstractTerm,?package).
+
+method_(?TermMatcher,void,push,[?AbstractTerm],[term],{
+        stack.push(term); })
+    :- term_matcher_class(?TermMatcher,?AbstractTerm,?package).
+
+method_(?TermMatcher,Term,pop,[],[],{
+        return stack.pop(); } )
+    :- term_matcher_class(?TermMatcher,?AbstractTerm,?package).
+
+    method(?TermMatcher,void,fail,[],[],{
+        fail=true;})
+    :- term_matcher_class(?TermMatcher,?AbstractTerm,?package).
+
+method_(?TermMatcher,void,?deconstructTerm,[],[],{
+        if (failed) return;
+        try {
+            ?Term top = (?Term)stack.pop(); ?deconstruct_parts
+        }
+        catch (ClassCastException e) {
+            failed=true;
+        }}
+      )
+    :- term_matcher_class(?TermMatcher,?AbstractTerm,?package),
+	   term_production(?Term,?parts),
+       reverse(?parts,?rparts),
+       string_append(deconstruct,?Term,?deconstructTerm),
+	   map<deconstruct_part>(?rparts,?deconstruct_parts).
+
+deconstruct_part([?Type,?name],{
+            stack.push(top.?getter());}
+) :- getter_name(?name,?getter).
+
+class_(?Command)
+ :- term_composite(?Term,?),term_package(?package),
+    package_class(?package,?Term,?TermCls),
+    string_append(Deconstruct,?Term,?DeconstructTerm),
+    package_class(?package,?DeconstructTerm,?Command),
+    term_matcher_class(?TermMatcher|?).
+      
+    method_(?Command,void,execute,[?TermMatcher],[machine],{
+         machine.deconstruct?Term(); }
+    ).
+
+   IF package_class(?package,TermMatcherInstruction,?AbstractCommand) THEN
+       extends_(?Command,?AbstractCommand).
+       class_(?AbstractCommand).
+       abstract_(?AbstractCommand).
+       method_(?AbstractCommand,void,execute,[?TermMatcher],[machine]).
+       abstract_(method<?AbstractCommand,execute,[?TermMatcher]>).
+
+       mod_var_(?TermCls,[static],?AbstractCommand,match_instruction,
+           { new ?Command() }).
+   END
+
+END
+*/

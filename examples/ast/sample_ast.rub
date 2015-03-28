@@ -1,0 +1,20 @@
+#include "astgen.rub"
+
+// A very simple example AST grammar.
+
+ast_package(examples.ast).
+
+ast_root(Exp).
+
+ast_terminal(Number,int).
+ast_terminal(Operation,java.lang.String).
+
+ast_production(Exp,   BinOp).
+ast_production(Exp,   UnOp).
+ast_production(Exp,   Number).
+
+ast_production(BinOp,  [ [Operation,op], [Exp,e1], [Exp,e2] ] ).
+ast_production(UnOp,   [ [Operation,op], [Exp,e] ] ).
+
+// Example of a production of the kind A -> B*
+ast_production(Sequence, many<Exp>).

@@ -1,0 +1,22 @@
+//
+// Finds prime numbers
+//
+
+prime :: =Integer, =Integer
+MODES (F,B) IS NONDET END
+
+prime(2,3).
+
+prime(?p,?bound) :- greater(?bound,2),
+//debug_print({
+//getting primes for ?bound}),
+//debug_print({
+//getting primes for ?bound => ?p}),
+	(
+	 prime(?p,?dec_bound),sum(?dec_bound,1,?bound)
+	;
+	 sum(?p,1,?bound),NOT ( EXISTS ?f : prime(?f,?p), mul(?f,?,?p) )
+	).
+
+//:- prime(?p,20).
+

@@ -1,0 +1,148 @@
+/*
+ * print.rub
+ *
+ * Library of rules defining printing methods for AST nodes.
+ */
+
+
+/* 
+ * ast_default_print(?node,?lt,?sep,?rt).
+ *
+ * Printing method for nodes with multiple parts.
+ * Characterized by three delimiter strings.
+ */
+
+package_import_(?ast,"java.io.*") :- 
+   ast_package(?ast).
+
+abstract_(method<?c,print,[PrintStream]>) :- ast_root_class(?c).
+method_(?c,void,print,[PrintStream],[ostr]) :- ast_root_class(?c).
+
+ast_class_default_print(?class,?lt,?sep,?rt) :-
+  ast_default_print(?s,?lt,?sep,?rt),
+  ast_class_for(?s,?class).
+
+method_(?c,void,print,[PrintStream],[ostr],{ 
+        ostr.print("?lt"); ?printparts
+        ostr.print("?rt");})
+ :- ast_nonterm_class(?c,?parts),
+    ast_class_default_print(?c,?lt,?sep,?rt),
+    ast_printparts<?sep>(?parts,?printparts).
+
+ast_printparts<?sep>([],{}).
+ast_printparts<?sep>([[?T1,?n1],[?T2,?n2]|?r],{
+          ?n1.print(ostr); 
+        ostr.print("?sep"); ?printrest})
+     :- ast_printparts<?sep>([[?T2,?n2]|?r],?printrest).
+ast_printparts<?sep>([],{}).
+ast_printparts<?sep>([[?T1,?n1]],{
+          ?n1.print(ostr);}).
+
+method_(?c,void,print,[PrintStream],[ostr],{ 
+        ostr.print(?n.toString());})
+     :- ast_terminal_class(?c,[?T,?n]),
+        NOT(ast_class_default_print(?c,?lt,?sep,?rt)).
+
+method_(?c,void,print,[PrintStream],[ostr],{ 
+        ostr.print("?lt");
+        ostr.print(?n.toString());
+        ostr.print("?rt");})
+     :- ast_terminal_class(?c,[?T,?n]),
+        ast_class_default_print(?c,?lt,?sep,?rt).
+
+method_(?c,void,print,[PrintStream],[ostr],{ 
+        ostr.print("?lt");
+        int size = this.size();
+        for (int i=0;i<size;i++) {   
+            if (i!=0) 
+                ostr.print("?sep");
+            this.get(i).print(ostr);
+        }
+        ostr.print("?rt");})
+     :- ast_many_nonterm_class(?c,?T),
+        ast_class_default_print(?c,?lt,?sep,?rt).
+
+/*
+ * ast_wrapped_print(?node).
+ *
+ * The ?node should be "wrapper" node, i.e. it should have precisely one
+ * child node. The wrapped print method simply delegates printing to the
+ * part node.
+ */
+
+method_(?c,void,print,[PrintStream],[ostr],{ 
+        ?child.print(ostr);})
+     :- ast_nonterm_class(?c,[[?T,?child]]),
+        ast_class_for(?node,?c),ast_wrapped_print(?node).
+
+/*
+ * ast_string_print(?node,?printstring).
+ *
+ * The ?node should be a childless node. The printing method for this node
+ * will simply print the ?printstring.
+ */
+
+method_(?c,void,print,[PrintStream],[ostr],{ 
+        ostr.print("?printstring");})
+     :- ast_nonterm_class(?c,[]),ast_class_for(?node,?c),
+        ast_string_print(?node,?printstring).
+
+/*
+ * ast_list_print(?node,?lt,?sep1,?sep2,?rt).
+ *
+ * The ?node should be abstract node defined with precisely
+ * two subtypes, one to present the emptylist and one to
+ * represent a pair.
+ *
+ * ast_production(?Node,?EmptyListNode),
+ * ast_production(?EmptyListNode,[]),
+ * ast_production(?PairNode,[[?Car,?car],[?Cdr,?cdr]])
+ */
+
+ast_class_list_print(?List,?Pair,?car,?Cdr,?cdr,?EmptyList,?lt,?sep1,?sep2,?rt)
+     :- ast_list_print(?node,?lt,?sep1,?sep2,?rt),
+        ast_class_for(?node,?List),
+        ast_abstract_nonterm_class(?List,?EmptyList),
+        ast_nonterm_class(?EmptyList,[]),
+        ast_abstract_nonterm_class(?List,?Pair),
+        ast_nonterm_class(?Pair,[[?Car,?car],[?Cdr,?cdr]]).
+
+method_(?Pair,void,printCdr,[boolean,?Cdr,PrintStream],[begin,cdr,ostr],{
+        if (cdr instanceof ?Pair) {
+           ?Pair pcdr = (?Pair)cdr;
+           if (!begin) ostr.print("?sep1");
+           pcdr.?car.print(ostr);
+           printCdr(false,pcdr.?cdr,ostr);
+        }
+        else if (!(cdr instanceof ?EmptyList)) {
+           ostr.print("?sep2"); 
+           cdr.print(ostr);
+        }}) 
+     :- ast_class_list_print(?List,?Pair,?car,?Cdr,?cdr,?EmptyList,?lt,?sep1,?sep2,?rt).
+
+method_(?Pair,void,print,[PrintStream],[ostr],{ 
+        ostr.print("?lt");
+        printCdr(true,this,ostr);
+        ostr.print("?rt");})
+     :- ast_class_list_print(?List,?Pair,?car,?Cdr,?cdr,?EmptyList,?lt,?sep1,?sep2,?rt).
+     
+method_(?EmptyList,void,print,[PrintStream],[ostr],{ 
+        ostr.print("?lt?rt");})
+     :- ast_class_list_print(?List,?Pair,?car,?Cdr,?cdr,?EmptyList,?lt,?sep1,?sep2,?rt).
+
+method_(?c,void,print,[PrintStream],[ostr],{ 
+        ostr.print("?printstring");})
+     :- ast_nonterm_class(?c,[]),ast_class_for(?node,?c),
+        ast_string_print(?node,?printstring).
+
+/*
+ * ast_custom_print(?node,?methodbody).
+ *
+ * Provides an arbotray implmentation for the printmethod of a given node.
+ */
+
+method_(?c,void,print,[PrintStream],[ostr],?methodbody)
+     :- ast_class_for(?node,?c),
+        ast_custom_print(?node,?methodbody).
+
+

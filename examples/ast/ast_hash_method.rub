@@ -1,0 +1,45 @@
+//
+// Provides an implementation of a hashmethod for any AST node rooted
+// at a given node.
+//
+
+hash_method(?c,hashCode) :- ast_root_class(?c).
+hash_method(?c,?m) :- ast_hash_method(?n,?m),ast_class_for(?n,?c).
+
+abstract_(method<?c,?hashCode,[]>) :- hash_method(?c,?hashCode).
+method_(?c,int,?hashCode,[],[])    :-  hash_method(?c,?hashCode).
+
+needs_hash_method(?c,?hashCode) :- hash_method(?c,?hashCode).
+needs_hash_method(?c,?hashCode) :- extends_(?c,?super),needs_hash_method(?super,?hashCode).
+
+method_(?class,int,?hashCode,[],[],{
+       final int size = size();
+       int hash = getClass().hashCode();
+       for (int i=0;i<size;i++)
+           hash = hash*19 + get(i).?hashCode();
+       return hash;})
+:- ast_many_nonterm_class(?class,?T),
+   needs_hash_method(?class,?hashCode).
+
+method_(?class,int,?hashMethod,[],[],{
+        return ?hashcode;})
+:- ast_nonterm_class(?class,?parts),
+   needs_hash_method(?class,?hashMethod),
+   parts_hashcode<?hashMethod>(?parts,?hashcode).
+
+parts_hashcode<?hashMethod>([], {this.getClass().hashCode()}).
+parts_hashcode<?hashMethod>([ [?C,?n] | ?rest ], {?n.?hashMethod() + 13*( ?restcode )})
+   :- parts_hashcode<?hashMethod>(?rest,?restcode).
+
+method_(?class,int,?hashMethod,[],[],{
+        return ?hashcode;})
+  :- needs_hash_method(?class,?hashMethod),
+     ast_terminal_class_hashcode(?class,?hashMethod,?hashcode).
+     
+ast_terminal_class_hashcode(?class,?hashMethod,?hashcode)
+  :- ast_class_for(?node,?class),
+     ast_terminal_hashcode(?node,?hashMethod,?hashcode).
+
+ast_terminal_hashcode(?node,hashCode,{?name.hashCode()}) 
+  :- ast_terminal(?node,[?T,?name]).
+     

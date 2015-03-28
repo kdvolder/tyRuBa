@@ -1,0 +1,9 @@
+----- results for tests in benchmark.qry -------
+splatter(abcdefghijklmnop,?x),splatter(?y,?x)  #results = 32768  seconds = 16.189
+topo_sort(?x)  #results = 27388  seconds = 11.086
+prime(?x,250)  #results = 53  seconds = 0.586
+selection(?lx,[a,b,c,d,e,f,g,h]),implode(?lx,?x)  #results = 256  seconds = 0.056
+selection(?lx,[a,b,c,d,e,f,g,h]),implode(?lx,?x)  #results = 256  seconds = 0.0090
+selection(?lx,[a,b,c,d,e,f,g,h]),implode(?lx,?x),bench_forward(?x,?bork)  #results = 219  seconds = 0.058
+selection(?lx,[a,b,c,d,e,f,g,h]),implode(?lx,?x),bench_backward(?bork,?x)  #results = 219  seconds = 0.972
+

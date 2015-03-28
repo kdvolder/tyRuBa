@@ -1,0 +1,72 @@
+/*
+ * A tyruba program that generates a large number of facts and writes 
+ * them to a standard output.
+ * 
+ * This file is used in conjunction with benchmark.rub. See Makefile
+ * on how to run factgen to generate the testset of facts before
+ * running the benchmark.
+ */
+
+// For creating atoms from lists
+implode :: [=String], =String
+MODES 
+  (B,F) IS DET 
+END
+
+implode([],"").
+implode([?l|?ist],?s_list) :- implode(?ist,?s_ist), string_append(?l,?s_ist,?s_list).
+
+// We use this for making many different lists (to make many atoms)
+
+factgen :: =String, =String, [=String]
+MODES
+  (F,F,B) IS NONDET
+END
+
+factgen(?x,?y,?list) :- selection(?l_x,?list),append([?a,?b,?c],?,?l_x),
+	implode([?a,?b,?c],?y),implode(?l_x,?x).
+
+factgen :: =String
+MODES
+  (B) IS SEMIDET
+END
+
+// Will produce about 128000 simple facts
+factgen(?xxx) :- BOUND ?xxx : // factgen(?x,?y,[a,b,c,d, e,f,g,h, i,j,k,l]),
+        write_output({bench_forward :: String, String
+PERSISTENT MODES 
+  (F,F) IS MULTI
+  (B,F) IS SEMIDET
+  (F,B) IS NONDET
+END
+
+bench_backward :: String, String
+PERSISTENT MODES 
+  (F,F) IS MULTI
+  (F,B) IS SEMIDET
+  (B,F) IS NONDET
+END
+}),
+        factgen(?x,?y,[a,b,c,d, e,f,g,h, i,j,k,l, m,n,o,p]),
+	// will generate approximately 64000 pairs of ?x and ?y atoms
+	// ?y is functionally dependent on ?x
+
+	debug_print({?y *** }), // to have an idea of progress
+	write_output({bench_forward("?x","?y").
+bench_backward("?y","?x").
+}), false() .
+
+factgen :: ()
+
+factgen() :- factgen(go).
+
+querygen :: ()
+MODES () IS SEMIDET END
+
+querygen() :- selection(?lx,[a,b,c,d,e,f,g]),implode(?lx,?x),
+	write_output({:- bench_backward(??x,"?x").
+}).
+
+querygen() :- selection(?lx,[a,b,c,d,e,f,g]),implode(?lx,?x),
+	write_output({:- bench_forward("?x",??y).
+}).

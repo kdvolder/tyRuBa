@@ -1,0 +1,25 @@
+#library "gen_initfile.rub"
+
+#include "astgen.rub"
+#include "ast_print.rub"
+#include "ast_equality.rub"
+#include "ast_hash_method.rub"
+#include "ast_factory.rub"
+
+#include "modes_ast.rub"
+#include "modes_print.rub"
+
+#include "extra_stuff.rub"
+
+#include "check_equal_types.rub"
+
+ast_hash_method(Term,formHashCode).
+ast_terminal_hashcode(Variable,formHashCode,0).
+ast_terminal_hashcode(?Terminal,formHashCode,?hashcode) :-
+   ast_terminal(?Terminal), NOT( equal(?Terminal,Variable) ),
+   ast_terminal_hashcode(?Terminal,hashCode,?hashcode).
+
+//:- file(?fle,?contents).
+
+:- ast_class_list_print(?List,?Pair,?car,?Cdr,?cdr,?EmptyList,?lt,?sep1,?sep2,?rt).
+:- genfiles .

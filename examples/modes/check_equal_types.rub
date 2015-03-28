@@ -1,0 +1,7 @@
+//
+// Implementation of a ...
+//
+
+method_(?Type,boolean,checkEqualTypes,[?Type],[other]) :- ast_class_for(Type,?Type).
+abstract_(method<?Type,checkEqualTypes,[?Type]>) :- ast_class_for(Type,?Type).
+

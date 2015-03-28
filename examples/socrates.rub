@@ -1,0 +1,27 @@
+#include "predicate_declaration.rub"
+
+/* Data about Socrates */
+human(Socrates).
+
+/* Data about Kris */
+human(Kris).
+livesIn(Kris,Vancouver).
+alive(Kris).
+
+/* Data about John */
+human(John).
+livesIn(John,Denver).
+
+/* Data about people in Paris */
+human(Jacques).
+livesIn(Jacques,Paris).
+human(Jeanette).
+livesIn(Jeanette,Paris).
+
+dog(Fifi).
+livesIn(Fifi,Vancouver).
+
+city(Vancouver).
+city(Paris).
+city(Denver).
+city(HongKong).

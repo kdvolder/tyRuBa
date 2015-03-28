@@ -1,0 +1,56 @@
+
+//default_print_template({?lines}) :-
+//   FINDALL(ast_symbol(?x),{ast_default_print(?x,"?x(",",",")").
+//},?lines).
+//
+//:- default_print_template(?copy_paste).
+
+ast_string_print(Bound, "B").
+ast_string_print(Free, "F").
+
+ast_default_print(BindingList,  "(", ",",  ")" ).
+ast_default_print(PredicateMode,  "", " is ",  "" ).
+
+ast_custom_print(TVar,{
+        ostr.print("??"+name.toString());}).
+ast_custom_print(AtomicType,{
+        ostr.print(name.toString());}).
+ast_custom_print(CompositeType,{
+        ostr.print(name.toString());
+        types.print(ostr);}).
+
+ast_default_print(TypeList,  "(", ", ",  ")" ).
+
+/*
+ast_custom_print (CompoundTerm,{
+        int size = size();
+        if (size==0) 
+            ostr.print("<>");
+        else {
+        	get(0).print(ostr);
+        	ostr.print("<");
+        	for (int i=1;i<size;i++) {
+        	    if (i>1)
+        	        ostr.print(",");
+        	    get(i).print(ostr);
+        	}
+        	ostr.print(">");
+        }}).
+
+ast_default_print(Not,            "NOT(",            ",",  ")" ).
+ast_default_print(Conjunction,    "AND(",            ",",  ")" ).
+ast_default_print(Disjunction,    "OR(",             ",",  ")" ).
+
+ast_default_print(CompilationUnit,"MODULE ",      "\\n", "\\nEND." ).
+
+ast_default_print(Assertions,     "",                "\\n", ""  ).
+ast_default_print(Fact,           "",                ":-", "." ).
+ast_default_print(Rule,           "",                ":-", "." ).
+ast_default_print(Query,          ":-",              "",   "." ).
+ast_default_print(Include,        "#include ",       "",   "").
+
+*/
+
+//ast_wrapped_print(TermExpression).
+
+//ast_list_print(List,           "[",   ",",  "|",  "]" ).

@@ -1,0 +1,88 @@
+This contains all the example code for the "COOL" synchronization aspect 
+language described in the Reflection'99 paper on Aspect-Oriented Logic 
+Meta Programming. 
+
+Download paper: 
+http://prog.vub.ac.be/Research/ResearchPublicationsDetail2.asp?paperID=66
+
+Read in detail about this example in the paper. This file only provides 
+basic explanation about the pragmatics of loading these files and how they 
+are organized.
+
+All files ending in .rub are supposed to be include files. Some 
+special file names are
+
+  initfile.rub -- 
+     A file which is must be loaded always. This contains 
+     basic definitions of code generator stuff, basic predicates, etc.  
+     This does not have directly to do with the example (but
+     is needed) 
+
+     To load this file with the current
+     version of tyruba, you must override its default initfile
+     from being loaded like this:
+
+     tyruba -noinit initfile.rub ...other arguments...
+
+
+  BoundedStack.jrub   -- The input file which loads other files and
+     instructs the code generator to generate BoundedStack.java
+     This file is an 'instance' of the naming convention: 
+
+  xxx.jrub files
+     A number of other .jrub files are versions of input.jrub, which 
+     generate only a part of the code.
+
+  xxx.java 
+     generated code for the corresponding .jrub file
+  
+  prolog.rub
+     Defines some basic logic predicates such as equal, append, etc.
+
+  deduced.rub 
+     Some very basic predicates deducing a few simple but
+     useful things about java code.
+
+  java.rub
+     Some auxilairy predicaes for generating little bits and pieces of Java
+     code.
+
+  coolCodegenerator.rub
+     The code generator (weaver) for the COOL aspect language. Uses 
+     layered.rub.
+
+  layered.rub
+      A simple setup for layered code generators (layer to layer 
+      code tranformations).
+
+  Variations.rub
+      The user-defined aspect language variations from the paper. Defined on
+      top of the simplest cool aspect language.
+
+  BoundedStack.java
+     The generated code from this example.
+    
+  Test.java
+     A test class which does something with the BoundedStack to see if it 
+     really works. 
+
+
+NOTE
+
+   If you which to actively play around with these examples rather than 
+   simply look at them and the provided output here...
+   Download and install the tyruba commandline or application from
+   http://www.cs.ubc.ca/~kdvolder/TyRuBa/
+
+   To generate the BoundedStack.java file type the command:
+   tyruba BoundedStack.jrub BoundedStack.java
+   
+   Current version of tyruba does not have an interactive interface. If you want to
+   type queries and see their result, for example to get a better idea of what is in
+   the rulebase, the easies way is to edit the BoundedStack.jrub file and add your
+   queries to the end of that file. The result of queries will be printen on
+   the standard error device.
+
+Send any comments or questions to me:
+
+--- Kris De Volder <kdvolder@cs.ubc.ca>

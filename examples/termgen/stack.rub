@@ -1,0 +1,39 @@
+/***********************************************************************
+ * stack.rub
+ *
+ *  Declare a fact
+ * 
+ *  stack_class(?cls,?ElementType).
+ *
+ *  to create a class ?cls which implements a stack of ?ElementType
+\**********************************************************************/
+
+stack_class(?Stack,?Bucket,?Term) :- stack_class(?Stack,?Term),
+    string_append(?Term,Bucket,?Bucket).
+
+class_(?Stack) 
+:- stack_class(?Stack,?Bucket,?Term).
+
+var_(?Stack,?Bucket,stack,null)
+:- stack_class(?Stack,?Bucket,?Term).
+  
+method_(?Stack,void,push,[?Term],[term],{
+	stack = new ?Bucket(term,stack); })
+:- stack_class(?Stack,?Bucket,?Term).
+	
+
+method_(?Stack,?Term,pop,[],[],{
+	if (empty())
+            throw new Error("Pop from empty stack");
+        Term result = stack.first;
+        stack = stack.next;
+        return result; })
+:- stack_class(?Stack,?Bucket,?Term).
+
+method_(?Stack,boolean,empty,[],[],{
+	return stack==null; })
+:- stack_class(?Stack,?Bucket,?Term).
+    
+data_class_(?Bucket,[ [?Term,first], [?Bucket,next] ])
+:- stack_class(?Stack,?Bucket,?Term).
+

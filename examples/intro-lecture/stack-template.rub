@@ -1,0 +1,24 @@
+class_(example.Simple).
+
+
+/*
+generate(Stack<?El>,{
+public class Stack_?El {
+
+   private int top=0;
+   private ?El[] contents;
+
+   public Stack_?El() {
+      contents = new ?El[100];
+   }
+
+   public void push(?El e) {
+      contents[top++]=e;
+   }
+
+   public ?El pop() {
+      return contents[--top];
+   }
+
+}}).
+*/

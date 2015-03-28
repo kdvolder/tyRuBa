@@ -1,0 +1,547 @@
+This is the Readme file for the TyRuBa5.13 distribution package
+
+Also visit the website
+
+http://tyruba.sourceforge.net/
+
+There are some more documentation files there, describing the actual logic 
+language.
+
+NEW IN RELEASE 5.13
+
+  1) Important: this release sacrifices some of the meta programming 
+  capability of using "|" inside compound terms and predicates to express
+  variable arity functors and predicates. 
+
+  I noticed that in practice these features are hardly used. By removing
+  them I was able to enhance memory performance for larger factbase and
+  their indexes by about 20% to 30% (this number based on a 
+  rather simplistic benchmark).
+
+  2) Bugfix to the NODUP meta predicate.
+
+  3) Added a TERM2LIST meta predicate to compensate for the loss
+  of flexibility explained in 1). The lib/prolog.rub predicates 
+  arg and functor have also been reimplemented using TERM2LIST | term
+  pattern matching.
+
+NEW IN RELEASE 5.12
+
+   A "retract" funtion was added to FrontEnd
+   Some convenient factory methods where added to FrontEnd
+   (and removed from the now obsolete Query class)
+   Some deprecated API's in FrontEnd fixed (thanks to Stefan Hanenberg)
+
+   A number of bugfixes.
+   
+NEW IN RELEASE 5.11
+
+  A few more bugfixes to the commandline interpreter.
+
+  A more sophisticated factbase indexing mechanism. The mechanism now
+  also supports speeding up lookups which bind variables in the left
+  part of the query but have constants in the right part. See
+  examples/benchmark/ directory. The speedup between the old indexing
+  mechanism and the new one should be quite obvious.
+
+  A commandline option "-old_factbase" to switch-off the new factbase
+  indexing mechanism and use the old one instead (useful for comparing
+  the performance of both: see examples/benchmark).
+
+NEW IN RELEASE 5.10
+
+ - There now are ASSERT and RETRACT expressions which allow adding and
+   removing ground facts during evaluation. Still undocumented and highly
+   experimental. I may decide to change or remove it altogether.
+
+ - The major reason for releasing this package is the addition of a
+   rudimentary regexp matching utility. A minimal extension to the
+   lexical analyzer has been added to allow "regexp objects" in the
+   syntax. A minimal interface to match regexp objects to strings
+   is added to the library in lib/regexp.rub. This interface may
+   be extended later. Feedback about this is welcome.
+
+NEW IN RELEASE 5.9
+
+  - some restructuring of the sources. 
+    o There is now a class called
+      "FrontEnd" which offers somewhat clearer interface towards users
+      wanting to call tyruba from their Java applications.
+    o Package structure has been simplified.
+
+  - Library extensions:
+    o An alternative to using #generate. See the library file 
+      "lib/filegenerator.rub". Uses predicates to write to files.
+       This allows more control from within tyruba what files to write
+       by declaring facts of the form file(name,contents)
+    o  A way to add imports to generated files.
+    o  "javagenerator: support for exceptions and interface generation"
+    o  Capitalization functions (in lib/tyni.rub)
+    o  lib/mail.rub: A function to send email from tyruba. Use TyNI to call
+       Java Mail API. To use this you must install the Java Mail API and
+       edit the tyruba shell script to add the mail.jar and activation.jar 
+       files to the classpath.
+
+  - TyNI changes
+    o Less cumbersome notation for java class terms:
+      #java.lang.String instead of #<java.lang.String>
+
+  - TyRuBa now uses java.lang.SoftReference to represent
+    The query cache. This means that query entries don't stick around for
+    ever. Results in some loss of speed but much better memory usage.
+    In practice, it seems programs don't slow down too much because of the
+    cache misses (a cache miss due to cleared entry is seen by the printing
+    of a @)
+
+  - Added a "multirule" IF conditions THEN rules END. I don't like the syntax
+    and the way it works so this is likely to disappear in the future. 
+
+BUILDING:
+
+With GNU make:
+
+Just type "make tyruba.jar" (or gmake, depending on how gnu make was
+installed on your system) the top-level directory of the distribution
+package. You will need to have JavaCC installed to generate the
+parser. If you don't want to bother with this, you can download the
+precompiled version.
+
+You can edit the makefile to avoid compiling the mail goody (see a
+comment in the makefile). You might want to do that in case you want to avoid
+installing the Java Mail API.
+
+RUNNING:
+
+To run the command-line application:
+
+  1) Put the tyruba.jar file on your classpath. 
+  2) Start the main class: tyRuBa.applications.CommandLine
+
+The most convenient way to accomplish this and run tyruba from the 
+commandline is probably to have a look at the bin/tyruba shell script. 
+Move this to somewhere on your path. You may need to edit it so that it 
+points to wherever you stored your tyruba.jar file 
+
+If you did all that, you should be able to run tyruba from the commandline
+by invoking the tyruba command. See below for a description of commandline
+options and syntax.
+
+THE GUI INTERFACE
+
+For a short time tyruba had a simple GUI front-end. But it was too
+primitive to be of any use anyway, so it has been discontinued. It may
+be revitalized in the future. For now only a command-line version is
+available. If you are interested in developing a GUI front end, send
+me email kdvolder@cs.ubc.ca
+
+COMMANDLINE INTERFACE
+
+"tyruba" ["-noinit"] ("-silent" | "-nocache" | "-nofactbase" | 
+                      "-old_factbase" "-i" | "-o" filename | filename)*
+
+This will start the tyruba logic engine.  
+
+INITFILES
+
+Before starting to process the commandline, tyruba starts by reading a file
+called initfile.rub.  This file is packaged with tyruba in its jar file. 
+You can suppress loading this file by having the -noinit option as the very
+FIRST option of the commandline.  Note that a copy of the initfile lives in
+lib/.  If you edit them you must rebuild the .jar file or your changes
+won't be taking effect.  There is documentation on some of the basic
+predicates at http://tyruba.sourceforge.net.
+
+Tyruba's initfiles are still highly experimental, not very elaborate
+and may be quite buggy. So it is not altogether fictional you may want to
+use this option. Also, this option may be useful if you want to
+use tyruba for a different purpose and consequently would like to
+provide a different initfile.
+
+COMMANDLINE PROCESSING
+
+After reading the initfile, the commandline is read from left to
+right. Options and filenames are processed directly, in that order
+(i.e.  left to right).
+
+The engine will load logic files, parse them and interpret them.
+Queries occurring in the parsed files will be processed directly after
+they are parsed. The result of the query will be printed on the
+standard error device.  Queries are normally not part of a regular
+tyruba program, but they may be helpful as a rudimentary debugging
+mechanism to inspect the state of the logic database, when the program
+performs unexpectedly.  
+
+GENERATING OUTPUT
+
+The old way for a tyruba program to generate output is through using a 
+
+#generate Something
+
+directive. The generate directive works as follows: when tyruba encounters
+a generate directive like the one above it will launch a query
+
+:- generate(Something,?result).
+
+It will get the first result returned from that query, get the binding
+for the variable ?result and dump this on the current output file (set
+by the -o option).
+
+This generation mechanism is built into the tyruba engine. The way you
+affect code generation is by implementing rules/facts that tell how/what
+exactly is generated.
+
+The initfile that comes with tyruba implements a generation mechanism
+for Java code that assembles classes and interfaces from facts
+describing them.
+
+There are now also predicates in lib/tyni.rub which can be used to generate
+output (e.g writing a file). Also check out the lib/filegenerator.rub file.
+The generate directive is basically obsolete and less flexible than the
+mechanism which uses predicate calls to generate output. It will probably 
+be discontinued in future releases.
+
+For more information about using tyruba, how to write logic rules and
+facts. How to use the generate directive and other things. Go see the
+TyRuBa tutorial/manual file. (Manual is not complete at this time)
+
+COMMANDLINE OPTIONS
+
+ -noinit 
+
+     This option must be the very first in the command-line! It
+     suppresses reading of the standard initfile "initfile.rub" which is
+     packaged in the .jar file.  Use this option if you want to use a
+     different initfile. Then load your own initfile just like any
+     ordinary file. Note if you want to use this option, you may find
+     it helpfull to browse the initfiles in lib/ (for inspiration on 
+     writing your own)
+ 
+ -o <filename>
+
+     Sets the output file to the given filename. What is written to
+     the output file is only the result of #generate directives in the
+     tyruba program. Results of queries are written to standard error
+     device and are not affected by this option.
+
+     Note also that due to the way that options and filenames are
+     interpreted left-to-right, this option only affects the output
+     generated by input files occurring to the right of this option! 
+
+     You can use multiple -o options in a single command line.  Thus
+     different output files can be written in a single run of the tyruba
+     program.  This will probably be considerably faster than relaunching
+     tyruba, especially if the generation of several of the files share a
+     lot of computation. (This is because of tyruba's caching mechanism).
+
+  -i 
+
+     Start processing input from System.in (standard input) instead of from
+     a file.  A user can now type queries and directives "interactively". 
+     This is a very rough interactive mode.  When entering queries this
+     will produce output on standard error. When entering #generate 
+     directives output will be printed on the current output stream as set 
+     by the -o option.
+
+  -silent
+
+     Supresses the printing of the ".", "o" and "H" characters which indicate
+     query engine processing. (Note: remember left to right interpretation of
+     commandline options. The option will take effect only with respect to
+     commandline arguments to the right of it) 
+
+  -nocache
+
+     Turns off tyruba's query cache. This will considerably slow down tyruba. 
+     But saves a lot of memory. 
+
+  -nofactbase
+
+    Disable the optimized index for storing ground facts. 
+
+  -old_factbase
+  
+    This option has no effect of used in combination with -nofactbase. Otherwise,
+    its effect is to use the older more simplistic fact base indexing mechanism.
+    This will be considerably slow down query resolution (orders of magnitude!) 
+    if you have 
+      1) large collections of facts AND
+      2) queries which look up information in the factbase "from right to left" 
+
+  -classpath <name>
+
+    Inserts a fact classpath(<name>). into the
+    rulebase. filegenerator makes use of this fact to generate its .java
+    files in the right place. If this option is not given, no files will
+    be generated.
+
+    A strange side effect: if you include several classpath options in 
+    the command line then several copies of the files will be generated 
+    in each classpath.
+
+    Like with all other cmdline options. You have to include the option in the
+    commandline before the options/files that make use of the classpath.
+
+  -parse <query-rule-or-fact string>
+
+     Example tyruba -classpath myclasses ast.jrub -parse ":- genfiles ."
+
+INCLUDE FILES
+
+Any file loaded by tyruba may contain #include directives. They look like
+
+#include "a filename"
+
+The filename is interpreted relative to the file in which the include
+directive is encountered. #include directives in -i mode are not
+supported currently.
+
+IMPORTANT CHANGES TO THE LANGUAGE (since the old specification in my PhD)
+
+1) TYNI: TYruba Native Interface
+
+Tyruba now has a primitive "native interface" which can be used to
+call upon java messages as part of the logic inference process. For
+examples of how/what Tyni can be used for, see the files lib/tyni.rub
+and aRuBa/Tyni.java.
+
+Note that this is still rather experimental and the interface may
+change in the future. (Which is why I won't bother right now to
+document it extensively). Also note that this is intended mainly as a
+mechanism to make it more easy to extend tyruba, as part of internal
+library files. It is not meant to be an interface to arbitrary Java
+messages. More particularly there are issues with stateful operations
+because of tyruba's caching mechanism.
+
+2) Some library extensions using TYNI manipulate strings (and atoms)
+to throw errors, print debug messages, etc. during query evaluation
+have been added. The error throwing mechanism has been put to use in
+the implementation of a simple unit testing utility. See the library
+file lib/unit_tests.rub for details.  For some examples how these
+unit_tests can be used, see the file lib/tyni.rub which uses it to
+test some of the latest additions of library functionality. To run
+unit tests in the library run the command "make unit_tests".
+
+3) Quoted code blocks {...}
+
+Since the last release, there is one important change to the way that
+quoted code blocks (i.e. the terms which typically hold Java code
+between {}). This part of tyruba has been re-implemented because it
+was crappy.
+
+It did not actually parse Java code inside {} but still was
+implemented in way that made it dependent on Java's lexical structure.
+So you could only use it reasonably for generating Java code.  Since
+no real benefits were derived from this language dependence, this
+part has been reimplemented to be more language independent.  The text
+in between {} is best thought of as a "multi-line" string.  You can
+still use logic variables inside {}.  Anything which looks like an
+identifier that starts with a "?"  will be treated as a logic
+variable.  To include a "?"  in your code simply repeat the "?": "??"
+will be treated as an escaped "?".
+
+Other logic terms such as "foo<?x>" are no longer supported. This
+means you may need to slightly edit some programs which rely on
+this. Usually all you need to do is something like this:
+
+If this is the original: { class Stack<?el> extends Collection<?el> ... }
+then this will fix it:   { class Stack_?el extends Collection_?el ... }
+
+The advantage of the new implementation is that it is usable in
+principle for generating any kind of text, not just Java code.  For
+example generating .html is an interesting possibility.
+
+4) MultiRule: 
+
+A syntactic sugar was added:
+
+IF <Expression> THEN
+   ( <Rule> | <Fact>) *
+END
+
+This expands to a number of rules by adding the <Expression> as an extra (first)
+condition to each fact and rule in the boyd of the multirule.
+
+This syntax is experimental. I'm not sure it will be retained in future releases.
+
+TYRUBA WHILE RUNNING
+
+Tyruba will print some strange characters while running. There are four
+different ones: ".", "o", "H" and "@". What the heck is that? :-)
+
+You probably don't need to know. Just look at them as a sign that
+tyruba is working on a query. (I've sometimes told my students to think 
+of it as "logic sweat" :-). But since you asked... Tyruba has a two
+level cache/optimization of the main rulebase to speed up
+queries. This is quite necessary because without it tyruba is immensely
+slow.
+
+I started building tyruba and did not care about speed... and so I
+just represented a rule base as a recursive linked list type of
+structure. Of course this got me into trouble soon, with programs
+that generate two pages of Java text but run for 45 minutes to do so.
+
+The rulebase is still a simple unorganized list (it is now a vector,
+for another reason: Java does not handle tail recursion very nicely,
+so I had to get rid of the recursion). Three optimization mechanisms now
+are built into tyruba. 
+
+The first one is an "index" of the rulebase. The "index-key" is the
+query as it appears in a rule, or as it is typed by the user. It is
+assumed that several queries may be launched that have this same
+pattern, but possibly with different bindings for the variables. To
+speed up all such queries, the first such query that gets launched
+will cause tyruba to build a specialized copy of the rule base by
+unifying each fact and rule in the rulebase with that query's original
+form (i.e. without the binding for the variables it may have
+acquired). This typically reduces the number of rules as it will only
+yield rules which actually match the query and no other rules. So, the
+first query will be slow but all subsequent queries of the same form
+will be much faster because immediately it finds the right rules in
+the index.
+
+A second optimization caches the exact result of a query. That means
+that if a query of exactly the same form is encountered twice, it will
+reuse the answers computed the first time. The second query will be
+"instantaneous". This optimization is quite important in the way tyruba
+is often used as a code generation tool. Very often a lot of rules
+that generate bits of code have the same condition attached to
+them. Thus, that query will be run many, many times. Often this query
+is quite computationally intensive.
+
+Actually, this optimization is a bit more complex in reality
+because the cached query results are computed lazily. They are stored
+in the cache *before* they are actually computed. So sometimes a query
+may actually refer to its "precached" result in computing its own
+result. This mechanism is quite similar to something called "tabling"
+as found for example in the XSB logic system.  This mechanism allows
+tyruba to detect certain kinds of recursive loops and answer them
+correctly, where an ordinary prolog program would loop infinitely.
+
+The third optimization is a separate, indexed data structure to store
+ground facts. Ground facts are facts which don't have any free
+variables. The facts are stored/accessed by means of an indexing
+schema making it much more efficient if you have a lot of facts.
+
+The indexing schema in this version is more complex and optimized in
+terms of speed than prior to release 5.11. When a query is run,
+potentially matching facts are looked up in an index based on a
+key. The key can best be thought of as pattern containing a wild-card
+in place of every variable in the query.
+
+For example a query :- foo(Zork,?x) will have a lookup-key you can
+think of as equivalent to a term of the form foo(Zork,*), where * is a
+"wildcard" term.
+
+Accessing facts based on this key works differently depending on the
+position of the wildcard in the lookup key. 
+
+A basic index is built when facts are inserted. This index works well
+if wild-cards are at or near the end of the query. 
+
+For example, 
+
+:- foo(Zork,?x)
+
+will work well, whereas a query like
+
+:- foo(?x,Zork) 
+
+Will not work so well if there are many facts of the form foo(...).
+
+So far, this is all more or less the same as it used to be in the old
+indexing mechanism. The new indexing mechanism however will extend the
+basic index at runtime when it encounters wildcards in the key. Thus,
+it will build an extended index at run time in order to also make
+queries like
+
+:- foo(?x,Zork) 
+
+which have a key of the form foo(*,Zork) work fast.
+
+How does this work (in broad lines).
+
+The first time a query of the form foo(*,Zork) is run, the basic index
+will work well right upto the point the lookup mechnanism hits the
+*. At this point it can find all facts that look like
+foo(...). Collecting all these facts it will then build an extra
+"wildcard index" which skips over the part of the fact that mathces
+the * and then indexing it on the next element after the *.
+
+Thus, what you will perceive (very clearly in running
+examples/benchmark) is that
+  - queries with * only at the right end work fast (from the start)
+  - but queries with a * more towards the left end work slow the first
+    time. They however become fast as soon as the wildcard index has been
+    constructed (after the first query of a similar form has been run)
+
+Now, you also understand what the three strange characters mean. Every
+time a query is launched, including ones called indirectly through
+rules a character is printed.
+
+A "." means "this is a fresh query. I have never seen anything like
+it I must build a specialized rule base and put it in the rule-index. This
+is the slowest kind of query.
+
+A "o" means "I don't have that exact same query in my cache, but a
+query almost like this one is in my rulebase-index so I can get the
+right rules very fast, however then I still have to compute the result
+using those rules. This is the second best with respect to speed.
+
+A "H" means "A HIT in the cache, I've seen that query before and I
+already know the result".
+
+Entries in the cache are represented using so-called "soft"
+references. This means that the Java garbage collector can reclaim
+them when memory is running low. This is not a real problem, because
+they can always be recomputed. So this trades memory for speed. To
+have some kind of indication of the impact of entry reclamation by the
+garbage collector, a "@" will be printed when a query touches a
+cleared cache entry.
+
+There is a fifth character you may occasionally see: a "#". This is
+printed when, while computing a lazy query result, tyruba finds a
+circular dependency, i.e. result that depends on itself. Such "bad
+loops" are cut off by the algorithm and tyruba then tries another way
+to find results. If you encounter this, it may be wise to try and get
+rid of it, i.e. figure out where the loop is and try and write your
+program so it goes away. Usually it works ok, with the # but I suspect
+that in rare occasions you may lose results which you'd actually
+expect. 
+
+Typically, when tyruba starts you will see a lot of "." then more and
+more "o" and "H" will appear and execution speeds up.
+
+There are cases where tyruba cleans out the caches for
+consistency. The mechanism does not do anything sophisticated about
+managing cache consistency. As soon as you add more facts and rules to
+the rulebase, the cache and index is cleared completely. Clearly not
+the most efficient way to implement this, but definitely the easiest
+:-). I did not spend much effort on this because 1) it is quite tricky
+to implement more sophisticated strategies. 2) The way tyruba is run
+(in my programs at least) is usually to read all facts and rules first
+and never change them again during the run of the program. If more
+'interactive' use with assert and retact of facts seems to be
+desirable then more effort on cache maintenance may be required, but
+this will probably require a major rewrite of large parts of the
+system. 
+
+CREDITS
+
+  The regexp package from apache was used to implement tyruba's regexp
+  matching utility. See http://www.apache.org for details.
+ 
+  The source code for the regexp package is included with the tyruba
+  distribution package. Copyright information for this portion of the
+  code can be found in the actual source file comments.
+
+--------------------------------------------------------------------------------
+
+I hope you enjoy tyruba, despite its rather primitive interface and
+currently hairy state of development. If you like tyruba send me a
+message. If you don't like it, send me a message as well! Every bit of
+information is useful in making it better.
+
+Comments, questions, bug reports feature requests -> visit the tyruba
+project page on http://sourceforge.net/
+
+Or... send me email at kdvolder@cs.ubc.ca or kdvolder@users.sourceforge.net

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#
+# Run benchmark (call this after setup). With no arguments.
+#
+
+echo tyruba -silent -dbdir 1*/ rules/initfile.rub user.rub -benchmark 1*_log_*.qry
+tyruba -silent -dbdir 1*/ rules/initfile.rub user.rub -benchmark 1*_log_*.qry
+

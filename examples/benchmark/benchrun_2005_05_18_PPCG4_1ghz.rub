@@ -1,0 +1,39 @@
+----- results for tests in benchmark.qry -------
+splatter(abcdefghijklmnop,?x),splatter(?y,?x)  #results = 32768  seconds = 11.299
+topo_sort(?x)  #results = 27388  seconds = 9.682
+prime(?x,250)  #results = 53  seconds = 0.276
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 6.911
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 1.045
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_forward(?x,?bork)  #results = 32647  seconds = 2.054
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_backward(?bork,?x)  #results = 32647  seconds = 2.042
+permutation([a,b,c,d,e,f,g],?x)  #results = 5040  seconds = 1.42
+perm([1,2,3,4,5,6,7],?x)  #results = 5040  seconds = 12.95
+TOTAL : 47.679
+
+----- results for tests in benchmark.qry -------
+splatter(abcdefghijklmnop,?x),splatter(?y,?x)  #results = 32768  seconds = 11.329
+topo_sort(?x)  #results = 27388  seconds = 9.72
+prime(?x,250)  #results = 53  seconds = 0.279
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 6.873
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 1.053
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_forward(?x,?bork)  #results = 32647  seconds = 2.106
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_backward(?bork,?x)  #results = 32647  seconds = 2.05
+permutation([a,b,c,d,e,f,g],?x)  #results = 5040  seconds = 1.435
+perm([1,2,3,4,5,6,7],?x)  #results = 5040  seconds = 12.974
+TOTAL : 47.819
+
+----- results for tests in benchmark.qry -------
+splatter(abcdefghijklmnop,?x),splatter(?y,?x)  #results = 32768  seconds = 11.256
+topo_sort(?x)  #results = 27388  seconds = 9.723
+prime(?x,250)  #results = 53  seconds = 0.28
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 6.912
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 1.062
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_forward(?x,?bork)  #results = 32647  seconds = 2.052
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_backward(?bork,?x)  #results = 32647  seconds = 2.033
+permutation([a,b,c,d,e,f,g],?x)  #results = 5040  seconds = 1.421
+perm([1,2,3,4,5,6,7],?x)  #results = 5040  seconds = 12.91
+TOTAL : 47.649
+
+
+
+

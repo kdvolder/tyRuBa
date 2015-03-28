@@ -1,0 +1,89 @@
+<project name="tyruba" default="dist" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="src"   location="src"/>
+  <property name="build" location="build"/>
+  <property name="dist"  location="dist"/>
+  <property name="version" value="release_6_1"/>
+  
+  <path id="jars">
+  </path>
+  
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init,parser"
+        description="compile the source " >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}" classpath="/Users/kdvolder/Library/Jars/activation.jar:/Users/kdvolder/Library/Jars/mail.jar"/>
+    <copy todir="${build}">
+       <fileset dir="${src}" includes="lib/**/*"/>
+    </copy>
+  </target>
+  
+  <target name="test" depends="dist" description="Run the tyruba self tests">
+    <java classname="tyRuBa.applications.CommandLine" fork="true" maxmemory="256m" dir="${src}">
+        <arg line="tyRuBa/unit_tests.test lib/unit_tests.rub"/>
+    	<classpath>
+    	   <path location="${dist}/tyruba.jar"/>
+    	   <path refid="jars"/>
+    	</classpath>
+    </java>
+
+  </target>
+
+  <target name="parser" depends="init"
+       description="generate parser with JavaCC" >
+
+     <javacc 
+         target="${src}/tyRuBa/parser/TyRuBaParser.jj" 
+	 outputdirectory="${src}/tyRuBa/parser"
+         javacchome="C:\\Temp\\javacc-3.2"
+     />
+  </target>
+
+   <target 
+		name="zip_project"
+		depends="compile"
+		description="Zips all the project files.">
+
+		<mkdir dir="zip"/>
+
+		<zip zipfile="zip/${ant.project.name}-${TODAY}-project.zip">
+			<fileset dir=".">
+				<patternset>
+					<include name="**/*"/>
+					<exclude name="zip/*"/>
+					<exclude name="doc/*"/>
+					<exclude name="dist/*"/>
+					<exclude name="**/CVS/*"/>
+					<exclude name="test_space/**/*"/>
+				</patternset>
+			</fileset>
+		</zip>
+	</target>
+
+  <target name="dist" depends="compile"
+        description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}"/>
+
+    <jar jarfile="${dist}/tyruba.jar" basedir="${build}"/>
+  </target>
+
+  <target name="clean"
+        description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+    <delete dir="test_space"/>
+    <delete>
+       <fileset dir="." includes="tyRuBa/parser/*.java"/>
+    </delete>
+  </target>
+  
+</project>

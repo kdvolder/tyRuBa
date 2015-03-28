@@ -1,0 +1,54 @@
+//
+// An implementation of 
+//
+//   public boolean equals(Object x) 
+//
+//   for all AST nodes.
+
+// This one is the abstract method for the root of the tree.
+method_(?class,boolean,equals,[Object],[other]) :-
+   ast_root_class(?class).
+abstract_(method<?class,equals,[Object]>) :-
+   ast_root_class(?class).
+
+// This one is for all except the "many" nodes or abstract classes.
+method_(?class,boolean,equals,[java.lang.Object],[other],{
+        if (other instanceof ?class) { 
+             ?class cother = (?class)other; 
+             return ?eqTests;
+        } 
+        else
+            return false; }) 
+:- ast_class(?class),NOT(ast_many_nonterm_class(?class,?)),
+   NOT(abstract_(?class)),
+   FINDALL(ast_var_eq_tester(?class,?tester),?tester,?testList),
+   JavaConjunction(?testList,?eqTests).
+
+ast_var_eq_tester(?class,{?var==cother.?var}) :- 
+   (var_(?class,?T,?var);var_(?class,?T,?var,?)),
+   JavaPrimType(?T).
+ast_var_eq_tester(?class,{?var.equals(cother.?var)}) :- 
+   (var_(?class,?T,?var);var_(?class,?T,?var,?)),
+   eq_class(?T).
+
+// This one is for the "many" nodes
+method_(?class,boolean,equals,[Object],[other],{
+        if (other instanceof ?class) { 
+             ?class cother = (?class)other; 
+             int size = size();
+             if (size!=cother.size()) 
+                 return false;
+             else {
+                 for (int i=0;i<size();i++) {
+                     if (!(get(i).equals(cother.get(i))))
+                         return false;
+                 }
+                 return true;
+             }
+        } 
+        else
+            return false; }) 
+:- ast_many_nonterm_class(?class,?T).
+
+// classes for which equality testing will work:
+eq_class(?C) :- NOT(JavaPrimType(?T)).

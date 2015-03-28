@@ -1,0 +1,42 @@
+/*
+ * Implementation of list-like terms
+ *   
+ *  declare this:
+ *    term_list(?Term,?Pair,?Nil,?lt,?sep1,?sep2,?rt).
+ *
+ */
+
+IF term_list(?Term,?Pair,?Nil,?lt,?sep1,?sep2,?rt) THEN
+    term_production(?Term,?Pair).
+    term_production(?Term,?Nil).
+    term_production(?Pair,[[?Term,car],[?Term,cdr]]).
+    term_production(?Nil,[]).
+    term_default_print(?Nil,?lt,"*ignored*",?rt).
+END
+
+term_list_print(?PairC,?NilC,?lt,?sep1,?sep2,?rt) :-
+   term_list(?Pair,?Nil,?lt,?sep1,?sep2,?rt),
+   term_class_for(?Term,?TermC),
+   term_class_for(?Pair,?PairC),
+   term_class_for(?Nil,?NilC).
+
+IF term_list_print(?TermC,?PairC,?NilC,?lt,?sep,?sep2,?rt) THEN
+    public_(method<?PairC,print,[PrintStream]>).
+    method_(?PairC,void,print,[PrintStream],[ostr],{ 
+        ostr.print("?lt"); 
+        printAsList(ostr);
+        ostr.print("?rt");}).
+
+    method_(?PairC,void,printAsList,[PrintStream],[ostr],{
+        ?car.print(ostr);        
+        if (?cdr==?NilC.the) return;
+        if (?cdr.getClass()==this.getClass()) {
+            ostr.print("?sep");
+            ((?PairC)?cdr).printAsList(ostr);
+        }
+        else {
+            ostr.print("?sep2");
+            ?cdr.print(ostr);
+        }}) :- term_composite_class(?PairC,[[?,?car],[?,?cdr]]).
+END
+

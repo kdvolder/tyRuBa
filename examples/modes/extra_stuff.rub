@@ -1,0 +1,5 @@
+
+var_(?tvar,Type,contents,{null}) :- ast_class_for(TVar,?tvar).
+var_(?tvar,int,id,{++ctr}) :- ast_class_for(TVar,?tvar).
+var_(?tvar,int,ctr,{0}) :- ast_class_for(TVar,?tvar).
+modifier_(var<?tvar,ctr>,static) :- ast_class_for(TVar,?tvar).

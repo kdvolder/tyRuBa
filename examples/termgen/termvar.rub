@@ -1,0 +1,15 @@
+////////////////////////////////////////////////////////////////////////
+// termvar.rub
+//
+//  Variables for terms
+//
+// If you want your terms to have variables for pattern mathcing
+// Then include this file and... pronto :-)
+//
+
+term_var_class(?c,?Term) 
+   :- term_abstract_class(?Term,?),string_append(?Term,Var,?c).
+
+term_composite_class(?c,[ [?Term,name] ])
+   :- term_var_class(?c,?Term).
+

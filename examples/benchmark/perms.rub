@@ -1,0 +1,15 @@
+perm :: [?a], [?a]
+MODES (B,F) IS MULTI
+      (F,B) IS MULTI
+END
+
+swap :: [?a], [?a]
+MODES (B,F) IS MULTI
+      (F,B) IS MULTI
+END
+
+swap(?list,?slit) :- append(?li,[?s|?t],?list), append([?s|?li],?t,?slit).
+
+perm(?l1,?l3) :- BOUND ?l1 : perm(?l1,?l2), swap(?l2,?l3)
+               | BOUND ?l3 : perm(?l2,?l3), swap(?l1,?l2).
+perm(?l1,?l1).

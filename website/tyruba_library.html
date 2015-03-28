@@ -1,0 +1,866 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>TyRuBa Library</title>
+</head>
+<body>
+<h1>TyRuBa Library</h1>
+<p>The following are predicates included in libraries loaded
+automatically in <tt>TyRuBa</tt>.
+If you would not like these predicates added to the rulebase, run <tt>TyRuBa</tt>
+with the
+<tt>-noinit</tt> option.</p>
+<table cellpadding="10">
+  <tbody>
+    <tr>
+      <td>
+      <ul>
+        <tt> <li><a href="#append">append</a></li>
+        <li><a href="#capitalize">capitalize</a></li>
+        <li><a href="#convert_type">convertToType</a></li>
+        <li><a href="#debug_print">debug_print</a></li>
+        <li><a href="#decapitalize">decapitalize</a></li>
+        <li><a href="#equals">equals</a></li>
+        <li><a href="#false">false</a></li>
+        <li><a href="#fileseparator">fileseparator</a></li>
+        <li><a href="#greater">greater</a></li>
+        <li><a href="#hash_value">hash_value</a></li>
+        <li><a href="#integer">Integer</a></li>
+        <li><a href="#length">length</a></li>
+        <li><a href="#list_ref">list_ref</a></li>
+        </tt>
+      </ul>
+      </td>
+      <td>
+      <ul>
+        <tt> <li><a href="#member">member</a></li>
+        <li><a href="#mul">mul</a></li>
+        <li><a href="#permutation">permutation</a></li>
+        <li><a href="#range">range</a></li>
+        <li><a href="#regexp">RegExp</a></li>
+        <li><a href="#re_match">re_match</a></li>
+        <li><a href="#reverse">reverse</a></li>
+        <li><a href="#selection">selection</a></li>
+        <li><a href="#string">String</a></li>
+        <li><a href="#string_append">string_append</a></li>
+        <li><a href="#string_index_split">string_index_split</a></li>
+        <li><a href="#string_length">string_length</a></li>
+        <li><a href="#string_repeat">string_repeat</a></li>
+        </tt>
+      </ul>
+      </td>
+      <td>
+      <ul>
+        <tt> <li><a href="#string_replace">string_replace</a></li>
+        <li><a href="#string_split_at_last">string_split_at_last</a></li>
+        <li><a href="#sum">sum</a></li>
+        <li><a href="#sumList">sumList</a></li>
+        <li><a href="#throw_error">throw_error</a></li>
+        <li><a href="#to_lower_case">to_lower_case</a></li>
+        <li><a href="#to_upper_case">to_upper_case</a></li>
+        <li><a href="#true">true</a></li>
+        <li><a href="#type_test">type test</a></li>
+        <li><a href="#write_file">write_file</a></li>
+        <li><a href="#write_output">write_output</a></li>
+        <li><a href="#zip">zip</a></li>
+        </tt>
+      </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>In some argument descriptions, there is an <tt>"="</tt> before a
+type. It indicates
+that the type is a <b>strict</b> type. For a description on strict
+types, look at the
+<a href="tyruba_tutorial.html#strict_type" target="_blank"> <tt>TyRuBa</tt>
+tutorial</a>.</p>
+<hr>
+<a name="append">
+<h3>append(?list1, ?list2, ?list3)</h3>
+</a>
+<pre>Arguments: ?list1 :: [?x]<br>           ?list2 :: [?x]<br>           ?list3 :: [?x]</pre>
+<pre>Bound: ?list1          Free: ?list3<br>       ?list2</pre>
+<blockquote> <tt>?list3 = </tt>list consisting of elements from <tt>?list1</tt>
+followed by elements of <tt>?list2</tt><br>
+  <tt>e.g. append([1,2],[3,4],?x) ---&gt; ?x = [1,2,3,4]</tt>
+</blockquote>
+<pre>Bound: ?list3          Free: ?list1<br>                             ?list2</pre>
+<blockquote> <tt>?list1</tt>, <tt>?list2 = </tt>ways to split <tt>?list3</tt>
+into two lists<br>
+  <tt>e.g. append(?x,?y,[1,2,3,4]) ---&gt; ?x = [], ?y = [1,2,3,4]</tt>
+</blockquote>
+<hr>
+<a name="capitalize">
+<h3>capitalize(?string, ?String)</h3>
+</a>
+<pre>Arguments: ?string :: =String<br>           ?String :: =String</pre>
+<pre>Bound: ?string         Free: ?String</pre>
+<blockquote> <tt>?String = ?string</tt> with the first character
+capitalized<br>
+  <tt>e.g. capitalize(abcd,?x) ---&gt; ?x = Abcd</tt>
+</blockquote>
+<hr>
+<a name="convert_type">
+<h3>convertTo<i>Type</i>(?from, ?to)</h3>
+</a>
+<pre>Arguments: ?from :: <span style="font-style: italic;">Type</span><br>           ?to :: =<span
+ style="font-style: italic;">Type</span></pre>
+<pre>Bound: ?from         Free: ?to</pre>
+<blockquote> <tt>The convertTo<span style="font-style: italic;">Type</span>
+predicate serves the purpose of converting an object's static type to
+an exact (=Type) type. This is useful sometimes for being able to pass
+arguments to predicates which expect exact types, when they are being
+used in a context where the static type is not exact. <br>
+  <br>
+Example:<br>
+  <br>
+  <span style="color: rgb(0, 0, 153);">:-
+member(?x,[1,a,2]),String(?x),string_append(?x,"_foo",?foo).<br>
+  <span style="color: rgb(255, 0, 0);">##QUERY :
+member&lt;?x,[1,a,2]&gt;, String&lt;?x&gt;,
+string_append&lt;?x,_foo,?foo&gt;</span><br
+ style="color: rgb(255, 0, 0);">
+  <span style="color: rgb(255, 0, 0);">Type or Mode Error: Incompatible
+types: Object, =String</span><br style="color: rgb(255, 0, 0);">
+  <span style="color: rgb(255, 0, 0);">in
+string_append&lt;?x,_foo,?foo&gt;</span><br
+ style="color: rgb(255, 0, 0);">
+  <span style="color: rgb(255, 0, 0);">in member&lt;?x,[1,a,2]&gt;,
+String&lt;?x&gt;, string_append&lt;?x,_foo,?foo&gt;</span><br
+ style="color: rgb(255, 0, 0);">
+  <br>
+  <span style="color: rgb(0, 0, 0);">Although the above query may
+appear type correct, it is not, because the type checking algorithm
+tries to ensure type correctness without assuming in what order the
+queries will get executed (the mode system may decide to change the
+order!). Thus from the type checker's point of view, it is possible
+that the string_append could get executed before the String(...) test,
+this would pass elements of a broader type than String to string_append
+(i.e. it could pass numbers 1 and 2). Since string_append has an
+"exact" =String type, it would probably crash the implementation of
+string_append (i.e. internally, some string relalted Java methods would
+get invoked on Integer objects). To work around this you can use
+convertToString predicate, like so:<br>
+  <br>
+  <span style="color: rgb(0, 0, 153);">:-
+member(?x,[1,a,2]),convertToString(?x,?stringx),</span><br
+ style="color: rgb(0, 0, 153);">
+  <span style="color: rgb(0, 0, 153);">string_append(?stringx,foo,?foo).</span><br
+ style="color: rgb(0, 0, 153);">
+  <span style="color: rgb(204, 0, 0);">##QUERY :
+member&lt;?x,[1,a,2]&gt;, convertToString&lt;?x,?stringx&gt;,
+string_append&lt;?stringx,foo,?foo&gt;</span><br
+ style="color: rgb(204, 0, 0);">
+  <span style="color: rgb(204, 0, 0);">inferred types: TypeEnv(
+?stringx==String ?x=Object ?foo==String )</span><br
+ style="color: rgb(204, 0, 0);">
+  <span style="color: rgb(204, 0, 0);">converted to Mode:
+member&lt;?x,[1,a,2]&gt;{(F,B) IS NONDET},
+convertToString&lt;?x,?stringx&gt;{(B,F) IS SEMIDET},
+string_append&lt;?stringx,foo,?foo&gt;{(B,B,F) IS DET}</span><br
+ style="color: rgb(204, 0, 0);">
+  <span style="color: rgb(204, 0, 0);">.....H</span><br
+ style="color: rgb(204, 0, 0);">
+  <span style="color: rgb(204, 0, 0);">| ?stringx=a ?x=a ?foo=afoo |H.</span><br
+ style="color: rgb(204, 0, 0);">
+  <span style="color: rgb(204, 0, 0);">##END QUERY</span><br
+ style="color: rgb(204, 0, 0);">
+  <br>
+In this example ?stringx will be bound to the same value as ?x in all
+cases where ?x is of the correct type (String). The predicate fails if
+?x is not of the correct type (anything not a String). Thus the type of
+?x will be narrowed to String by this operation (but not exact, since
+it still depends on execution time!) and the type of ?xString will be
+=String since it only gets bound in such cases where ?x is of the
+correct type. Thus, ?stringx can be safely passed as an argument to
+string_append.<br>
+  <br>
+  <span style="font-weight: bold;">Note: </span>We are considering
+integrating the type checker into the mode system so that restrictions
+based on "should be correct in any execution order" can be lifted and
+replaced by "should be correct in one of the possible, mode-correct,
+execution orders". THe latter is expected to produce more intuitive and
+relaxed type checking constraints. This change would make the
+concvertToType predicates obsolete.<br>
+  </span></span></tt><tt></tt></blockquote>
+<hr>
+<a name="debug_print">
+<h3>debug_print(?msg)</h3>
+</a>
+<pre>Arguments: ?msg :: Object</pre>
+<pre>Bound: ?msg            Free: <i>none</i></pre>
+<blockquote> always return true; print the string representation of <tt>?msg</tt>
+to <tt>System.err</tt>
+</blockquote>
+<hr>
+<a name="decapitalize">
+<h3>decapitalize(?String, string)</h3>
+</a>
+<pre>Arguments: ?String :: =String<br>           ?string :: =String</pre>
+<pre>Bound: ?String         Free: ?string</pre>
+<blockquote> <tt>?string = ?String</tt> with the first character
+decapitalized<br>
+  <tt>e.g. decapitalize(Abcd,?x) ---&gt; ?x = abcd</tt>
+</blockquote>
+<hr>
+<a name="equals">
+<h3>equals(?x,?y)</h3>
+</a>
+<pre>Arguments: ?x :: ?t<br>           ?y :: ?t</pre>
+<pre>Bound: ?x              Free: ?y</pre>
+<blockquote> <tt>?y = ?x<br>
+e.g. equals(1,?x) ---&gt; ?x = 1</tt>
+</blockquote>
+<pre>Bound: ?y              Free: ?X</pre>
+<blockquote> <tt>?x = ?y<br>
+e.g. equals(?x,1) ---&gt; ?x = 1</tt>
+</blockquote>
+<hr>
+<a name="false">
+<h3>false( )</h3>
+</a>
+<pre>Arguments: <i>none</i></pre>
+<blockquote> this predicate always fails
+</blockquote>
+<hr>
+<a name="fileseparator">
+<h3>fileseparator(?fs)</h3>
+</a>
+<pre>Arguments: ?fs :: =String</pre>
+<pre>Bound: <i>none</i>           Free: ?fs</pre>
+<blockquote> <tt>?fs = </tt>file separator of the system<br>
+  <tt>e.g. fileseparator(?fs) ---&gt; ?fs = \ (for Windows OS)</tt>
+</blockquote>
+<hr>
+<a name="greater">
+<h3>greater(?num1, ?num2)</h3>
+</a>
+<pre>Arguments: ?num1 :: =Integer<br>           ?num2 :: =Integer</pre>
+<pre>Bound: ?num1           Free: <i>none</i>
+       ?num2</pre>
+<blockquote> return true if <tt>?num1 &gt; ?num2</tt>
+</blockquote>
+<hr>
+<a name="hash_value">
+<h3>hash_value(?ob, ?hash)</h3>
+</a>
+<pre>Arguments: ?ob   :: =Object<br>           ?hash :: =Integer</pre>
+<pre>Bound: ?ob             Free: ?hash</pre>
+<blockquote> <tt>?hash = </tt>hash value of <tt>?ob</tt>
+</blockquote>
+<hr>
+<a name="integer">
+<h3>Integer(?int)</h3>
+</a>
+<pre>Arguments: ?int :: Integer</pre>
+<pre>Bound: ?int            Free: <i>none</i></pre>
+<blockquote> return true if <tt>?int</tt> is bound to an integer
+</blockquote>
+<hr><a name="length">
+<h3>length(?list, ?length)</h3>
+</a>
+<pre>Arguments: ?list   :: [?x]<br>           ?length :: =Integer</pre>
+<pre>Bound: ?list           Free: ?length</pre>
+<blockquote> <tt>?length = </tt>number of elements in <tt>?list</tt><br>
+  <tt>e.g. length([1,2,a,c],?length) ---&gt; ?length = 4</tt>
+</blockquote>
+<hr>
+<a name="list_ref">
+<h3>list_ref(?pos, ?list, ?elem)</h3>
+</a>
+<pre>Arguments: ?pos  :: =Integer<br>           ?list :: [?x]<br>           ?elem :: ?x</pre>
+<pre>Bound: ?pos            Free: ?elem<br>       ?list</pre>
+<blockquote> <tt>?elem = </tt>element of list <tt>?list</tt> at
+position <tt>?pos</tt><br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> list_ref(1,[a,b],?elem)<br>
+list_ref(2,[1],?elem) </tt></td>
+        <td><tt> ---&gt; ?elem = b<br>
+---&gt; FAILURE </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<pre>Bound: ?list           Free: ?pos<br>       ?elem</pre>
+<blockquote> <tt>?pos = </tt>position of <tt>?elem</tt> in <tt>?list</tt>
+(there can be multiple results)<br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td valign="top"><tt> list_ref(?pos,[a,b,c],a)<br>
+list_ref(?pos,[a,b,a],a) </tt></td>
+        <td valign="top"><tt> ---&gt; <br>
+---&gt; </tt></td>
+        <td><tt> ?pos = 0<br>
+?pos = 0<br>
+?pos = 2 </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr><a name="member">
+<h3>member(?elem, ?list)</h3>
+</a>
+<pre>Arguments: ?elem :: ?x<br>           ?list :: [?x]</pre>
+<pre>Bound: ?list           Free: ?elem</pre>
+<blockquote> <tt>?elem = </tt>an element of <tt>?list</tt><br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g. member(?elem,[1,2,a]) ---&gt; </tt></td>
+        <td><tt> ?elem = 1<br>
+?elem = 2<br>
+?elem = a </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr>
+<a name="mul">
+<h3>mul(?num1, ?num2, ?num3)</h3>
+</a>
+<pre>Arguments: ?num1 :: =Integer<br>           ?num2 :: =Integer<br>           ?num3 :: =Integer</pre>
+<pre>Bound: ?num1           Free: ?num3<br>       ?num2</pre>
+<blockquote> <tt>?num3 = ?num1 * ?num2</tt><br>
+  <tt>e.g. mul(2,3,?x) ---&gt; ?x = 6</tt>
+</blockquote>
+<pre>Bound: ?num1           Free: ?num2<br>       ?num3</pre>
+<blockquote> <tt>?num2 = ?num3 / ?num1</tt><br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> mul(2,?x,6) ---&gt; ?x = 3<br>
+mul(2,?x,7) ---&gt; FAILURE </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<pre>Bound: ?num2           Free: ?num1<br>       ?num3</pre>
+<blockquote> <tt>?num1 = ?num3 / ?num2</tt><br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> mul(?x,2,6) ---&gt; ?x = 3<br>
+mul(?x,2,7) ---&gt; FAILURE </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr>
+<a name="permutation">
+<h3>permutation(?list1, ?list2)</h3>
+</a>
+<pre>Arguments: ?list1 :: [?x]<br>           ?list2 :: [?x]</pre>
+<pre>Bound: ?list1          Free: ?list2</pre>
+<blockquote> <tt>?list2 = </tt>permutation (rearrangement) of <tt>?list1</tt><br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td valign="top"><tt>permutation([1,2,3],?list2)</tt></td>
+        <td valign="top"><tt>---&gt;</tt></td>
+        <td><tt> ?list2 = [1,2,3]<br>
+?list2 = [1,3,2]<br>
+?list2 = [2,1,3]<br>
+?list2 = [2,3,1]<br>
+?list2 = [3,1,2]<br>
+?list2 = [3,2,1] </tt></td>
+      </tr>
+      <tr>
+        <td><br>
+        </td>
+        <td><tt>permutation([],?list2)</tt></td>
+        <td><tt>---&gt;</tt></td>
+        <td><tt>?list2 = []</tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<pre>Bound: ?list2          Free: ?list1</pre>
+<blockquote> <tt>?list1 = </tt>permutation (rearrangement) of <tt>?list2</tt><br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td valign="top"><tt>permutation(?list1,[1,2,3])</tt></td>
+        <td valign="top"><tt>---&gt;</tt></td>
+        <td><tt> ?list1 = [1,2,3]<br>
+?list1 = [1,3,2]<br>
+?list1 = [2,1,3]<br>
+?list1 = [2,3,1]<br>
+?list1 = [3,1,2]<br>
+?list1 = [3,2,1] </tt></td>
+      </tr>
+      <tr>
+        <td><br>
+        </td>
+        <td><tt>permutation(?list1,[])</tt></td>
+        <td><tt>---&gt;</tt></td>
+        <td><tt>?list1 = []</tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr>
+<a name="range">
+<h3>range(?lo, ?high, ?num)</h3>
+</a>
+<pre>Arguments: ?lo   :: =Integer<br>           ?high :: =Integer<br>           ?num  :: =Integer</pre>
+<pre>Bound: ?lo             Free: ?num<br>       ?high</pre>
+<blockquote> <tt>?num = </tt>any <tt>?x</tt> such that <tt>?lo
+&lt;= ?x &lt; hi</tt><br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td valign="top"><tt>range(1,5,?num) ---&gt;</tt></td>
+        <td><tt> ?num = 1<br>
+?num = 2<br>
+?num = 3<br>
+?num = 4 </tt></td>
+      </tr>
+      <tr>
+        <td><br>
+        </td>
+        <td><tt>range(5,1,?num) ---&gt;</tt></td>
+        <td><tt>FAILURE</tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr>
+<a name="regexp">
+<h3>RegExp(?RE)</h3>
+</a>
+<pre>Arguments: ?RE :: org.apache.regexp.RE</pre>
+<pre>Bound: ?RE             Free: <i>none</i></pre>
+<blockquote> return true if <tt>?RE</tt> is an instance of <tt>org.apache.regexp.RE</tt>
+</blockquote>
+<hr>
+<a name="re_match">
+<h3>re_match(?RE, ?string)</h3>
+</a>
+<pre>Arguments: ?RE     :: =org.apache.regexp.RE<br>           ?string :: =String</pre>
+<pre>Bound: ?RE             Free: <i>none</i>
+       ?string</pre>
+<blockquote> return true if <tt>?string</tt> can be matched by the
+regular expression <tt>?RE</tt> <br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> re_match(/c*/,ccc)<br>
+re_match(/a/,ccc) </tt></td>
+        <td><tt> ---&gt; SUCCESS<br>
+---&gt; FAILURE </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr><a name="reverse">
+<h3>reverse(?list,?tsil)</h3>
+</a>
+<pre>Arguments: ?list :: [?x]<br>           ?tsil :: [?x]</pre>
+<pre>Bound: ?list           Free: ?tsil</pre>
+<blockquote> <tt>?tsil = </tt>list with elements of <tt>?list</tt>
+in reverse order<br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> reverse([a,b,c,d],?x)<br>
+reverse([],?x) </tt></td>
+        <td><tt> ---&gt; ?x = [d,c,b,a]<br>
+---&gt; ?x = [] </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<pre>Bound: ?tsil           Free: ?list</pre>
+<blockquote> <tt>?list = </tt>list with elements of <tt>?tsil</tt>
+in reverse order<br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> reverse(?x,[d,c,b,a])<br>
+reverse(?x,[]) </tt></td>
+        <td><tt> ---&gt; ?x = [a,b,c,d]<br>
+---&gt; ?x = [] </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr>
+<a name="selection">
+<h3>selection(?select, ?list)</h3>
+</a>
+<pre>Arguments: ?select :: [?x]<br>           ?list   :: [?x]</pre>
+<pre>Bound: ?list           Free: ?select</pre>
+<blockquote> <tt>?select = </tt>a selection of <tt>?list</tt><br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td valign="top"><tt>selection(?x,[1,2,3])</tt></td>
+        <td valign="top"><tt>---&gt;</tt></td>
+        <td><tt> ?x = []<br>
+?x = [1]<br>
+?x = [2]<br>
+?x = [3]<br>
+?x = [1,2]<br>
+?x = [2,3]<br>
+?x = [1,2,3] </tt></td>
+      </tr>
+      <tr>
+        <td><br>
+        </td>
+        <td><tt>selection(?x,[])</tt></td>
+        <td><tt>---&gt;</tt></td>
+        <td><tt>?x = []</tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr>
+<a name="string">
+<h3>String(?str)</h3>
+</a>
+<pre>Arguments: ?str :: String</pre>
+<pre>Bound: ?str            Free: <i>none</i></pre>
+<blockquote> return true if <tt>?str</tt> is bound to a string
+</blockquote>
+<hr><a name="string_append">
+<h3>string_append(?first, ?second, ?result)</h3>
+</a>
+<pre>Arguments: ?first  :: =String<br>           ?second :: =String<br>           ?result :: =String</pre>
+<pre>Bound: ?first          Free: ?result<br>       ?second</pre>
+<blockquote> <tt>?result = ?first concat ?second</tt><br>
+  <tt>e.g. string_append(ab,cd,?result) ---&gt; ?result = abcd</tt>
+</blockquote>
+<pre>Bound: ?result         Free: ?first<br>                             ?second</pre>
+<blockquote> <tt>?first concat ?second = ?result</tt><br>
+  <tt>e.g. string_append(?first,?second,abcd)</tt>
+  <table>
+    <tbody>
+      <tr>
+        <td>
+        <pre>      </pre>
+        </td>
+        <td valign="top"><tt>---&gt;</tt></td>
+        <td><tt> ?first = <i>empty string</i>, ?second = abcd<br>
+?first = a, ?second = bcd<br>
+?first = ab, ?second = cd<br>
+?first = abc, ?second = d<br>
+?first = abcd, ?second = <i>empty string</i><br>
+        </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr><a name="string_index_split">
+<h3>string_index_split(?pos, ?string, ?first, ?second)</h3>
+</a>
+<pre>Arguments: ?pos    :: =Integer<br>           ?string :: =String<br>           ?first  :: =String<br>           ?second :: =String</pre>
+<pre>Bound: ?pos            Free: ?first<br>       ?string               ?second</pre>
+<blockquote> <tt>?first = </tt>substring of <tt>?string</tt> from
+position <tt>0</tt> to <tt>?pos</tt> <tt>?second = </tt>substring
+of <tt>?string</tt> from <tt>?pos</tt>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> string_index_split(3,abcdefg,?s1,?s2)<br>
+string_index_split(3,ab,?s1,?s2) </tt></td>
+        <td><tt> ---&gt; ?s1 = abc, ?s2 = defg<br>
+---&gt; FAILURE </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr><a name="string_length">
+<h3>string_length(?string, ?length)</h3>
+</a>
+<pre>Arguments: ?string :: =String<br>           ?length :: =Integer</pre>
+<pre>Bound: ?string         Free: ?length</pre>
+<blockquote> <tt>?length = </tt>length of <tt>?string</tt><br>
+  <tt>e.g. string_length(abc,?length) ---&gt; ?length = 3</tt>
+</blockquote>
+<hr><a name="string_repeat">
+<h3>string_repeat(?num, ?string, ?result)</h3>
+</a>
+<pre>Arguments: ?num    :: =Integer<br>           ?string :: =String<br>           ?result :: =String</pre>
+<pre>Bound: ?num            Free: ?result<br>       ?string</pre>
+<blockquote> <tt>?result = ?string </tt>repeated <tt>?num</tt> of
+times
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> string_repeat(3,abc,?result)<br>
+string_repeat(0,abc,?result)<br>
+string_repeat(-1 abc,?result) </tt></td>
+        <td><tt> ---&gt; result = abcabcabc<br>
+---&gt; result = <i>empty string</i><br>
+---&gt; FAILURE </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr>
+<a name="string_replace">
+<h3>string_replace(?r1, ?r2, ?s1, ?s2)</h3>
+</a>
+<pre>Arguments: ?r1 :: =String<br>           ?r2 :: =String<br>           ?s1 :: =String<br>           ?s2 :: =String</pre>
+<pre>Bound: ?r1             Free: ?s2<br>       ?r2<br>       ?s1</pre>
+<blockquote> <tt>?s2 = ?s1</tt> with all occurences of <tt>?r1</tt>
+replaced by <tt>?r2</tt>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> string_replace(a,b,ananan,?s2) ---&gt; ?s2 = bnbnbn<br>
+string_replace(a,b,cncncn,?s2) ---&gt; ?s2 = cncncn </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<pre>Bound: ?r1             Free: ?s1<br>       ?r2<br>       ?ss</pre>
+<blockquote> <tt>?s1 = ?s2</tt> with all occurences of <tt>?r2</tt>
+replaced by <tt>?r2</tt>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> string_replace(a,b,?s1,bnbnbn) ---&gt; ?s1 = ananan<br>
+string_replace(a,b,?s2,cncncn) ---&gt; ?s1 = cncncn </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr><a name="string_split_at_last">
+<h3>string_split_at_last(?sep, ?string, ?first, ?second)</h3>
+</a>
+<pre>Arguments: ?sep    :: =String<br>           ?string :: =String<br>           ?first  :: =String<br>           ?second :: =String</pre>
+<pre>Bound: ?sep            Free: ?first<br>       ?string               ?second</pre>
+<blockquote>
+  <table>
+    <tbody>
+      <tr>
+        <td><tt> ?first<br>
+?second </tt></td>
+        <td><tt> =<br>
+= </tt></td>
+        <td> substring of <tt>?string</tt> from position <tt>0</tt>
+to the last occurence of <tt>?sep</tt><br>
+substring of <tt>?string</tt> from the last occurence of <tt>?sep</tt>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> string_split_at_last(".",abc.def,?s1,?s2) ---&gt; ?s1
+= abc, ?s2 = def </tt></td>
+      </tr>
+      <tr>
+        <td><br>
+        </td>
+        <td><tt> string_split_at_last(":",abc.def,?s1,?s2) ---&gt; ?s1
+= abc.def, ?s2 = <i>empty string</i> </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<pre>Bound: ?sep            Free: ?string<br>       ?first<br>       ?second</pre>
+<blockquote> <tt>?string = ?first concat ?sep concat ?second</tt><br>
+  <tt>e.g. string_split_at_last(".",?string,abc,def) ---&gt; ?string =
+abc.def</tt>
+</blockquote>
+<hr><a name="sum">
+<h3>sum(?num1, ?num2, ?sum)</h3>
+</a>
+<pre>Arguments: ?num1 :: =Integer<br>           ?num2 :: =Integer<br>           ?num3 :: =Integer</pre>
+<pre>Bound: ?num1           Free: ?sum<br>       ?num2</pre>
+<blockquote> <tt>?sum = ?num1 + ?num2</tt><br>
+  <tt>e.g. sum(2,4,?x) ---&gt; ?x = 6</tt>
+</blockquote>
+<pre>Bound: ?num1           Free: ?num2<br>       ?sum</pre>
+<blockquote> <tt>?num2 = ?sum - ?num1</tt><br>
+  <tt>e.g. sum(2,?x,6) ---&gt; ?x = 4</tt>
+</blockquote>
+<pre>Bound: ?num2           Free: ?num1<br>       ?sum</pre>
+<blockquote> <tt>?num1 = ?sum - ?num2</tt><br>
+  <tt>e.g. sum(?x,4,6) ---&gt; ?x = 2</tt>
+</blockquote>
+<hr>
+<a name="sumList">
+<h3>sumList(?list,?sum)</h3>
+</a>
+<pre>Arguments: ?list :: [=Integer]<br>           ?sum  :: =Integer</pre>
+<pre>Bound: ?list           Free: ?sum</pre>
+<blockquote> <tt>?sum = </tt>sum of all the elements of <tt>?list</tt>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> sumList([1,2,3],?sum)<br>
+sumList([],?sum) </tt></td>
+        <td><tt> ---&gt; ?sum = 6<br>
+---&gt; ?sum = 0 </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr>
+<a name="throw_error">
+<h3>throw_error(?msg)</h3>
+</a>
+<pre>Arguments: ?msg :: =String</pre>
+<pre>Bound: ?msg            Free: <i>none</i></pre>
+<blockquote> always return false; throw error with message <tt>?msg</tt>
+</blockquote>
+<hr>
+<a name="type_test">
+<h3>type test<br>
+</h3>
+</a>
+<p>For every type(constructor) a unary predicate with the same name as
+the type(constructor) is automatically defined. This predicate tests
+whether the type of its argument corresponds.<br>
+</p>
+<p>Examples of such predicates are the predicate <a href="#regexp">RegExp</a>,
+<a href="#string">String</a> and <a href="#integer">Integer</a>.<br>
+</p>
+<pre></pre>
+<pre>Arguments: ?term :: Object<br></pre>
+<pre>Bound: ?term     </pre>
+<blockquote> <tt>Succeeds if ?term has the correct type and fails
+otherwise.</tt><br>
+  <table style="width: 579px; height: 62px;">
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt>String(ABCDEF) ---&gt; Succeeds<br>
+Integer(abc) --&gt; Fails<br>
+Foo(haha::Foo) --&gt; Succeeds (assuming type Foo is defined!)<br>
+        </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr><a name="to_lower_case">
+<h3>to_lower_case(?STRING, ?string)</h3>
+</a>
+<pre>Arguments: ?STRING :: =String<br>           ?string :: =String</pre>
+<pre>Bound: ?STRING         Free: ?string</pre>
+<blockquote> <tt>?string = ?STRING</tt> to lower case<br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> to_lower_case(ABCDEF,?string) ---&gt; ?string = abcdef<br>
+to_lower_case(AbCdEF,?string) ---&gt; ?string = abcdef </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr><a name="to_upper_case">
+<h3>to_upper_case(?string, ?STRING)</h3>
+</a>
+<pre>Arguments: ?string :: =String<br>           ?STRING :: =String</pre>
+<pre>Bound: ?string         Free: ?STRING</pre>
+<blockquote> <tt>?STRING = ?string</tt> to upper case<br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> to_upper_case(abcdef,?string) ---&gt; ?string = ABCDEF<br>
+to_upper_case(aBCdeF,?string) ---&gt; ?string = ABCDEF </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<hr>
+<a name="true">
+<h3>true( )</h3>
+</a>
+<pre>Arguments: <i>none</i></pre>
+<blockquote> this predicate always succeed
+</blockquote>
+<hr>
+<a name="write_file">
+<h3>write_file(?filename, ?content)</h3>
+</a>
+<pre>Arguments: ?filename :: =String<br>           ?content  :: =String</pre>
+<pre>Bound: ?filename       Free: <i>none</i>
+       ?content</pre>
+<blockquote> return true if <tt>?content</tt> has been written to file
+with file name <tt>?filename</tt>
+</blockquote>
+<hr>
+<a name="write_output">
+<h3>write_output(?msg)</h3>
+</a>
+<pre>Arguments: ?msg :: =String</pre>
+<pre>Bound: ?msg            Free: <i>none</i></pre>
+<blockquote> always return true; print <tt>?msg</tt> to <tt>System.err</tt>
+</blockquote>
+<hr>
+<a name="zip">
+<h3>zip(?list1,?list2,?result)</h3>
+</a>
+<pre>Arguments: ?list1  :: [?x]<br>           ?list2  :: [?y]<br>           ?result :: [&lt;?x,?y&gt;]</pre>
+<pre>Bound: ?list1          Free: ?result<br>       ?list2</pre>
+<blockquote> <tt>?result = </tt>list of <tt>&lt;A<sub>i</sub>,B<sub>i</sub>&gt;</tt>
+  <table>
+    <tbody>
+      <tr>
+        <td>
+        <pre>    </pre>
+        </td>
+        <td valign="top">where</td>
+        <td> A<small>i</small> is the ith element of <tt>?list1</tt>
+and<br>
+B<small>i</small> is the ith element of <tt>?list2</tt> </td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt> zip([1,2,3],[a,b,c],?result) ---&gt; ?result =
+[&lt;1,a&gt;,&lt;2,b&gt;,&lt;3,c&gt;]<br>
+zip([1,2,3],[a,b],?result) ---&gt; FAILURE </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<pre>Bound: ?result         Free: ?list1<br>                             ?list2</pre>
+<blockquote> <tt>?list1 = </tt>list of the first subterms in each
+element (tuple) of <tt>?result</tt><br>
+  <tt>?list2 = </tt>list of the second subterms in each element
+(tuple) of <tt>?result</tt><br>
+  <table>
+    <tbody>
+      <tr>
+        <td valign="top"><tt>e.g.</tt></td>
+        <td><tt>zip(?list1,?list2,[&lt;1,a&gt;,&lt;2,b&gt;,&lt;3,c&gt;])
+---&gt; ?list1
+= [1,2,3], ?list2 = [a,b,c] </tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+</body>
+</html>

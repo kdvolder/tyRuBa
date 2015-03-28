@@ -1,0 +1,8 @@
+#!/bin/sh
+
+#
+# Start a "interactive" tyruba engine and initialize it with the database
+# set up by ./setup
+#
+
+tyruba -silent -dbdir 1*/ rules/initfile.rub user.rub -i

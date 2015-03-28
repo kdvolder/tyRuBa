@@ -1,0 +1,1 @@
+tyruba -bgpager -silent benchmark.rub $* -benchmark benchmark.qry

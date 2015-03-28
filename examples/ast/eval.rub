@@ -1,0 +1,11 @@
+//
+// eval.rub
+//
+// Evaluation method implementation for expressions.
+// Current version simply provides a bogus implementation.
+
+package_import_(tyRuBa.ast,tyRuBa.util.ElementSource).
+package_import_(tyRuBa.ast,tyRuBa.engine.RBContext).
+
+method_(tyRuBa.ast.Expression,ElementSource,eval,[RBContext],[engine],{
+        throw new Error("Unimplemented method");}).

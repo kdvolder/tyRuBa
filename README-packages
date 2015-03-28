@@ -1,0 +1,43 @@
+This file describes the package structure of tyruba implementation
+
+tyRuBa.engine
+	This contains the bulk of the implementation of the
+       	logic inference engine. For "external usage" the class FrontEnd
+	is a good starting point to explore the code.
+	
+tyRuBa.engine.index
+    Classes related to the indexed factbase of tyruba intended for
+    holding larger collection of facts partially in memory and partially
+    on disk.
+    
+tyRuBa.engine.visitor
+    Some visitor classes to visit terms and expressions.
+    
+tyRuBa.modes
+    Classes related to Mode and Type checking.
+    
+tyRuBa.tests
+    Unit tests for TyRuBa.
+
+tyRuBa.utils
+	Utility classes. Amongst others this contains a number of Enumeration-like
+	classes used in the implementation of tyruba.
+
+tyRuBa.parser
+	The tyruba parser (implemented with javacc)
+
+tyRuBa.applications
+	Application classes (currently only a commandline application lives here)
+	
+tyRuBa.compilation
+    Classes to which the tyruba code gets "compiled".
+
+Third party: (For the licences and terms of use of these products, see the
+  comments in their code).
+
+  org.apache.regexp    The source code for the apache regexp matcher utility.
+  
+  serp.util            A bunch of weak and soft hastables and collection classes borrowed
+                       from the serp library.
+                       
+                 

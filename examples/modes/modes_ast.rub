@@ -1,0 +1,42 @@
+// Idea... what if we use TyRuBa to generate its own AST classes?
+
+//
+// Global code gneration options for the
+// astgen library.
+//
+
+ast_package(tyRuBa.modes).
+ast_root(ModeRoot).
+
+//
+// Modes
+//
+
+ast_production(PredicateMode, [ [ BindingList, paramModes],
+                                [ Multiplicity, multi] ]).
+  
+ast_production(BindingList,many<BindingMode>).
+ast_production(BindingMode, Free).
+ast_production(BindingMode, Bound).
+
+ast_production(Free, []).
+ast_production(Bound,[]).
+
+ast_just_use(Multiplicity,tyRuBa.modecheck.Multiplicity).
+
+//
+// Types
+//
+
+ast_production(Type,AtomicType).
+ast_production(Type,CompositeType).
+ast_production(Type, TVar).
+
+ast_production(AtomicType, [[Name,name]]).
+ast_just_use(Name,String).
+
+ast_production(CompositeType,[ [Name,name], [TypeList, types] ]).  
+
+ast_production(TypeList,many<Type>).
+
+ast_production(TVar,[ [Name,name] ]).

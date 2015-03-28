@@ -1,0 +1,100 @@
+/***********************************************************************\
+ termgen.rub
+
+ The idea is to build a generator which can generate subclasses
+ of RBTerm. If this seems to work more or less in we will use it to
+ bootstrap tyruba letting it generate some of its own term hierarchy.
+
+ This is based on astgen.rub. 
+
+\***********************************************************************/
+
+/****** The term generator ******/
+
+// aux. predicate to prepend the package name to a class in
+// the ast package.
+term_class_for(?x,?px) :- term_package(?p),package_class(?p,?x,?px).
+
+term_class(?c) :- 
+   term_abstract_class(?c,?);
+   term_composite_class(?c,?);
+   term_terminal_class(?c,?).
+
+term_symbol(?s) :- term_production(?s,?);term_terminal(?s,?).
+term_composite(?c,?parts) :- term_production(?c,?parts),
+    list(?parts).
+
+term_composite_class(?c,?parts) :- term_production(?nt,?rhs),term_class_for(?nt,?c),
+    zip(?symbols,?names,?rhs),
+    map<term_class_for>(?symbols,?Types),
+    zip(?Types,?names,?parts).
+
+//A composite term with number of term parts
+public_(?c) :- term_composite_class(?c,?parts).
+class_(?c) :- term_composite_class(?c,?parts).
+mod_var_(?c,[read],?T,?n) :- term_composite_class(?c,?parts), member([?T,?n],?parts).
+public_(constructor<?c,?Ts>) :- term_composite_class(?c,?parts),equal(?Ts,[?|?]).
+constructor_(?c,?Ts,?as,?body) :- term_composite_class(?c,?parts),
+	zip(?Ts,?as,?parts),
+	JavaInitFromArgs(?as,?body).
+
+//Special case: no parts
+public_(var<?c,the>) :- term_composite_class(?c,[]).
+static_(var<?c,the>) :- term_composite_class(?c,[]).
+var_(?c,?c,the,{new ?c()}) :- term_composite_class(?c,[]).
+private_(constructor<?c,[]>) :- term_composite_class(?c,[]).
+
+// abstract terms
+term_abstract_class(?cls,?subclass) :- 
+   term_production(?nt,?rhs),term_symbol(?rhs),
+   term_class_for(?rhs,?subclass),term_class_for(?nt,?cls).
+
+class_(?c) :- term_abstract_class(?c,?subclass).
+abstract_(?c) :- term_abstract_class(?c,?subclass).
+public_(?c) :- term_abstract_class(?c,?subclass).
+extends_(?subclass,?c) :- term_abstract_class(?c,?subclass).
+
+//////
+// Functions which must be implemented on terms
+//
+
+term_hash_method(hashCode).
+
+public_(method<?c,?hashMethod,[]>) :- term_composite_class(?c,?parts).
+method_(?c,int,?hashMethod,[],[],{
+        return ?hashComputation;}) 
+    :- term_composite_class(?c,?parts),
+       term_hash_method(?hashMethod),
+       term_hash_computation(?hashMethod,?parts,?hashComputation).
+
+public_(method<?c,equals,[java.lang.Object]>) :- term_composite_class(?c,?parts).
+method_(?c,boolean,equals,[java.lang.Object],[x],{
+        if (!(x.getClass()==this.getClass()))
+            return false;
+        ?c cx = (?c)x;
+        return ?equalsCompuation;}) 
+    :- term_composite_class(?c,?parts),
+       zip(?,?ns,?parts),
+       map<term_equals_expression<equals>>(?ns,?exps),
+       JavaConjunction(?exps,?equalsCompuation).
+
+public_(method<?c,?hashMethod,[]>) 
+      :- term_abstract_class(?c,?subclass),term_hash_method(?hashMethod).
+abstract_(method<?c,?hashMethod,[]>)
+      :- term_abstract_class(?c,?subclass),term_hash_method(?hashMethod).
+method_(?c,int,?hashMethod,[],[])
+      :- term_abstract_class(?c,?subclass),term_hash_method(?hashMethod).
+
+public_(method<?c,equals,[java.lang.Object]>)
+      :- term_abstract_class(?c,?subclass).
+abstract_(method<?c,equals,[java.lang.Object]>)
+      :- term_abstract_class(?c,?subclass).
+method_(?c,boolean,equals,[java.lang.Object],[x])
+      :- term_abstract_class(?c,?subclass).
+
+term_equals_expression<?equals>(?n,{?n.?equals(cx.?n)}).
+
+term_hash_computation(?hashMethod,[],?v) :- hash_value(?hashMethod,?v).
+term_hash_computation(?hashMethod,[[?,?n]],{?n.?hashMethod()}).
+term_hash_computation(?hashMethod,[[?,?n],?r1|?r],{?n.?hashMethod()+11*(?hashr)})
+   :- term_hash_computation(?hashMethod,[?r1|?r],?hashr).

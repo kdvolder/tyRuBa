@@ -1,0 +1,3 @@
+#include "stack-template.rub"
+
+#generate Stack<String>

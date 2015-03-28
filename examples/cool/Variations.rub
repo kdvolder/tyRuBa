@@ -1,0 +1,37 @@
+/* Variations on the synchronization aspect language */
+
+/**************************************************************
+ Example of AL extension 1: More convenient syntax with lists.
+
+ mutexList(?class,[...methods...]).
+   The methods in mutexList should be pairwise mutex
+ selfexList(?class,[...methods...])
+   The methods in the list are mutexclusive with themselves.
+ **************************************************************/
+
+mutex(?c,?m1,?m2) :- mutexList(?c,?methods),
+   member(?m1,?methods),
+   member(?m2,?methods),
+   NOT(equal(?m1,?m2)).
+
+mutex(?c,?m,?m) :- selfexList(?c,?methods),
+   member(?m,?methods).
+
+/**************************************************************
+ Example of AL variation 2: 
+
+ Explicitly declare why methods are mutex or selfex as follows:
+
+ modifies(?class,?method,?thing)
+   If the ?method modifies the state of ?thing
+  
+ inspects(?class,?method,?thing)
+   If the ?method consults the state of ?thing
+ **************************************************************/
+
+mutex(?class,?inspector,?modifier) :- 
+   inspects(?class,?inspector,?state),
+   modifies(?class,?modifier,?state).
+
+inspects(?class,?modifier,?state) :- 
+   modifies(?class,?modifier,?state).

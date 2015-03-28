@@ -1,0 +1,79 @@
+/********************************************************************************\
+ ast_factory.rub
+ 
+ Will generate a factory class for creating AST objects so that it should
+ be easy enough to change the classes used to represent AST nodes 
+ without having to change the parser.
+ 
+\********************************************************************************/
+
+//
+// Dependencies...
+//
+// The rules in this file assume that te astgen.rub library and a set of
+// ast_productions have been loaded.
+
+ast_factory_class(?class) :- 
+   ast_class_for(Factory,?class).
+   
+class_(?class) :- ast_factory_class(?class).
+   
+//
+// Factory methods for Terminal nodes.
+//
+
+method_(?Factory,?TermClass,?makeTerm,[?ContentClass],[?name], {
+        return new ?TermClass(?name);})
+  :- ast_factory_class(?Factory),
+     ast_terminal(?Term,[?ContentClass,?name]),
+        ast_class_for(?Term,?TermClass),
+     string_append(make,?Term,?makeTerm).
+
+//
+// Factory methods for many<...> nodes.
+//
+
+method_(?Factory,?TermClass,?makeTerm,[{?ContentClass[]}],[children], {
+        ?TermClass created = new ?TermClass();
+        for (int i = 0; i < children.length; i++)
+            created.add(children[i]);
+        return created;})
+  :- ast_factory_class(?Factory),
+     ast_production(?Term,many<?Content>),
+        ast_class_for(?Term,?TermClass),
+        ast_class_for(?Content,?ContentClass),
+     string_append(make,?Term,?makeTerm).
+
+method_(?Factory,?TermClass,?makeTerm,[],[], {
+        return new ?TermClass();})
+  :- ast_factory_class(?Factory),
+     ast_production(?Term,many<?Content>),
+        ast_class_for(?Term,?TermClass),
+     string_append(make,?Term,?makeTerm).
+
+//
+// Factory methods for nodes with fixed number of children.
+//
+
+method_(?Factory,?TermClass,?makeTerm,?Types,?names, {
+        return new ?TermClass(?comma_names);})
+  :- ast_factory_class(?Factory),
+     ast_production(?Term,?parts),
+     ast_class_for(?Term,?TermClass),
+     NOT(singleton_class(?TermClass)),
+     zip(?PartNodes,?names,?parts),
+     JavaCommaList(?names,?comma_names),
+     map<ast_class_for>(?PartNodes,?Types),
+     string_append(make,?Term,?makeTerm).
+
+method_(?Factory,?TermClass,?makeTerm,?Types,?names, {
+        return ?TermClass.the;})
+  :- ast_factory_class(?Factory),
+     ast_production(?Term,?parts),
+     ast_class_for(?Term,?TermClass),
+     singleton_class(?TermClass),
+     zip(?PartNodes,?names,?parts),
+     JavaCommaList(?names,?comma_names),
+     map<ast_class_for>(?PartNodes,?Types),
+     string_append(make,?Term,?makeTerm).
+     

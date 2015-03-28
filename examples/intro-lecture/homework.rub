@@ -1,0 +1,18 @@
+inverse([],[]).
+inverse([?l|?ist],?tsil) :- inverse(?ist,?tsi),
+     append(?tsi,[?l],?tsil).
+
+inverse(?list,?tsil) :- inverse(?list,[],?tsil).
+
+inverse([],?reverse,?reverse).
+inverse([?l|?ist],?reverse,?result) :-
+    inverse(?ist,[?l|?reverse],?result).  
+    
+postfix(?st,[?l|?ist]) :- postfix(?st,?ist). 
+postfix(?st,?st).
+
+permute([],[]).
+permute([?l|?ist],?ilts) :-
+    permute(?ist,?its),
+    append(?i,?ts,?its),
+    append(?i,[?l|?ts],?ilts).

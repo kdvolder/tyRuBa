@@ -1,0 +1,141 @@
+/***********************************************************************\
+ astgen.rub
+
+  An example for CPSC 539: generation of AST classes from a description
+  of a CFG like the example in ast.jrub
+
+ See sample_ast.rub for an example.
+
+\***********************************************************************/
+
+#library "error.rub"
+
+#include "coding_rules.rub"
+
+/****** Some integrity checks for the declarations needed by this library *****/
+
+//error("Test for tests").
+
+error({Ast symbol used, but never declared: ?x}) :-
+   ast_symbol_used(?x),NOT(ast_symbol(?x)).
+   
+error("No ast_root declared") :- NOT(ast_root(?)).
+
+ast_parent(?child,?parent) :- ast_production(?parent,?child), ast_symbol(?child).
+
+/****** The AST generator ******/
+
+// aux. predicate to prepend the package name to a class in
+// the ast package.
+ast_class_for(?x,?px) :- ast_package(?p),package_class(?p,?x,?px).
+
+//Same, byt also ads a RB prefix to the names of the generated classes.
+//ast_class_for(?x,?px) :- ast_package(?p),
+//    (  BOUND(?x),  string_append(Gen_,?x,?gx), package_class(?p,?gx,?px)
+//    |  BOUND(?px), package_class(?p,?gx,?px), string_append(RB,?x,?gx)
+//    |  NOT(BOUND(?x);BOUND(?px)), throw_error({Illegal call: ast_class_for(?x,?px)})).
+
+//
+// The ast_root class.
+//
+
+ast_root_class(?c) :- ast_root(?n),ast_class_for(?n,?c).
+abstract_(?c) :- ast_root_class(?c).
+class_(?c) :- ast_root_class(?c).
+
+// Any AST class which does not have a parent should be made subclass
+// of the AST root class.
+
+extends_(?class,?root) :-
+   ast_class_for(?node,?class),
+   ast_symbol(?node),NOT(ast_parent(?node,?x)),
+   ast_root_class(?root).
+   
+//
+// Terminal classes
+//
+
+ast_terminal(?t) :- ast_terminal(?t,?x).
+ast_non_terminal(?nt) :- ast_production(?nt,?rhs).
+ast_symbol(?x) :- ast_terminal(?x);ast_non_terminal(?x).
+
+ast_terminal_class(?cls,?t) :- ast_terminal(?x,?t), ast_class_for(?x,?cls).
+
+class_(?c) :- ast_terminal_class(?c,?).
+accessed_var(?c,?T,?name) :- ast_terminal_class(?c,[?T,?name]).
+constructor_(?c,[?T],[?name],{this.?name=?name;}) :- ast_terminal_class(?c,[?T,?name]).
+
+//
+// Non terminal classes.
+// 
+
+// for concrete non terminals
+
+ast_nonterm_class(?c,?parts) :- ast_production(?nt,?rhs),ast_class_for(?nt,?c),
+    zip(?symbols,?names,?rhs),
+    map<ast_class_for>(?symbols,?Types),
+    zip(?Types,?names,?parts).
+    
+class_(?c) :- ast_nonterm_class(?c,?parts).
+accessed_var(?c,?T,?n) :- ast_nonterm_class(?c,?parts),member([?T,?n],?parts).
+constructor_(?c,?Ts,?as,?body) :-  ast_nonterm_class(?c,?parts),
+	zip(?Ts,?as,?parts),
+	JavaInitFromArgs(?as,?body).
+
+ast_symbol_used(?x) :- 
+    ast_production(?nt,?rhs),zip(?symbols,?names,?rhs),member(?x,symbols).
+
+ast_symbol_used(?x) :- 
+    ast_production(?lhs,many<?x>).
+
+ast_symbol_used(?x) :- 
+    ast_production(?lhs,?x),ast_symbol(?x).
+
+// abstract NON terminals
+
+ast_abstract_nonterm_class(?cls,?subclass) :- 
+   ast_production(?nt,?rhs),ast_symbol(?rhs),
+   ast_class_for(?rhs,?subclass),ast_class_for(?nt,?cls).
+
+class_(?c) :- ast_abstract_nonterm_class(?c,?subclass).
+abstract_(?c) :- ast_abstract_nonterm_class(?c,?subclass).
+extends_(?subclass,?c) :- ast_abstract_nonterm_class(?c,?subclass).
+
+// non terminals declared with "many" productions
+
+ast_many_nonterm_class(?c,?T) :- ast_production(?lhs,many<?part>),
+	ast_class_for(?lhs,?c),ast_class_for(?part,?T).
+
+class_(?c) :- ast_many_nonterm_class(?c,?T).
+var_(?c,java.util.Vector,parts) :- ast_many_nonterm_class(?c,?T).
+method_(?c,int,size,[],[],{
+        return parts.size(); }) :- ast_many_nonterm_class(?c,?T).
+method_(?c,?T,get,[int],[i],{
+        return (?T)parts.elementAt(i); }) :- ast_many_nonterm_class(?c,?T).
+method_(?c,void,set,[int,?T],[i,newPart],{
+        parts.setElementAt(newPart,i); }) :- ast_many_nonterm_class(?c,?T).
+method_(?c,void,add,[?T],[newPart],{
+        parts.add(newPart); }) :- ast_many_nonterm_class(?c,?T).
+method_(?c,void,remove,[int],[i],{
+        parts.removeElementAt(i); }) :- ast_many_nonterm_class(?c,?T).
+constructor_(?c,[],[],{
+        parts = new java.util.Vector(); }) :- ast_many_nonterm_class(?c,?T).
+
+ast_class(?c) :- ast_symbol(?s),ast_class_for(?s,?c).
+singleton_class(?c) :- ast_nonterm_class(?c,[]).
+
+// Variables with accessors 
+var_(?c,?T,?n) :- accessed_var(?c,?T,?n).
+method_(?c,?T,?getter,[],[],{
+        return ?n; })
+:- accessed_var(?c,?T,?n),getter_name(?n,?getter).
+method_(?c,void,?setter,[?T],[newValue],{
+        ?n = newValue; })
+:- accessed_var(?c,?T,?n),setter_name(?n,?setter).
+
+//The following rules define the naming conventions for getters and setters
+// (They are defined javagenerator_extras.rub)
+//getter_name(?name,?getter) :- string_append(get_,?name,?getter).
+//setter_name(?name,?setter) :- string_append(set_,?name,?setter).
+
+genfiles :- run_tests . // when files are generated make sure integrity test are run.

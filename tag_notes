@@ -1,0 +1,641 @@
+CVS tags in tyruba cvs repoistory have the following naming convention:
+
+release_X_Y
+
+    A (presumably) stable release that works.
+
+trans_X_Y_Z
+
+    A transistion release. It works sort of, can be compiled etc. but
+    may not be fully functional, or have some odd behavior that needs to
+    be fixed.
+
+wip_X_Y_Z_I
+
+    A snapshot that was saved at an arbitray stage of development. This may
+    not even build. (wip = Work in progress)
+
+------------------------------------------------------------------------
+
+release_5_6
+
+   This is the initial version imported to CVS. Just fixed a few minor 
+   things to make it compile in Java 1.2. Also meddled a bit with the 
+   Makefile etc.
+
+   The GUI has been thrown out.
+
+trans_5_6_1
+
+   Transition release towards 5_7 
+   
+   Goal: to build a version of TyRuBa 5_7 that really
+   treats {} blocks as strings with "escaped" variables. This will presumably
+   make it somewhat easier to understand and more flexible in dealing with
+   other things than Java code alone. 
+
+   Status: parser and scanner have been adapted. {} are now strings but...
+   variables in the strings are not being recognized.
+
+   This version is unusable as far as quoted code blocks is concerned. The 
+   rest of the logic language should still be working.
+
+   Next step: to implement unquoting of variables inside {} blocks.
+
+trans_5_6_2
+
+  Almost 5_7 the {} blocks seem to work again, but have not really been tested
+  thorougly.
+
+trans_5_6_3
+
+  Something went wrong in trans_5_6_2. Apparnatly it does not work anymore,
+  what happened? (I guess I accidentally edited the TyRuBaParser.java file)
+  and those edits got hopelessly lost.
+
+  Here is the next attempt to refix it.
+
+  It now appears to work again. 
+
+  Known issue: notation with terms inside {} no longer works. This should not be so bad
+  because we should be able to just write the examples without using this feature.
+
+  => Reworked the cool example so that it no longer uses compound terms inside {} blocks.
+
+  The cool example seems to work again.
+
+  Did some updates to the cool example. A Makefile, some changes to the README.
+
+trans_5_6_4
+
+  RBJava is obsolete? Remove that sucker.
+
+trans_5_6_5
+
+  Allow string literals to be used as constants.
+
+trans_5_6_6
+
+  Fix up the RBQuoted so that they really work like a CompoundTerm
+  "{}"<part1,part2,part3,...> 
+
+  Known issue although "{}"<...> things can now unify with {...} things
+  they are not quite the same yet. They are still instances of different 
+  classes and have different printing methods for example.
+
+trans_5_6_7
+
+  Change the way variables and \ work inside of \\. We want to make it more
+  easy to just copy-paste stuff into {} blocks without having to worry about
+  its interpretation of \ messing things up. Therefore we will just interpret
+  ? characters as being special. Inside {} a ?? means ? and a ? followed by
+  anyhting other than a ? will be interpreted as a logic variable.
+
+  All that needs to be done to preserve a text after copy-pasting it into
+  {} is double the question marks. 
+
+trans_5_6_8
+
+  Shipping the initfiles with the .jar file.
+
+  Since the easiest way to load from a jar, a file, or whatever uniformly
+  is by using URL's. The parser now reads from URL's.
+
+trans_5_6_9
+
+  Better commandline interface: list of input files and -o option for the
+  outputfile. If no -o option is given uses System.out
+
+trans_5_6_10
+
+  Interactive tyruba mode. Tyruba now runs in interactive mode, what is that?
+  It means that after loading all the files, tyruba continues reading from 
+  System.in so the user can type queries or directives from the console.
+
+release_5_7
+
+  Some small cosmetic improvements:
+    - Don't terminate parsing in -i mode when parse error occurs.
+
+wip_5_7_0_1
+
+  JavaObject: a term which wraps any Java object. This object only unifies
+  with itself (i.e. object with same object identity).
+
+  Also messed about a bit with the initfiles: this is only half done. Rest 
+  of work deferred. See TODO file.
+
+wip_5_7_0_2
+
+  Implement a UNIQUE meta predicate.
+
+wip_5_7_0_3
+ 
+  Remove the BEST and CAP meta predicate which is crummy and never used anyway.
+  We'll provide a way to manipuate strings thorugh Java methods later which
+  will be better than the CAP thing.
+
+wip_5_7_0_4
+
+  Noticed that compound terms inside of {} (when substituted for a variable) print
+  funny (i.e. just concatenate all the parts). Let's juts make them print how they
+  print normally outside of {}. 
+
+wip_5_7_0_5
+
+  Some experiment in the initfile (mostly javagenerator.rub). The idea is to have
+  it work with packages and 'tags': public, private etc. Not finished.
+
+wip_5_7_0_6
+
+  Trying to compile Raji's reification engine and make a command "j2rub" which 
+  parses a java files and generates facts. This works.
+
+wip_5_7_0_7
+
+  Interface for tyruba in Raji's browser. Seems to work more or less. 
+  Not really tested much. Some problems with browser.cfg file (not found).
+
+wip_5_7_0_8
+
+  JAVASEND
+
+wip_5_7_0_9
+
+  Extend java send. Two version now possible:
+
+  JAVASEND(?receiver,message<?type1,?type2,...>,[?arg1,?arg2,...]) 
+    for invoking java predicates
+
+  JAVASEND(?receiver,message<?type1,?type2,...>,[?arg1,?arg2,...],?result)
+    for invoking any kind of java method.
+
+wip_5_7_0_10
+
+  Do away with RBName, RBInteger etc. and replace all by RBJavaObject 
+
+wip_5_7_0_11
+
+  JAVASOLVE meta predicate. Is like the JAVASEND meta predicate but
+  the method invoked needs to return a Vector of different alternatives..
+
+wip_5_7_0_12
+
+  debug_print predicate (implemented with Tyni).
+ 
+wip_5_7_0_13
+   Fix the printing of empty lists in quoted block
+
+wip_5_7_0_14
+   An error predicate. When called it throws an error. We'll use this to implement
+   tyruba unit tests tests.
+
+wip_5_7_0_15
+   Write some unit tests.
+
+wip_5_7_0_16
+   A -silent option on the commandline supresses printing of the ..HHoo
+
+wip_5_7_0_17
+   A -nocache option to turn use of the query cache off.
+
+wip_5_7_0_18
+   Fix makefile rules for making releases.
+
+wip_5_7_0_19
+   Additions to tutorial
+
+wip_5_7_0_20
+   More meddling with the javagenerator
+
+trans_5_7_1
+   Working on the docs. Plan: put together a quick and dirty manual.
+   This will be just a minimal reference manual. Not a tutorial.
+   Work on the tutorial has been suspended for now. No time :-(
+
+release_5_8
+   Prepare for use in CPSC 539: correct lots of typos in docs.
+   etc.
+
+release_5_8_1
+   Bug fix -o option (when no -o output from #generate to System.out).
+
+release_5_8_2
+   "Small bugfixes to lib files, added ast example"
+
+release_5_8_3
+   "More small bugfixes to lib files"
+
+trans_5_8_4
+   Moving some files and packages around.
+
+trans_5_8_5
+   Some cleanup with up and down of Terms and Java objects.
+   Now uses UppedTerm to pass terms to Java for all terms
+   not covered by the special up cases.
+
+trans_5_8_6
+   Implement an alternative to #generate so that we can declare
+   rules which define facts of the form file(name,contents)
+
+trans_5_8_7
+   Change the notation for java class terms to #java.lang.String instead of
+   #<java.lang.String>
+
+trans_5_8_8
+   Some things forgotten to remove from repository in 5_8_4 
+   
+trans_5_8_9
+   "Soft cache entry for better memory usage"
+
+trans_5_8_10
+   Make upped term print right.   
+
+trans_5_8_11
+   Constant pattern such as get_?x : A constant pattern is a pattern of
+   symbol followed by a variable. It matches with strings and other constant
+   patterns in the expected way.
+
+trans_5_8_13
+   "Allow adding imports to generated files."
+
+trans_5_8_14
+   "javagenerator: support for exceptions and interface generation"
+
+trans_5_8_15
+   A variable ? never binds to anything (since we don't care about it anyway).
+
+trans_5_8_16
+   A little bit more "functional" style in TyRuBaParser.
+
+trans_5_8_17
+   Multi rule
+
+cvs_release_tag := trans_5_8_18
+cvs_release_comment := "Capitalization functions"
+
+cvs_release_tag := trans_5_8_19
+cvs_release_comment := "Remove dead code in tyRuBa.util"
+
+cvs_release_tag := trans_5_8_20
+cvs_release_comment := "Some unit tests for things in lib"
+
+cvs_release_tag := trans_5_8_21
+cvs_release_comment := "A list test function in lib"
+
+cvs_release_tag := trans_5_8_22
+cvs_release_comment := "Termgen example"
+
+cvs_release_tag := trans_5_8_23
+cvs_release_comment := "Raji's QBrowser tool"
+
+    branch_5_8_23
+    branch_5_8_23_2 : updates from the latest jar file (19-11-2001)   
+
+cvs_release_tag := trans_5_8_24
+cvs_release_comment := "Making the reification engine work and generate hotdraw .meta files"
+
+cvs_release_tag := trans_5_8_25
+cvs_release_comment := "Making the QBrowser work with tyruba"
+
+cvs_release_tag := trans_5_8_27
+cvs_release_comment := "Merging in Raji's jar file changes"
+
+cvs_release_tag := trans_5_8_28
+cvs_release_comment := "Moving backend frontend into qBrowser directory"
+
+cvs_release_tag := trans_5_8_29
+cvs_release_comment := "Trying out raji's patches"
+
+cvs_release_tag := trans_5_8_30
+cvs_release_comment := "Trying out raji's patches"
+
+cvs_release_tag := trans_5_8_31
+cvs_release_comment := "Fixing up the commandline application code to make use of load method"
+
+cvs_release_tag := trans_5_8_32
+cvs_release_comment := "Change cool example to use :- filegen . rather than generate directive"
+
+cvs_release_tag := trans_5_8_33
+cvs_release_comment := "Updates to qBrowser tyruba interface to work with new FrontEnd"
+
+cvs_release_tag := trans_5_8_34
+cvs_release_comment := "Email sending from tyruba, and some small changes."
+
+cvs_release_tag := trans_5_8_35
+cvs_release_comment := "Add back the generate directive for backward compatibility"
+
+cvs_release_tag := trans_5_8_36
+cvs_release_comment := "Some updates to the documentation and tutorial"
+
+cvs_release_tag := release_5_9
+cvs_release_comment := "Preparing for release"
+
+cvs_release_tag := trans_5_9_1
+cvs_release_comment := "Support for a CC address in Java Mail native"
+
+cvs_release_tag := trans_5_9_4
+cvs_release_comment := "A length predicate implemented using tyni, now can work with long lists"
+
+cvs_release_tag := trans_5_9_5
+cvs_release_comment := "Remove the prefix patterns."
+
+cvs_release_tag := trans_5_9_6
+cvs_release_comment := "Small typo fixes, remove some debugging things"
+
+cvs_release_tag := trans_5_9_7
+cvs_release_comment := "Additions to lib, including support for default_package in javagenerator"
+
+cvs_release_tag := trans_5_9_8
+cvs_release_comment := "Indexed and cached rulebases are now more independent wrappers. Started some stuff for separate fact base. (Not yet completed but should compile without interfering)"
+
+cvs_release_tag := trans_5_9_9
+cvs_release_comment := "Fixed a bug in javagenerator involbing default_package declaration"
+
+cvs_release_tag := trans_5_9_10
+cvs_release_comment := "Simplified implementation of RBVariable"
+
+cvs_release_tag := trans_5_9_11
+cvs_release_comment := "Some simple java.lang.Reflect calls"
+
+cvs_release_tag := trans_5_9_12
+cvs_release_comment := "Added an arg and functor predicate to lib/prolog"
+
+cvs_release_tag := trans_5_9_13
+cvs_release_comment := "Added am infix '==' meta predicate and a TEST meta predicate. Also implemented some predicates with it in prolog.rub"
+
+cvs_release_tag := trans_5_9_14
+cvs_release_comment := "Added an infix '==' meta predicate and a TEST meta predicate. Also implemented some predicates with it in prolog.rub"
+
+cvs_release_tag := release_5_9_1
+cvs_release_comment := "A small extension to the public interface of tyRuBa.engine.Frame. Prepare a release."
+
+cvs_release_tag := trans_5_9_1_1
+cvs_release_comment := "Java solve now works with Vectors as well as arrays as return values"
+
+cvs_release_tag := trans_5_9_1_2
+cvs_release_comment := "Ground facts stored in separate factbase with index. Much better performance for large factbases"
+
+cvs_release_tag := trans_5_9_1_3
+cvs_release_comment := "Remove some debug printing from FactBase, fix some severe bugs in CommandLine interpretation"
+
+cvs_release_tag := trans_5_9_1_4
+cvs_release_comment := "Bug fix for escaping the first ? in a {} block"
+
+cvs_release_tag := trans_5_9_1_5
+cvs_release_comment := "A simple benchmark for testing factbase performance"
+
+cvs_release_tag := trans_5_9_1_6
+cvs_release_comment := "Some minor cleanups in qbrowser initfile"
+
+cvs_release_tag := release_5_9_2
+cvs_release_comment := "Small change to avoid class loader problems in Eclipse + Prepare for release."
+
+cvs_release_tag := trans_5_9_2_1
+cvs_release_comment := "An ASSERT expression to assert facts into the factbase"
+
+cvs_release_tag := trans_5_9_2_2
+cvs_release_comment := "A RETRACT expression to retract facts from the factbase"
+
+cvs_release_tag := trans_5_9_2_3
+cvs_release_comment := "Adding the jakarta regexp package and a syntax to match tyruba varaibles to patterns"
+
+cvs_release_tag := trans_5_9_2_4
+cvs_release_comment := "Previous version of regexp chucked away. Was too hard to implement well. For now a simpler regexp extensions relying on Tyni for invoking operations on org.apache.regexp.RE term objects."
+
+cvs_release_tag := release_5_10
+cvs_release_comment := "Prepare for release. Includes rudimentary regexp extension."
+
+cvs_release_tag := trans_5_10_1
+cvs_release_comment := "Minor typo fixes. A bug report"
+
+cvs_release_tag := trans_5_10_2
+cvs_release_comment := "Fix commandline bug in -noinit"
+
+cvs_release_tag := trans_5_10_3
+cvs_release_comment := "Towards a better index for the factbase."
+
+cvs_release_tag := trans_5_10_4
+cvs_release_comment := "Spelling errors and typo fixes in README and docs"
+
+cvs_release_tag := trans_5_10_5
+cvs_release_comment := "Towards a better index... adding a path variable to remmeber position of a subindex. Adding wildcardkind (not fully supported yet)"
+
+cvs_release_tag := trans_5_10_6
+cvs_release_comment := "We now have on-demand-built index entries for WildCardKind. Speedup of right-to-left queries now also works (after the first of it a given pattern has been run, next ones are fast)"
+
+cvs_release_tag := trans_5_10_7
+cvs_release_comment := "Provide a -old_factbase commandline option to use the old version of the FactIndex. Old version is less sophisticated (no WildCardIndexes) but uses up somewhat less memory"
+
+cvs_release_tag := release_5_11
+cvs_release_comment := "Prepare for release."
+
+cvs_release_tag := trans_5_11_1_1
+cvs_release_comment := "RBTermExpression knows itself what rulebase it needs to evaluate in, instead of passing around as part of RBContext"
+
+// Meta note: from here on down. I will make notes in between tagged versions
+// where a line TAG: ... marks a point in time where I tagged the CVS.
+// All changes BEFORE that are thus included with the tagged version.
+// the changes after that are not.
+
+   Working towards an implementation where RBTermExpression keeps track of
+   its own specialized copy of the RuleBase, so it avoids a lookup. 
+   
+   Will open up potential ways to further optimization of Expression evaluation.
+   
+   Merged changes from Head version trans_5_11_1_2
+      Added retract funtion to FrontEnd
+   Moved factory methods from Query into FrontEnd
+   
+   Added retract funtion to FrontEnd
+   Moved factory methods from Query into FrontEnd
+   
+   Added retract funtion to FrontEnd
+   Moved factory methods from Query into FrontEnd
+   Makefiles and build.xml files clean-up. 
+   Some deprecated API's in FrontEnd fixed (thanks to Stefan Hanenberg)
+   
+TAG: trans_5_11_1_2
+
+   An experiment: Factbase index: replacing Hashtable by a TreeMap. 
+   Expect to get better memory performance because we have lots of 1-item hastables.
+   => Did not work. TreeMap cannot be used it needs an order compare function.
+      No such function is available for RBJavaObjects.
+   We might be able to implement our own TreeMap datastructure that uses the
+   Hashcode for defining the order. 
+   
+   Changed some uses of Hashtable to the newer HashMap in tyruba.engine.index.
+   
+   Merged in a BugFix from Lazy... branch: tyRuBa.engine.Index had serious problems
+   with WildCard indexes.
+   
+   The entire Lazy... branch is now merged in. It should provide the same functionality as
+   before but with the Caches now distributed over several specialized copies associated with
+   RBTermExpression objects directly. This hopefully will open up some possibilities
+   to a more selective flushing of caches and indexes. (Still done all at once now even 
+   thought they are distributed over different CachedRuleBase and IndexedRuleBase objects.
+
+release_5_11_2
+
+  It's about time we put out all those bug fixes.
+
+release_5_12 
+
+  A small redudancy removed from RBLazySpecializers.
+  
+  Clean up FactIndex and FactKey and related method which are dead code.
+  (because all fact indexing is taken care of by stuff in tyRuBa.engine.Index).
+
+  Dead code: printSeparatorBefore
+  
+  Refactoring and clean up: introduce RBAbstractPair class.
+
+trans_5_12_1
+
+   Change parser to dissallow | in compound terms
+
+release_5_12_2
+
+   Re-implement indexing for CompoundTerms taking the assumption that
+   no | terms exist and therfore we can index based on arity. Expect to
+   gain some memory here!
+
+  Fixes arg and functor predicates to work again. Use the newly added
+  TERM2LIST expression.
+ 
+  Bugfix to NODUP. NODUP was not used for sooooo long that we did not
+  notice it is no longer working (when did this happen??).
+
+release_5_13
+
+   FrontEnd takes care of loading initfiles from the jar file.
+   This option is controlled by a boolean parameter to the
+   FrontEnd constructor.
+   
+   mul predicate added to library.
+   
+   Added "buckets". FrontEnd refactored into QueryEngine abstratc superclass + ...
+   
+   Little bugfix to CachedRuleBase.
+   
+trans_6_0_1
+
+	First version with mode and type checking.
+	
+	Kris: I fixed a bug that caused "percentfree" to work exactly the oposite way
+	of what it should do. => makes *very* bad decisions on predicate order.
+	Afther this fix => JQuery much faster!
+   
+    Kris: I made it so that now ModedRuleBases are generated on the
+    fly if a predicate is used with a mode which is not declared, but which
+    is more specific (more things bound) than a declared one.
+    Because more variables are bound it is expected that it may be advantageous
+    to execute things in a different order.
+    
+    TODO: I've patched up NativePredicate to also respond to on the fly
+    requests for mode (re)conversion. Somehow this seems not quite right since
+    there is nothing to be gained for Native predicates. We need to take a
+    second look at how Native predicates work now. It seems overly complex and
+    inefficient.
+    
+    ---
+    
+    An example of how on-the-fly modedrulebase helps:
+    
+	:- string_append(abc,?d,efg,abcdefg).
+	##QUERY : string_append<abc,?d,efg,abcdefg>
+	(B,F,B,B) is NONDET ==> string_append<?s1,?s2,?s3,?s123> :- 
+	    string_append<?s12,?s3,?s123>{(F,B,B) is SEMIDET},
+	    string_append<?s1,?s2,?s12>{(B,F,B) is NONDET}.
+
+	| ?d=d |
+	##END QUERY
+
+	In the above it didn't help because the rule for (F,F,F,B) was converted in the same way
+	(this is a bit of luck really).
+	
+	In the next example it makes a difference:
+	
+    :- string_append(abc,def,?x,abcdefghij).
+	##QUERY : string_append<abc,def,?x,abcdefghij>
+	(B,B,F,B) is NONDET ==> string_append<?s1,?s2,?s3,?s123> :- 
+	    string_append<?s1,?s2,?s12>{(B,B,F) is DET},
+	    string_append<?s12,?s3,?s123>{(B,F,B) is NONDET}.
+
+	| ?x=ghij |
+	##END QUERY
+	
+	---
+	
+	Fixed write_output and debug_print to work with {...} terms.
+	
+	---
+	
+	Implemented a simple benchmarking utility together with a simple benchmark.
+	See tyRuBa.tests.PerformanceTest and examples/benchmark
+
+trans_6_0_2
+	
+	Version before tuples being used in RBPredicateExp... and RBCompoundTerm
+	
+trans_6_0_3
+
+	- Added RBTuples and used them in RBCompoundTerm and RBPredicateExpression.
+	
+	- One FactBase per ModedRuleBaseCollection.
+	
+    - Moved the cachedRuleBase to wrap around a ModedRuleBase with facts and rules.
+   
+trans_6_0_4
+
+	- RBComponent and RuleBase unify only with arguments (RBTuple) instead of
+	  term (RBCompoundTerm)
+	  
+	- Optimization of evaluation of semidet or det predicates: stop evalution if
+	  a solution is found
+	 
+trans_6_0_5
+
+  After a lot of tweaking and adding a kind of "compiled" representation of
+  rules and expression the benchmarks now run approx 2* faster.
+  
+trans_6_0_6
+
+  Added progress monitor support.
+  
+trans_6_0_7
+
+	-Added support for destroying unneeded buckets
+	
+release_6_0
+
+    The soon to be released first "public beta" version of the new tyruba engine
+    with mode and type checking and diskbased factbase. 
+    
+release_6_1
+
+    Release 6_0 never made it. Too many bugs in the new factbase. Hopefully most
+    of those have now been fixed in trans_6_1.
+    
+trans_6_1_1
+
+    Stable version before JIm starts messing.
+
+release_7_0
+
+    Jim is done messing.
+    
+    The factbase has been completely rewritten to be more efficient and less
+    buggy.  Support for "fact libraries" has been added.  Much of the type system
+    has also been refactored/rewritten so that there's only one representation of types
+    and not two as there was before ( the "::" syntax is just sugar now).
+    
+release_7_1
+
+    Working version with some more bug fixes. After 7_0. To be released on the
+    sourceforge website.
+    
+release_7_3_1
+
+	Updated the code generation library to mode and type checked version.
+    

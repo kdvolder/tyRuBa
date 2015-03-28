@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#
+# Remove large benchmark directory and logfiles (and only keep compressed .tar.gz files)
+#
+
+# Usasge: ./clean
+
+rm -fr 1*

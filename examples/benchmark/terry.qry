@@ -1,0 +1,7 @@
+//splatter(abcdefghijklmnop,?x),splatter(?y,?x)
+topo_sort(?x)
+prime(?x,250)
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)
+permutation([a,b,c,d,e,f,g],?x)
+perm([1,2,3,4,5],?x)

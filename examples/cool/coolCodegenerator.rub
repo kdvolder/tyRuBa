@@ -1,0 +1,101 @@
+/**********************************************************************
+ The cool "code generator" is the layer below the JCore layer. It "weaves"
+ COOL aspects into the JCore program.
+ **********************************************************************/
+
+/** First we copy all code from the layer above: */
+copyLayer(JCore,COOL).
+
+/** For the time being the COOL layer is the final layer */
+copyLayer(COOL,FI).
+
+/*********************************************************************
+ Step 1: LOW LEVEL KERNEL AL:
+
+ requires(?class,?method,?condition).
+   means that the method ?method of the class ?class must wait
+   for ?condition to become true before it may start executing.
+   If there is more than one such condition these are combined by means
+   of an && expression in Java
+
+ onEntry(?class,?method,?statement)
+   The Java ?statement must be executed whenever the ?method of the given
+   ?class starts executing.   
+
+ onExit(?class,?method,?statemen)
+   The Java ?statement must be executed whenever the ?method of the given
+   ?class stops executing.   
+
+ ********************************************************************/
+
+/** Wrapper code template for COOL methods */
+method_(COOL,?class,?Return,?name,?Args,?head,{
+    while (true) {
+      synchronized ( this ) {
+        if (?condition) { 
+           ?atStart
+           break; } }
+      try { wait ( ) ; }
+      catch ( InterruptedException COOLe ) { } }
+    try {?body}
+    finally {
+      synchronized(this) {
+        ?atEnd
+        notifyAll();} }
+}) :- method_(JCore,?class,?Return,?name,?Args,?head,?body),
+      COOL_allRequired(?class,?name,?condition),
+      COOL_atStartStatements(?class,?name,?atStart),
+      COOL_atEndStatements(?class,?name,?atEnd).
+
+/* Three auxiliary predicates to collect the missing pieces */
+COOL_allRequired(?class,?name,?exp) :-
+  FINDALL(requires(?class,?name,?cond),
+          ?cond,?conditions),
+  JavaConjunction(?conditions,?exp). //Note: fails when ?conditions=[]
+
+COOL_atStartStatements(?class,?name,?statements) :- 
+   FINDALL(onEntry(?class,?name,?stat),
+           ?stat,?statements).
+
+COOL_atEndStatements(?class,?name,?statements) :- 
+   FINDALL(onExit(?class,?name,?stat),
+           ?stat,?statements).
+
+/*********************************************************************
+ Step 2: Higher level AL features in terms of Step 1
+
+ mutex(?class,?method1,?method2).
+    ?method1 and ?method2 of ?class should not 
+    be allowed to run concurrently with eachother.
+    If ?method1 and ?method2 are the same method this means it
+    should not run concurrently with itself.
+ *********************************************************************/
+
+/* First, mutex is a symmetric relationship. However for user convenience,
+   we do not ask the user to explcitly  declare the symetric pairs.
+   The weaver takes the symmetric completion of mutex and calls this mutExSym.
+   The weaver will allways refer to mutexSym and not to mutex directly from here
+   on.
+ */
+mutexSym(?c,?m1,?m2) :- mutex(?c,?m1,?m2);mutex(?c,?m2,?m1).
+
+/** If a method ?name is mutex with ?other it is "guarded" by the following
+    required expression */
+requires(?class,?name,{COOLBUSY_?other == 0}) :-
+    mutexSym(?class,?name,?other).
+
+/** Declare a COOLBUSY counter variable for every
+    method which is either self or mutex */
+var_(COOL,?class,int,COOLBUSY<?name>,{
+  private int COOLBUSY_?name = 0; 
+}) :- mutexSym(?class,?name,?other).
+
+/** Every method for which there is a COOLBUSY counter
+    must get some atEnd and atStart statements to maintain
+    these counters */
+onEntry(?class,?name,{
+        ++COOLBUSY_?name;
+}) :- feature1(COOL,?class,var<int,COOLBUSY<?name>>).
+onExit(?class,?name,{
+        --COOLBUSY_?name;
+}) :- feature1(COOL,?class,var<int,COOLBUSY<?name>>).

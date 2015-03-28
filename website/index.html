@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<!--This file created 2/9/02 11:33 PM by Claris Home Page version 3.0-->
+  <title>TyRuBa -- Logic Meta Programming for Java</title>
+  <meta name="GENERATOR" content="Claris Home Page 3.0">
+  <x-claris-window top="55" bottom="755" left="237" right="767"></x-claris-window>
+  <x-claris-tagview mode="minimal"></x-claris-tagview>
+</head>
+<body bgcolor="#ede8ff">
+<p>
+<table border="0" bgcolor="#9fa9d4" cellspacing="0" cellpadding="0"
+ width="100%">
+  <tbody>
+    <tr>
+      <td colspan="3" bgcolor="#666666">
+      <center><font size="+4" face="Sand" color="#99ccff">TyRuBa
+Homepage</font></center>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+      <p><font size="+2"><b>Quicklinks</b></font></p>
+      <ul>
+        <li><a
+ href="http://sourceforge.net/project/showfiles.php?group_id=31888">Download</a></li>
+        <li><a href="tyruba_language_reference.html">Language Reference</a></li>
+        <li><a href="tyruba_tutorial.html">Tutorial</a> (under
+construction)</li>
+        <li><a href="http://sourceforge.net/projects/tyruba/">Tyruba
+project page on sourceforge.</a> </li>
+      </ul>
+      </td>
+      <td valign="bottom">
+      <p align="right"><a href="http://sourceforge.net"><img
+ src="http://sourceforge.net/sflogo.php?group_id=31888"
+ alt="SourceForge Logo" width="88" height="31" border="0" align="bottom"></a></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p><b>What is TyRuBa?</b></p>
+<p>TyRuBa is a logic-meta-programming system which was designed to be
+used for generating Java code. It was implemented as part of
+<a href="http://www.cs.ubc.ca/%7Ekdvolder/publications/phd-summary.htm">my
+Ph.D. work</a> as a system to experiment with the idea of
+type-oriented logic meta programming. TyRuBa's name derives from this
+origin, it is an acronym for '<b>Ty</b>pe <b>Ru</b>le <b>Ba</b>se'.
+However, the system has no specific built-in features which make it
+focus on types. Rather it is a general, simple logic programming
+language with a few peculiarities to facilitate the manipulation of
+Java code for the purpose of code generation.</p>
+<p><b>TyRuBa Generation 2 (versions 6.x and beyond): major changes
+since version 5.x<br>
+</b></p>
+<p>The TyRuBa logic programming language has undergone major changes
+since its last publicly released version. Changes to the language are
+of the extent that for a brief time I considered changing TyRuBa's
+name. In some sense it is not the same language anymore and it is
+unfortunatley not backward compatible. I think that most code however
+can be ported relatively easily to the new version if it did not rely
+extensively on some of the higher order programming features. The
+higher order programming features are no longer supported in the new
+language. They are useful at times, but were sacrificed for the sake of
+efficiency and to simplify the implementation of more advanced type and
+mode checking which are described in some detail in the revised <a
+ href="tyruba_tutorial.html">tutorial</a>.<br>
+</p>
+<p>New features in TyRuBa 6.x versions:<br>
+</p>
+<ul>
+  <li>A Type and Mode checking system. This offers better (though still
+rather cryptic at times :-) error messages as well as more intelligence
+on behalf of the query engine in "making" queries work by rearranging
+the order of expressions. Thus the language has become significantly
+more declarative. In general, writing rules has become a bit harder now
+because you have to satisfy the type system, which is a little picky
+sometimes, but writing queries on the other hand has become
+signficantly easier because of the engines understanding of proper
+execution modes for predicates. The Type and Mode system should be
+considered as experimental at this stage and likely to undergo changes.
+You can actually have an impact on what changes by informing is where
+the type system makes it hard / impossible to port existing 5.x code.<br>
+  </li>
+  <li>A factbase which stores facts and indexes for lookup partially on
+disk. This allows for much larger factbases to be used without running
+out of memory.</li>
+  <li>Together with the disk-based factbase comes the ability to
+persist a factbase between runs of the engine (only accessible through
+use of the API interfaces, not through the commandline application)</li>
+</ul>
+Good old TyRuBa 5.x features retained in 6.x<br>
+<ul>
+  <li>Most of the existing library predicates from version 5.x have
+been ported. For end-users writing queries, for example in the <a
+ href="http://jquery.cs.ubc.ca">JQuery</a> tool the difference will
+harldy be noticed (except that there are more interesting error
+messages and the query engine now is not so picky about the order in
+which expressions occur in a query anymore).</li>
+  <li>TyRuBa does 'tabling' of query results. Tabling is a kind of
+caching, which stores results of previously run queries. It does so in
+a way which helps detect certain forms of recursive dependencies which
+would make ordinary Prolog go into infinite loops.</li>
+  <li>TyRuBa has a special term syntax which can be used to represent
+code/string templates. This is a primitive but effective mechanism to
+generate/assemble code from logic descriptions. The mechanism under 6.x
+has not been used or tested much and there are some portential
+complications in using it because the query engine now reorganizes
+queries based on modes. Since the codegeneration typically depends on
+some "impure" predicates such "write_output" this may cause
+complications.<br>
+  </li>
+  <li>TyRuBa is still 100% pure Java and runs on any machine which
+supports Java 1.3.<br>
+  </li>
+</ul>
+<p>Feature no longer supported:<br>
+</p>
+<ul>
+  <li>TyRuBa 5.x higher order (hilog) logic programming features.</li>
+  <li>TyNI: TyRuBa 5.x experimental native interface, a mechanism to
+call Java methods from within TyRuBa has been dropped.&nbsp; It has
+been
+replaced with a more efficient internal API for adding native
+predicates. If there is a need for people to port some of their
+existing native predicates to TyRuBa6.0 please contact me, and we
+probably will put some effort into helping you out and making these
+API's more accessible and documented for outside use.</li>
+</ul>
+<p><b>Example Code</b></p>
+<p>Most example code has not been ported yet to 6.x versions.<br>
+</p>
+<ul>
+  <li><a
+ href="http://www.cs.ubc.ca/%7Ekdvolder/binaries/design-pattern-example.zip">dessing-pattern-example.zip</a>
+paper in pdf is included in the package. Also Mac standalone versions
+of the GUI and comand-line TyRuBa Java applications. <font
+ color="#ff0000"><b>This example has not been converted to the newest
+version of tyruba.</b></font></li>
+  <li>COOL (Coordination Aspect Language) This is the example from the
+Reflection'99 paper. It implements a simple synchronization language
+and uses it to generate synchronization code for a stack class in
+several different ways. This is now part of the tyruba distribution
+package under examples/cool/</li>
+</ul>
+<p><b>More Reading Material</b></p>
+<p>Some other material available for reading more about TyRuBa:</p>
+<ul>
+  <li><a href="tyruba_language_reference.html">Tyruba language
+reference manual</a>.</li>
+  <li><a
+ href="http://www.cs.ubc.ca/%7Ekdvolder/publications/design_patterns-abstract.htm">Implementing
+Design Patterns as Declarative Code Generators</a> an unpublised paper
+which uses TyRuBa to generate design-pattern code.</li>
+  <li><a
+ href="http://prog.vub.ac.be/Research/ResearchPublicationsDetail2.asp?paperID=66">Aspect-Oriented
+Logic Meta Programming</a> a paper which elaborates an example of how
+TyRuBa 5.x was used to do Aspect Oriented Programming. We implemented
+and extend an aspect language for managing synchronization in Java
+programs.</li>
+  <li><a
+ href="http://www.cs.ubc.ca/%7Ekdvolder/publications/phd-summary.htm">Type
+Oriented Logic Meta Programming</a>: my Ph.D. dissertation, the origin
+of TyRuBa.</li>
+  <li><a href="tyruba_tutorial.html">Tutorial</a> (Under
+condstrunction, but already useful in its current form)</li>
+</ul>
+<p><b>Download TyRuBa</b></p>
+<p>TyRuBa is being distributed under the terms and conditions of the
+BSD <a href="BSD-open-source.html">open-source license</a>. TyRuBa is
+now hosted by <a href="http://sourceforge.net/">sourceforge</a>. For
+downloads, mailing lists, bug reports etc. please visit <a
+ href="http://sourceforge.net/projects/tyruba/">tyruba's
+project page on sourceforge</a>.</p>
+<p>Older versions of TyRuBa can be downloaded from the <a
+ href="http://prog.vub.ac.be/">Programming
+Technology Lab</a>'s <a href="ftp://prog.vub.ac.be/languages/TyRuBa/">ftp-site</a>.<br>
+</p>
+<p><b>Questions?</b></p>
+<p>If you have any questions or comments I am eager to here them, so
+send me a message at: <a href="mailto:kdvolder@cs.ubc.ca">kdvolder@cs.ubc.ca</a>
+or post a message on the <a
+ href="http://sourceforge.net/projects/tyruba/">tyruba
+mailing lists on sourceforge</a>.</p>
+<p>&nbsp;</p>
+<p>
+</p>
+<hr>
+<p></p>
+<p align="right">Kris De Volder &lt; <a
+ href="mailto:kdvolder@cs.ubc.ca">kdvolder@cs.ubc.ca</a>&gt;</p>
+</body>
+</html>

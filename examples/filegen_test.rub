@@ -1,0 +1,10 @@
+#library "gen/initfile.rub"
+
+classpath("generated_codes").
+
+class_(bar.Foo).
+
+var_(bar.Foo,int,test).
+private_(var<bar.Foo,test>).
+
+:- genfiles().

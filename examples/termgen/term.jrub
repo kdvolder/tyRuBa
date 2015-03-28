@@ -1,0 +1,28 @@
+#include "sampleterm.rub"
+
+//:- fileseparator(?sep).
+
+//:- classpath(?cp).
+
+//:- class_(?c).
+//:- generate(?class,?contents).
+
+//:- file(?name).
+
+//:- term_composite_class(?c,[?p1,?p2]).
+//:- term_class_default_print(?c,?lt,?sep,?sep2,?rt).
+//:- file(?fle,?contents).
+
+//:- term_class_for(RBTerm,?x).
+//:- term_symbol(?x).
+//:- term_production(?lhs,?rhs).
+
+//:- hash_value(foobar,?c).
+
+//:- term_composite_class(?c,?parts),term_hash_method(?hashMethod),
+//   term_hash_computation(?hashMethod,?parts,?hashComputation).
+
+//:- class_(?c),import_(?c,?x).
+
+// :-   term_composite_class(?C,?parts).
+

@@ -1,0 +1,78 @@
+// Idea... what if we use TyRuBa to generate its own AST classes?
+
+//
+// Global code gneration options for the
+// astgen library.
+//
+
+ast_package(tyRuBa.ast).
+ast_root(AST).
+
+//
+//  Compilation Unit
+//
+
+ast_production(CompilationUnit, many<CompilationUnitElement>).
+  
+ast_production(CompilationUnitElement,Assertion).
+ast_production(CompilationUnitElement,Directive).
+
+//
+// Directives
+//
+
+ast_production(Directive,Include).
+ast_terminal(Include,[java.net.URL,url]).
+
+//
+// Assertions (facts and rules)
+//
+
+//ast_production(Assertions,many<Assertion>).
+ast_production(Assertion,Rule).
+ast_production(Assertion,Fact).
+
+ast_production(Rule,  [ [Term,conclusion], [Expression, Condition] ]).
+ast_production(Fact,  [ [Term,conclusion] ]).
+
+
+//
+// Expressions
+//
+
+ast_production(Expression,   Conjunction).
+ast_production(Conjunction,  many<Expression>).
+
+ast_production(Expression,   Disjunction).
+ast_production(Disjunction,  many<Expression>). 
+
+ast_production(Expression,   Not).
+ast_production(Not,          [ [Expression, negated] ]).
+
+ast_production(Expression,     TermExpression).
+ast_production(TermExpression, [ [Term, term] ]).
+
+//
+// Terms
+//
+
+ast_production(Term,             AbstractVariable).
+
+ast_production(AbstractVariable, Variable).
+ast_terminal(Variable,           [String,name]).
+
+ast_production(AbstractVariable, IgnoredVariable).
+ast_production(IgnoredVariable,  []).
+
+ast_production(Term,         JavaObject).
+ast_terminal(JavaObject,     [Object,obj]).
+
+ast_production(Term,         List).
+ast_production(List,         EmptyList).
+ast_production(EmptyList,    []).
+ast_production(List,         Pair).
+ast_production(Pair,         [ [Term,car],[Term,cdr] ]).
+
+ast_production(Term,         CompoundTerm).
+ast_production(CompoundTerm, many<Term>).
+

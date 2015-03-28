@@ -1,0 +1,15 @@
+#!/bin/sh
+
+#
+# Setup for wrking with given benchmark archive (log files + dbdir)
+#
+# Usage: ./setup <filename>
+#
+# Example: ./setup jhotdraw_bm.tar.gz
+
+echo Removing old benchmark files...
+rm -fr 1*
+echo Installing $1 files...
+tar zxf $1
+echo Done
+

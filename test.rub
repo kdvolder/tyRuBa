@@ -1,0 +1,12 @@
+TYPE Tree = Empty | Leaf | Node
+TYPE Empty AS <> 
+TYPE Leaf AS String 
+TYPE Node AS <Tree,Tree> 
+
+foo :: String, Integer
+MODES (F,F) IS NONDET END
+
+foo(Kirs,55).
+foo(Eric,55).
+
+:- foo(?x,55).

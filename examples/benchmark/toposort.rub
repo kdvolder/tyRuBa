@@ -1,0 +1,130 @@
+/**************************************************************************\
+ * Toplogical sorting:
+ *
+ *   Declare a binary relation "precedes"
+ *
+ *   Then call the predicate topo(?x).
+\*************************************************************************/
+
+precedes :: Object,Object
+MODES 
+   (F,F) IS NONDET
+END
+
+// The example code is at the end of the file!
+
+/******** Auxiliary functions *****/
+
+//
+// like member/2 but also binds the other elements to ?rest
+//
+member :: ?a,[?a],[?a]
+MODES
+  (F,B,F) IS NONDET
+  (B,B,F) IS NONDET
+  (F,B,B) REALLY IS SEMIDET
+END
+
+member(?x,?from,?rest) :-
+	append(?beg,[?x|?end],?from), append(?beg,?end,?rest).
+
+/***** Topo sorting stuff *****/
+
+// predicates for finding all the elements to be sorted
+
+topo_element :: Object
+MODES
+  (F) IS NONDET
+END
+
+// This one is broken because of a bug with ? in the factbase
+//topo_element(?x) :- precedes(?x,?) ; precedes(?,?x).
+topo_element(?x) :- precedes(?x,?y) ; precedes(?y,?x).
+
+topo_elements :: [Object]
+MODES
+  (F) IS DET
+END
+
+topo_elements(?all) :- FINDALL(topo_element(?x),?x,?all).
+
+// predicate to divide a list of elements into a minimal element
+// and remaining elements.
+
+topo_start :: Object,[Object],[Object]
+MODES
+   (F,B,F) IS NONDET
+END
+
+topo_start(?x,?from,?rest) :- Object(?x),member(?x,?from,?rest), 
+	NOT(EXISTS ?y:precedes(?y,?x),member(?y,?from)).
+
+//
+// topo sort a list of elements
+//
+topo_sort :: [Object],[Object]
+MODES
+  (B,F) IS NONDET
+END
+
+topo_sort(?list,[?start|?sortedrest]) :-
+	topo_start(?start,?list,?rest),
+	topo_sort(?rest,?sortedrest).
+topo_sort([],[]).
+
+topo_sort :: [Object]
+MODES (F) IS NONDET END
+topo_sort(?sorted) :- topo_elements(?all),topo_sort(?all,?sorted).
+
+/**** Example code how to use this *****/
+
+// Some example precedes declarations. This is how you declare dependencies.
+
+precedes(foundation,walls).
+precedes(foundation,floor).
+
+precedes(walls,roof).
+precedes(walls,windows).
+
+precedes(roof,chimney).
+
+precedes(floor,furniture).
+precedes(walls,paint).
+precedes(windows,paint).
+precedes(paint,furniture).
+
+precedes(?x,furnace) :- precedes(?x,furniture).
+precedes(chimney,furnace).
+precedes(furnace,kindling).
+precedes(kindling,fire).
+precedes(fire,smoke).
+
+precedes(fire,heat).
+
+precedes(heat,scrabblegame).
+precedes(scrabbleboard,scrabblegame).
+precedes(furniture,scrabbleboard).
+
+precedes(land,foundation).
+precedes(permit,foundation).
+precedes(furniture,occupants).
+precedes(occupants,scrabblegame).
+
+// Possible last tasks?
+
+last_task :: Object
+MODES (F) IS NONDET END
+
+last_task(?last) :- topo_sort(?tasklist),append(?,[?last],?tasklist).
+
+// Example 1: find all elements that where declared in "precedes"
+//:- topo_element(?x).
+
+// Example 2: same as example 1, but finds them in a list.
+//:- topo_elements(?x).
+
+// Example 3: topological sort the elements. (will find all possible
+//            sortings that satisfy the precedes relationship)
+//:- topo_sort(?s).
+
+//:- last_task(?x).

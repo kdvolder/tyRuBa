@@ -1,0 +1,39 @@
+Note: first run with background pager disabled.
+
+I suspect that the background pager is misbehaving and not waiting until the query engine is
+really idle, thus it steals/wastes time and slows down the query engine (that is in this
+benchmark because it loads a big factbase from .rub file before getting started.
+
+I have now disabled the background pager by default for CommandLine applications. It
+really only makes sense to use it in a setup where we are running inside of a GUI that
+makes use of the fastbackup method.
+
+----- results for tests in benchmark.qry -------
+splatter(abcdefghijklmnop,?x),splatter(?y,?x)  #results = 32768  seconds = 11.422
+topo_sort(?x)  #results = 27388  seconds = 9.918
+prime(?x,250)  #results = 53  seconds = 0.286
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 6.603
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 0.988
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_forward(?x,?bork)  #results = 32647  seconds = 2.113
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_backward(?bork,?x)  #results = 32647  seconds = 2.074
+permutation([a,b,c,d,e,f,g],?x)  #results = 5040  seconds = 1.295
+perm([1,2,3,4,5,6,7],?x)  #results = 5040  seconds = 12.761
+TOTAL : 47.46
+
+These are the results when the bg pager is enabled:
+
+----- results for tests in benchmark.qry -------
+splatter(abcdefghijklmnop,?x),splatter(?y,?x)  #results = 32768  seconds = 20.998
+topo_sort(?x)  #results = 27388  seconds = 15.977
+prime(?x,250)  #results = 53  seconds = 0.866
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 16.598
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 2.823
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_forward(?x,?bork)  #results = 32647  seconds = 5.505
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_backward(?bork,?x)  #results = 32647  seconds = 2.872
+permutation([a,b,c,d,e,f,g],?x)  #results = 5040  seconds = 3.626
+perm([1,2,3,4,5,6,7],?x)  #results = 5040  seconds = 20.361
+TOTAL : 89.626
+
+The problem appears to be that most of these tests are not using the DB hence not using the pager
+hence Pager sees no activity and starts purging the facts out to disk thereby stealing time from
+the execution of queries.

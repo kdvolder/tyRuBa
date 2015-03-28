@@ -1,0 +1,44 @@
+---------------------------------------------------------------------------
+ Cleared this file.
+ All the stuff in here related to premodechecked version...
+ 
+ Starting afresh.
+---------------------------------------------------------------------------
+Subtle bug in mode checker:
+
+Example: (Discovered while converting the toposort example)
+  
+Following definition of member
+
+member :: ?a,[?a],[?a]
+MODES
+  (F,B,F) IS NONDET
+  (B,B,F) IS SEMIDET
+  (F,B,B) IS SEMIDET
+END
+
+member(?x,?from,?rest) :-
+	append(?beg,[?x|?end],?from), append(?beg,?end,?rest).
+
+Correctly causes an error:  
+  tyRuBa.modes.TypeModeError: while converting to mode: (B,B,F) is SEMIDET
+    cannot convert member<?x,?from,?rest>:-
+        append<?beg,[?x|?end],?from>{(F,F,B) is MULTI},
+        append<?beg,?end,?rest>{(B,B,F) is DET} 
+    to the declared mode SEMIDET.
+    inferred mode was MULTI
+    
+However the message reveals that the modechecker thinks that
+   append<?beg,[?x|?end],?from>{(F,F,B) is MULTI},
+will be MULTI but should be NONDET.
+
+Reason: [?x|?end] is treated by the modechecker as F because ?x is free.
+However since [?x|?end] is not just a variable it is more restrictive and
+thus implies an implicit test for pattern similarity which may cause the
+predicate call to fail. 
+
+Proposed solution: need to distinguish between F, B, and "partialy free/bound"
+(or say, FB for short). For picking a mode, FB is treated as F, but it has
+to use Mode.moreBound to determine the correct mode of the call.
+
+--------------------------------------------------------------------------

@@ -1,0 +1,656 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<!--This file created 6/6/02 3:59 PM by Claris Home Page version 3.0-->
+  <title>TyRuBa Language Reference</title>
+</head>
+<body bgcolor="#ffffff">
+<h1>
+<center>Logic Programming and Logic Meta Programming in
+TyRuBa</center>
+</h1>
+<h3>
+<center>Language Reference (for release 5.10)</center>
+</h3>
+<h2>See also</h2>
+<ul>
+  <li><a href="tyruba_tutorial.html">Tutorial style manual</a> (under
+construction)</li>
+  <li><tt>README</tt> file in the distribution package for a
+description of the command line interface.</li>
+  <li><a href="tyruba_library.html">Description of predicates in library</a></li>
+</ul>
+<h2>Syntax in relation to Prolog</h2>
+<p>Tyruba's syntax is based on Prolog's syntax but has some
+differences.</p>
+<ul>
+  <li>lexical differences in representing name constants and variables</li>
+  <li>no support for infix operators</li>
+  <li>different syntax for terms.</li>
+</ul>
+<hr>
+<h2>Lexemes</h2>
+<h4>Comments:</h4>
+<blockquote> The conventions for comments are the same as those for
+Java. Some examples of comments:
+  <pre><font color="#0000ff">   // This is a single line comment<br>   /* This is a multi line<br>      comment */</font></pre>
+</blockquote>
+<h4>Literals</h4>
+<blockquote>Lexemes for string literals and numbers are as in Java.
+  <p><font color="#ff0000">Note: although string literals can contain
+escape sequences like "<tt>\t</tt>" etc. These are recoginzed by the
+parser but not all escape sequences are currently handled by the
+language implementation. "<tt>\\</tt>" and "<tt>\"</tt>" work
+correctly. Do not assume any other escape sequences work.</font></p>
+  <p>Some examples:</p>
+  <pre>   <b>integers: </b>1234  -1234 0x4FA0<br>   <b>floating point: </b>0.9   1234.4E6   -9.9E-10<br>   <b>string:  </b>"This is a simple string"  <br>            "You can escape \" and \\ in a string"<br>	</pre>
+</blockquote>
+<h4>Keywords</h4>
+<pre>     These are "reserved" words in TyRuBa:<br><br>        AS          END         MODES       REALLY      UNIQUE<br>        BOUND       EXISTS      MULTI       SEMIDET<br>        DEFAULT     FINDALL     NONDET      TEST<br>        DET         IS          NOT         TYPE<br><br></pre>
+<h4>Variables and (Name) Constants</h4>
+<blockquote> <tt>TyRuBa</tt> variables are distinguishable from name
+constants because variables start with a leading question mark.
+</blockquote>
+<pre>CONSTANT ::= &lt;LETTER&gt; (&lt;LETTER&gt;|"_"|"."|&lt;DIGIT&gt;)*</pre>
+<blockquote> Name constants match any legal Java identifier, including
+names qualified by a package name.
+  <p><b>Examples</b>:</p>
+  <pre>   abc_def.ghiASSD<br>   abx<br>   AB<br>   Snapshot<br>   java.lang.Object</pre>
+  <p><b>note: </b>String literals and constants containing the same
+characters are equivalent. I.e. constants are just represented as
+string Literals. <tt>"abc"</tt> and <tt>abc</tt> are therefore equal
+to one another.</p>
+</blockquote>
+<pre>VARIABLE ::= "?" (&lt;LETTER&gt;|&lt;DIGIT&gt;)*</pre>
+<blockquote><b>Examples</b>
+  <pre>   ?X<br>   ?<br>   ?List1<br>   ?List2b<br>   ?number</pre>
+  <p>The variable "<tt>?</tt>" has a special purpose. It is like the
+prolog variable <tt>_</tt>. Normally two occurrences of variables with
+identical names in a query or rule will be treated as "equal". However,
+for "<tt>?</tt>" each occurrence will be treated as a "fresh" variable.
+(i.e. imagine that they are implicitly followed by distinct number <tt>?1</tt>,
+  <tt>?2</tt>, etc...</p>
+</blockquote>
+<h4>Quoted Code/Text Sequences</h4>
+<blockquote> This is a mechanism built into <tt>TyRuBa</tt> to
+facilitate the assembly of text, such as for example Java code, error
+messages, etc...
+  <p>Quoted code blocks start with a "<tt>{</tt>" and end at the first
+matching "<tt>}</tt>". I.e. the number of "<tt>{</tt>" and "<tt>}</tt>"
+must be balanced. Example:</p>
+  <pre><font color="#0000ff">   { This is a simple quoted text block<br>   It may span multiple lines and contain<br>   matched numbers of { and } as this<br>   example shows.<br>   }</font></pre>
+  <p>Quoted code blocks may also contain logic variables like this:</p>
+  <pre><font color="#0000ff">   { This block contains a ?Variable and ?anotherVariable }</font></pre>
+  <p>Question marks can be included by doubling them like this:</p>
+  <pre><font color="#0000ff">   { Do you want to include a question mark ?? <br>     Then just repeat it twice to avoid it being<br>     treated as a ?variable<br>   }</font></pre>
+  <p>Quoted code blocks are useful to assemble pieces of code (or other
+text). Variables represent holes in the text where other text may be
+fitted in by binding the variable. Every kind of binding has some
+textual representation inside a quoted code block (which may differ
+from the normal way it is printed).</p>
+  <table border="1">
+    <tbody>
+      <tr>
+        <td><b>Type of element</b></td>
+        <td><b>Syntax Example</b></td>
+        <td><b>Printed inside { } as</b></td>
+      </tr>
+      <tr>
+        <td>
+        <p>Constant</p>
+        </td>
+        <td><tt> java.lang.Object<br>
+"Zork!!!" </tt></td>
+        <td><tt> java.lang.Object<br>
+Zork!!! </tt></td>
+      </tr>
+      <tr>
+        <td>Lists and Pairs</td>
+        <td><tt> [1,2,abc,def]<br>
+[]<br>
+[abcdef]<br>
+[[a,b,c],[1,2,3]] </tt></td>
+        <td><tt> 12abcdef<br>
+        <i>prints nothing</i><br>
+abcdef<br>
+abc123 </tt></td>
+      </tr>
+      <tr>
+        <td>Compound terms</td>
+        <td><tt> person&lt;Kris,DeVolder&gt;<br>
+examples.Stack&lt;int&gt; </tt></td>
+        <td><tt> person&lt;Kris,DeVolder&gt;<br>
+examples.Stack&lt;int&gt; </tt></td>
+      </tr>
+    </tbody>
+  </table>
+  <p><b>Note:</b> Lists occuring inside quoted text are printed without
+any separators or delimiters between elements. This is convenient in
+some situations (e.g. inserting snippets of text found by <samp>FINDALL</samp>)
+but not so convenient in others (e.g. when you use it to generate an
+error message text, and actually want the list to appear as printed
+with separators... this is a bit of a dilemma.)</p>
+</blockquote>
+<hr>
+<h2>Grammar</h2>
+<pre><b>CompilationUnit</b> ::= <br>  ( IncludeDirective<br>  | PredicateDeclaration<br>  | UserDefinedTypeDeclaration<br>  | Rule <br>  | Query<br>  ) *<br>  &lt;EOF&gt;</pre>
+<h3>Directives</h3>
+<pre><b>IncludeDirective</b>  ::= "#include" &lt;STRING_LITERAL&gt;</pre>
+<blockquote> Any file loaded by <tt>TyRuBa</tt> may contain <tt>#include</tt>
+directives. They look like
+  <blockquote><samp> <font color="#0000ff">#include "a filename"</font>
+    </samp></blockquote>
+The filename is interpreted relative to the file (or <tt>URL</tt>) in
+which the include directive is encountered. Include directives in <tt>-i</tt>
+mode are not supported.
+</blockquote>
+<pre><b>
+PredicateDeclaration</b> ::= &lt;STRING_LITERAL&gt; "::" TypeList<br>                         [ "MODES" ( ModeDeclaration )* "END" ]</pre>
+<blockquote> Each <tt>SimplePredicate</tt> must be declared before use
+(both in Rules and in Query). <tt>PredicateDeclaration</tt> contains
+the predicate's argument types and its available mode of execution.
+</blockquote>
+<blockquote> For a more detailed explanation of predicate declaration,
+take a look at the <a href="tyruba_tutorial.html#predicate_declaration"
+ target="_blank"> <tt>TyRuBa</tt> tutorial</a>.
+</blockquote>
+<pre><b>
+UserDefinedTypeDeclaration</b> ::= UserDefinedAtomicTypeDeclaration<br>                             | UserDefinedCompositeTypeDeclaration</pre>
+<pre><b>
+UserDefinedAtomicTypeDeclaration</b> ::= "TYPE" AtomicType "=" AtomicType ( "|" AtomicType )*<br>                                   | "TYPE" AtomicType "AS" AtomicType</pre>
+<blockquote> <tt>AtomicType</tt> can be declared as a union of <tt>AtomicTypes</tt>.
+</blockquote>
+<blockquote> <font color="#0000ff"><tt>TYPE Vechicle = Car | Bicycle</tt></font>
+is a declaration for <tt>AtomicType</tt> "<tt>Vehicle</tt>" which is
+the union of <tt>AtomicTypes</tt> "<tt>Car</tt>" and "<tt>Bicycle</tt>".
+One thing to note is that "<tt>Car</tt>" and "<tt>Bicycle</tt>" must be
+declared before declaring "<tt>Vehicle</tt>".
+</blockquote>
+<blockquote> All <tt>AtomicTypes</tt> corresponding to any class in
+the <tt>java.lang package</tt> are already declared. The way to
+declare an <tt>AtomicType</tt> that does not have any subtypes is to
+indicate what declared <tt>AtomicType</tt> is used to represent it.
+</blockquote>
+<blockquote> For example: <font color="#0000ff"><tt>TYPE Car AS String</tt></font>
+declares <tt>AtomicType</tt> "<tt>Car</tt>" which is represented with
+String. The type system of <tt>TyRuBa</tt> only knows a constant is of
+type "<tt>Car</tt>" if there is a typecast on the constant. (More on
+typecasting in description of <a href="#term">Term</a>)
+</blockquote>
+<pre><b>
+UserDefinedCompositeTypeDeclaration</b> ::= "TYPE" CompositeType "=" CompositeType ( "|" CompositeType )*<br>                                      | "TYPE" CompositeType "AS" (TupleType | ListType)</pre>
+<blockquote> Similar to defining atomic type declaration, composite
+type declaration describes hierarchy between composite types. Please
+see <a href="tyruba_tutorial.html#compound_term" target="_blank"><tt>TyRuBa</tt>
+tutorial</a> for examples.
+</blockquote>
+<pre><b>
+Rule</b> ::= SimplePredicate [ ":-"  Expression ] "."<br><br>SimplePredicate ::= &lt;IDENTIFIER&gt; "(" TermList ")"</pre>
+<blockquote> Rules are simply parsed and inserted into the rule base.
+Rules which do not have a condition (<samp>condition = the part after
+":-"</samp>) are called <b>facts</b>. Facts are basically just rules
+with a condition that is always true.
+</blockquote>
+<pre><b>
+Query</b> ::= ":-" Expression "."</pre>
+<blockquote> Immediately after a query has been parsed it is launched
+in the current rule base. Its results are then printed on the standard
+error device.
+</blockquote>
+<br>
+<br>
+<h2>Expressions</h2>
+<pre><b>Expression</b>    ::= Disjunction | ModeSwitchExpression<br>Disjunction   ::= Conjunction ( ";" Conjunction )*<br>Conjunction   ::= Predicate ( "," Predicate )*</pre>
+<blockquote> The meaning of conjunctions (logical "and") and
+disjunctions (logical "or") are similar to Prolog; however, <tt>TyRuBa</tt>'s
+mode system may decide to change the order of execution.
+</blockquote>
+<pre><b>
+ModeSwitchExpression</b> ::= ModeCase ( "|" ModeCase )* [ "|" DefaultModeCase ]<br>ModeCase ::= "BOUND" VariableList ":" Expression<br>DefaultModeCase ::= "DEFAULT" ":" Expression</pre>
+<blockquote><span style="font-weight: bold;">purpose: </span>A <tt>ModeSwitchExpression
+  </tt>allows the developer to gain explicit control over the precise
+implementation and execution order of expressions for a predicate,
+depending on the binding modes of the variables. This is useful in
+cases where an expert developer decides he can implement some predicate
+more efficiently by providing varying implementations for different
+modes. It is technically possible to provide mode clauses which are not
+semantically equivalent, however this not a recommended use since it
+likely will caus confusion about the meaning of a predicate when it is
+being used (i.e. the meaning of an expression may change depending on
+the execution order in the context of its use, this execution order is,
+to some degree arbitrary!)<br>
+  <br>
+  <span style="font-weight: bold;">execution semantics: </span>When a <tt>ModeSwitchExpression</tt>
+is evaluated, <tt>TyRuBa</tt> looks at each <tt>ModeCase</tt> in
+order. If the variables in the current <tt>ModeCase</tt>'s <tt>VariableList</tt>
+is not all bound, then <tt>TyRuBa</tt> moves on to the next <tt>ModeCase</tt>.
+The <tt>DefaultModeCase</tt> is just a <tt>ModeCase</tt> that does
+not require any variable to be bound (i.e. this <tt>ModeCase</tt> can
+always be satisfied). If all the <tt>ModeCases</tt> fail and there is
+no <tt>DefaultModeCase</tt>, then <tt>TyRuBa</tt> is unable to
+evaluate this <tt>ModeSwitchExpression</tt> and a <tt>Mode Error</tt>
+is thrown. Otherwise, the <tt>Expression</tt> corresponding to the
+first <tt>ModeCase</tt> that can be satisifed is evaluated in the
+exact order in which it was typed.<br>
+  <br>
+  <span style="font-weight: bold;">note: </span>The execution
+semantics as described above does not actually occur litterally because
+mode cases are resolved statically during type and mode checking, by
+the mode checker. <br>
+</blockquote>
+<pre><b>Predicate</b>  ::= ExistsQuantifier<br>             | FindAll<br>             | ConvertToTypeExpression<br>             | PredicateExpression<br>             | NotFilter<br>             | TestFilter<br>             | UniqueQuantifier<br>             | "(" Expression ")" </pre>
+<pre><b>
+ExistsQuantifier</b> ::= "EXISTS" VariableList ":" Expression</pre>
+<blockquote> This expression succeeds when the enclosed expression
+returns a solution. This is used mainly inside <tt>NotFilter</tt> to
+ensure the Variables in <tt>VariableList</tt> are all bound.
+</blockquote>
+<pre><b>
+FindAll</b> ::= "FINDALL" "(" Predicate "," t1=Term "," t2=Term ")"</pre>
+<blockquote> Very much like Prolog's <tt>findall</tt>. The predicate
+is evaluated. Then, <tt>t1</tt> is instantiated with the returned
+bindings. This is done for each individual solution of the predicate
+and a list is constructed with all the resulting instantiations of <tt>t1</tt>.
+This list is then unified with <tt>t2</tt>.
+</blockquote>
+<pre><b>
+ConvertToTypeExpression</b> ::= "convertTo<i>Type</i>" "(" from=Term "," to=Term")"</pre>
+<blockquote> This expression succeeds if <tt>from</tt> is of type <tt><i>Type</i></tt>
+and the type of <tt>to</tt> has an intersection with <tt><i>Type</i></tt>.
+This is used mainly to convert from a non strict type to a <b>strict</b>
+type. (More on <a href="#strict">strict type</a> later. See also the<a
+ href="tyruba_library.html"> example in the library</a> specification.<br>
+</blockquote>
+<pre><b>
+NotFilter</b> ::= "NOT" "(" Expression ")"</pre>
+<blockquote> Only succeeds when Expression fails. Note all FREE
+variables in the <tt>NOT</tt> must become bound before the <tt>NOT</tt>
+is evaluated. The mode system may rearrange to make it so. Below are
+some examples:
+  <blockquote><samp> <font color="#0000ff">:- NOT(foo(?x))</font> //
+illegal - ?x is not bound inside NOT<br>
+    <font color="#0000ff">:- NOT(foo(?))</font> // legal<br>
+    <font color="#0000ff">:- NOT(EXISTS ?x : foo(?x), bar(?x))</font>
+// legal </samp></blockquote>
+</blockquote>
+<pre><b>
+PredicateExpression</b> ::= &lt;IDENTIFIER&gt; "(" TermList ")"</pre>
+<blockquote> A <tt>PredicateExpression</tt> is an "atomic"
+predicate/goal to be matched with the rule base.
+</blockquote>
+<pre><b>
+TestFilter</b> ::= "TEST" "(" Expression ")"</pre>
+<blockquote> Only succeeds when Expression succeeds. This is the same
+as evaluating Expression, except that bindings made while evaluating
+Expression will not be retained after the <samp>TEST </samp>
+expression. This expression effectively is equivalent to <samp>NOT(NOT(...))</samp>
+</blockquote>
+<pre><b>
+UniqueQuantifier</b> ::= "UNIQUE" VariableList Expression</pre>
+<blockquote> This expression succeeds when the enclosed expression
+returns exactly one solution for the variables in <tt>VariableList</tt>,
+and fails otherwise. Note that <tt>TyRuBa</tt> automatically removes
+duplicates from any query's solutions. This means that replicated
+solutions will only be counted once.
+</blockquote>
+<h2>Terms</h2>
+<pre><b>Term</b> ::= CompoundTerm<br>       | List<br>       | QuotedCode<br>       | SimpleTerm<br>       | Tuple</pre>
+<pre><b>
+CompoundTerm</b> ::= name = &lt;IDENTIFIER&gt; "&lt;" TermList "&gt;"<br>               | name = &lt;IDENTIFIER&gt; List<br><br>TermList ::= Term [ "," TermList ]</pre>
+<blockquote> Every compound term has a corresponding composite type
+according to the <tt>TyRuBa</tt> type system. Each composite type must
+be declared before any reference to it. For an example of using
+compound terms, please see <a href="tyruba_tutorial.html#compound_term"
+ target="_blank"> <tt>TyRuBa</tt> tutorial</a>.
+</blockquote>
+<pre><b>
+List</b> ::= "[" RealTermList "]"<br><br>RealTermList ::= Term [ "," RealTermList <br>                      | "|" Term         ]</pre>
+<blockquote> <tt>TyRuBa</tt> lists are similar to prolog lists,
+including the notation using "|" for matching rest lists.
+</blockquote>
+<pre><b>
+QuotedCode</b> ::= "{" &lt;any_text_with_balanced_braces&gt; "}"</pre>
+<pre><b>
+SimpleTerm</b> ::= Constant<br>             | TypeCastedConstant<br>             | Variable </pre>
+<pre><b>
+Constant</b> ::= &lt;IDENTIFIER&gt; <br>           | &lt;INTEGER_LITERAL&gt;<br>           | &lt;FLOATING_POINT_LITERAL&gt;<br>           | &lt;STRING_LITERAL&gt;<br>           | "#" &lt;IDENTIFIER&gt; ("[]")           // Java Class<br>           | "/" (~["/"]|"\\/")* "/"           // Regexp matcher<br><br>&lt;IDENTIFIER&gt; ::= &lt;LETTER&gt; (&lt;LETTER&gt;|"."|"*"|"+"|&lt;DIGIT&gt;)*</pre>
+<blockquote> Integers, strings and floating point constants use the
+same syntax as Java's. Name constants are equivalent to strings, but it
+is convenient in the notation to be able to omit the quotes around
+them.
+</blockquote>
+<blockquote> Names preceded by a hash "<tt>#</tt>" sign are Java class
+constants. These are resolved by the Java class loader at the time the <tt>TyRuBa</tt>
+program is loaded.
+</blockquote>
+<blockquote> A sequence of characters in between two single "<tt>/</tt>"
+will be turned into an <tt>org.apache.regexp.RE</tt> object. The
+string in between the "<tt>/</tt>" may include "<tt>/</tt>" escaped by
+a "<tt>\</tt>". It must be in the syntax specified by the <a
+ href="http://jakarta.apache.org/regexp/apidocs/org/apache/regexp/RE.html">org.apache.RE
+API documentation</a>. The predicates to match regular expressions to
+strings are <tt>re_match</tt> and <tt>regexp</tt>. The descriptions
+for them are in <a href="tyruba_library.html"><tt>TyRuBa</tt> Library</a>.
+</blockquote>
+<a name="term">
+<pre><b>
+TypeCastedConstant</b> ::= Constant "::" AtomicType</pre>
+</a>
+<blockquote> Constant can be typecasted to any user defined type as
+long as that type is a "leaf type" and it is represented by the native
+type of the constant. A type is a "leaf type" if it does not have any
+subtypes. Example:
+  <blockquote> <font color="#0000ff"><samp> TYPE StreetName AS String <br>
+TYPE StreetNumber AS Integer <br>
+TYPE StreetInfo = StreetName | StreetNumber </samp></font> </blockquote>
+  <blockquote><samp> <font color="#0000ff">Granville::StreetName</font>
+// legal <br>
+    <font color="#0000ff">"10"::StreetName</font> // legal <br>
+    <font color="#0000ff">10::StreetNumber</font> // legal <br>
+    <br>
+    <font color="#0000ff">Granville::StreetNumber</font> // illegal -
+StreetNumber is represented by Integer, not String<br>
+    <font color="#0000ff">10::StreetName</font> // illegal - StreetName
+is represented by String, not Integer <br>
+    <font color="#0000ff">Granville::StreetInfo</font> // illegal -
+StreetInfo is not a "leaf type" (must typecast it to StreetName in this
+case) </samp></blockquote>
+</blockquote>
+<pre><b>
+Variable</b> ::= "?" (&lt;LETTER&gt;|&lt;DIGIT&gt;)*;<br><br>VariableList ::= "(" Variable [ "," Variable ] ")"</pre>
+<blockquote> <tt>TyRuBa</tt> variables are identifiers preceded by a
+"?".
+</blockquote>
+<pre><b>
+Tuple</b> ::= "&lt;" TermList "&gt;"</pre>
+<br>
+<br>
+<h2>Types</h2>
+<pre><b>Type</b> ::= AtomicType<br>       | CompositeType<br>       | ListType<br>       | TupleType<br><br>TypeList ::= "(" Type [ "," TypeList ] ")"<br><br>AtomicType ::= &lt;IDENTIFIER&gt;<br><br>CompositeType ::= &lt;IDENTIFIER&gt; "&lt;" TypeList "&gt;"<br><br>ListType ::= "[" Type "]"<br><br>TupleType ::= "&lt;" TypeList "&gt;<br><br>TypeVariable ::= "?" (&lt;LETTER&gt;|&lt;DIGIT&gt;)*</pre>
+<blockquote>
+  <table border="1">
+    <tbody>
+      <tr>
+        <td><b>Kind of Term</b></td>
+        <td><b>Term</b></td>
+        <td><b>Type of Term</b></td>
+      </tr>
+      <tr>
+        <td>Constant</td>
+        <td><samp> abc<br>
+100<br>
+123.123<br>
+abc::Foo </samp></td>
+        <td><samp> String<br>
+Integer<br>
+Float<br>
+Foo </samp></td>
+      </tr>
+      <tr>
+        <td>Compound terms</td>
+        <td><samp> person&lt;Kris, DeVolder&gt;<br>
+info&lt;abc, 123&gt; </samp></td>
+        <td><samp> person&lt;String, String&gt;<br>
+info&lt;String, Integer&gt; </samp></td>
+      </tr>
+      <tr>
+        <td>Lists and Pairs</td>
+        <td><samp> []<br>
+[1, 2]<br>
+[1, 2, abc, def]<br>
+[[], [1], [a]]<br>
+[foo&lt;abc&gt;] </samp></td>
+        <td><samp> [<i>any Type</i>]<br>
+[Integer]<br>
+[Object]<br>
+[[Object]]<br>
+[foo&lt;String&gt;] </samp></td>
+      </tr>
+      <tr>
+        <td>Tuples</td>
+        <td><samp> &lt;Kris, Devolder&gt;<br>
+&lt;abc, 123&gt; </samp></td>
+        <td><samp> &lt;String, String&gt;<br>
+&lt;String, Integer&gt; </samp></td>
+      </tr>
+      <tr>
+        <td>Unbound Variable</td>
+        <td><samp>?xyz</samp></td>
+        <td><samp>?xyz</samp></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>Note: <tt>?xyz</tt> on the left and <tt>?Xyz</tt> on the right
+are different. The one on the left is a logic variables whereas the one
+on the right is a type variable.</p>
+</blockquote>
+<br>
+<br>
+<h2>Modes</h2>
+<pre><b>Mode</b> ::= "SEMIDET"<br>       | "DET"<br>       | "NONDETMODE"<br>       | "MULTI"</pre>
+<blockquote>
+  <table border="1">
+    <tbody>
+      <tr>
+        <td><b>Mode</b></td>
+        <td align="center"><b>Expected # of Result(s)</b></td>
+      </tr>
+      <tr>
+        <td><samp>SEMIDET</samp></td>
+        <td align="center"><samp>0 - 1</samp></td>
+      </tr>
+      <tr>
+        <td><samp>DET</samp></td>
+        <td align="center"><samp>1</samp></td>
+      </tr>
+      <tr>
+        <td><samp>NONDET</samp></td>
+        <td align="center"><samp>0 - n</samp></td>
+      </tr>
+      <tr>
+        <td><samp>MULTI</samp></td>
+        <td align="center"><samp>1 - n</samp></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<br>
+<br>
+<h2>Mode Declaration</h2>
+<pre><b>ModeDeclaration</b> ::= BindingList [ "REALLY" ] "IS" Mode<br><br><b>Binding</b> ::= "B"["OUND"]<br>          | "F"["REE"]</pre>
+<blockquote> Predicate declaration example:
+  <ol>
+    <li> <samp><font color="#0000ff"> pred1 :: String <br>
+MODES (B) IS SEMIDET END </font></samp>
+      <ul>
+        <li> declares <tt>pred1</tt> to take one argument with type <tt>String</tt>
+        </li>
+        <li> <tt>pred1</tt> can only be executed with all its
+arguments bound</li>
+      </ul>
+    </li>
+    <br>
+    <li> <tt><font color="#0000ff"> pred1 :: String </font></tt>
+      <ul>
+        <li>is equivalent to <tt>(1)</tt></li>
+        <li> <tt>TyRuBa</tt> automatically adds the mode <tt>SEMIDET</tt>
+to predicates with arguments all bound </li>
+      </ul>
+    </li>
+    <br>
+    <li> <a name="strict"> <samp><font color="#0000ff">pred2 ::
+=Integer</font></samp> and <samp><font color="#0000ff">pred3 :: Integer</font></samp>
+      </a>
+      <ul>
+        <a name="strict"> <li> <tt>pred2</tt> uses a <b><i>strict</i></b>
+type, meaning no supertype of <tt>Integer</tt> is allowed to be passed
+into <tt>pred2</tt> </li>
+        <li> <tt>pred3</tt> does not use a strict type; therefore, if <tt>?x</tt>
+is bound to a value of type <tt>Object</tt> (a supertype of <tt>Integer</tt>),
+          <tt>pred3</tt> would execute with no problem, but <tt>TyRuBa</tt>'s
+type system would complain about <tt>?x</tt> having an incompatible
+type from the declared type of <tt>pred2</tt> if you try to use <tt>pred2</tt>
+with <tt>?x</tt> being bound to a value with type <tt>Object</tt> </li>
+        <li> given type <tt>A</tt>, <tt>=A(strict)</tt>, <tt>B</tt>,
+          <tt>=B(strict)</tt>:
+          <ul>
+            <li> <tt>A</tt> and <tt>B</tt> are compatible only if <tt>A</tt>
+and <tt>B</tt> have a common supertype </li>
+            <li> <tt>A</tt> and <tt>=B</tt> are compatible only if <tt>A</tt>
+and <tt>B</tt> are the same type or <tt>B</tt> is a supertype of <tt>A</tt>
+            </li>
+            <li> <tt>=A</tt> and <tt>=B</tt> are compatible only if <tt>A</tt>
+and <tt>B</tt> are the same type </li>
+          </ul>
+        </li>
+        <li> if a variable is bound to a value that has an intersection
+with a strict type but is not equals the strict type, you can use <tt>ConvertToTypeExpression</tt>
+to <i>convert</i> the type of the variable before passing it into a
+predicate that requires a strict type. For example if <tt>?x</tt> is
+bound to type <tt>Object</tt>: <tt><font color="#0000ff">convertToInteger(?xInt,?x),
+pred2(?xInt)</font></tt> will return the result of <tt>pred2(?x)</tt>
+when <tt>?x</tt> is of type <tt>Integer</tt> and fail if it is not an
+          <tt>Integer</tt>. </li>
+        </a>
+      </ul>
+      <a name="strict"> </a></li>
+    <a name="strict"><br>
+    <li> <samp><font color="#0000ff"> append :: [?a], [?a], [?a]<br>
+MODES<br>
+(B,B,F) IS DET<br>
+(F,F,B) IS MULTI<br>
+END<br>
+      </font></samp>
+      <ul>
+        <li> declares <samp>append</samp> to take three arguments with
+types of List with any element type; however, the three list element
+types must be compatible (have a common supertype)
+          <ul>
+            <li><samp> <font color="#0000ff">append([1,2],[3,4],?x)</font>
+// legal </samp> </li>
+            <li><samp> <font color="#0000ff">append([1,2],[a,b],?x)</font>
+// legal - String and Integer have common supertype (Object) </samp></li>
+            <li><samp> <font color="#0000ff">
+append([foo&lt;abc&gt;],[1],?x) </font> // illegal - foo&lt;String&gt;
+and Integer are incompatible types </samp></li>
+          </ul>
+        </li>
+        <li> when the first and second arguments are bound, the third
+argument will be bound to exactly one value </li>
+        <li> when only the third argument is bound, the first and
+second arguments will be bound to at least one value </li>
+      </ul>
+    </li>
+    <br>
+    <li> <samp><font color="#0000ff"> list_ref :: =Integer, [?x], ?x<br>
+MODES<br>
+(B,B,F) REALLY IS SEMIDET<br>
+END<br>
+      </font></samp>
+      <ul>
+        <li> the <tt>REALLY</tt> in the mode declaration tells <tt>TyRuBa</tt>
+that the declared mode is correct even if the system infers that it
+should return more result; the following illustrate why this would
+occur:
+          <ul>
+            <li> insert fact <tt> <font color="#0000ff">list_ref(0,[?x|?],?x).</font></tt>
+            </li>
+            <li> then insert rule <samp><font color="#0000ff">
+list_ref(?i,[?x|?r],?el) :- greater(?i,0), sum(?ii,1,?i),
+list_ref(?ii,?r,?el). </font></samp> </li>
+            <li> logically, we know that the fact and the rule cannot
+be satisfied together, since the fact requires the first argument to be
+              <tt>0</tt> and the rule requires the first argument to be
+greater than <tt>0</tt>; however, the type system only remembers that
+the first argument is of type <tt>=Integer</tt> in both the fact and
+the rule, and it will infer that there can be more than one result
+returned from using <tt>list_ref</tt> with the first two arguments
+bound to integers. </li>
+          </ul>
+        </li>
+        <li> warning: <tt>TyRuBa</tt> will use mode information to
+optimize execution, but if mode is incorrectly declared and the actual
+number of results is greater than the declared mode, than <tt>TyRuBa</tt>
+will throw away the "extra" results and queries with the predicate
+would return incorrect result </li>
+      </ul>
+    </li>
+    </a>
+  </ol>
+  <a name="strict"> <br>
+Note: it is illegal to use predicate with bindings that are not
+declared unless these bindings are "more bound" than the ones that are
+declared. For example: </a>
+  <blockquote><samp><a name="strict"> <font color="#0000ff">:-
+append(?x,?y,?z)</font> // illegal<br>
+    <font color="#0000ff">:- append([1,2],?x,[1,2,3])</font> // legal </a></samp></blockquote>
+</blockquote>
+<a name="strict"><br>
+<br>
+</a>
+<hr>
+<h2><a name="strict">Experimental Features</a></h2>
+<h3><a name="strict">Infinite Loop Detection</a></h3>
+<p><a name="strict"><tt>TyRuBa</tt> has a caching mechanism that
+remembers query results of
+previously run queries. This speeds up things considerably. One of
+the more interesting aspects of this mechanisms is that it actually
+"remembers" a lazily computed result. This means that it "remembers"
+the query even before it has been computed. This allows queries which
+run into their own tails so to speak to be resolved in a more
+meaningful way than just looping infinitely. <tt>TyRuBa</tt> is
+relatively
+smart in trying other alternatives to find solutions and then later
+try a previously "blocked" path again. This mechanism is quite
+similar to "tabling" as in XSB. Here is a concrete example of what it
+can do that prolog cannot:</a></p>
+<pre><a name="strict">   <font color="#0000ff">married :: String, String<br>   MODES <br>      (F,F) IS NONDET <br>   END<br><br>   married(John,Mary).<br>   married(?x,?y) :- married(?y,?x).<br>   :- married(?a,?b).</font>
+
+Produces the following result:
+
+   <font
+ color="#ff0000">##QUERY : married&lt;?a,?b&gt;<br>   .H########<br>   | ?b=Mary ?a=John |<br>   | ?b=John ?a=Mary |################<br>   ##END QUERY</font></a></pre>
+<pre><a name="strict">In Prolog such a thing would go into an infinite loop trying the<br>married(?x,?y) rule:<font
+ color="#0000ff">
+
+   married(?x,?y) :- married(?y,?x) :- married(?x,?y) :- ...</font></a></pre>
+<p><a name="strict">In <tt>TyRuBa</tt> this kind of situation is
+handled better due to a
+combination of the detection of queries "biting their own tail" and
+not keeping to accumulate duplicate results (this makes the search
+terminate when all swappings of marriage partners have been
+generated).</a></p>
+<p><a name="strict">I have found this a useful feature (as have many
+other logic
+language implementers before me with tabling and other similar
+techniques), but in practice I tend to avoid the situation of really
+needing it and relying on it because:</a></p>
+<ol>
+  <a name="strict"> <li> It clearly slows down the logic program<b>. </b>A
+rewrite somehow avoiding the situation is usually much better. (This is
+not necesarily a problem with the technique, but with the
+implementation in <tt>TyRuBa</tt>). </li>
+  <li> It is not always intuitive to know when it will and will not
+have the desired effect. Infinite loops may unexpectedly appear "out of
+the blue" anyway (depending on which variables are bound etc.) <span
+ style="font-weight: bold;">note: </span>this problem has been
+significanlty reduced by the mode system whose purpose it is exactly to
+avoid the situation where queries logically producing infinite number
+of results are avoided. Thus, the mode/type system makes the tabling
+feature a lot more useful and dependable!)&nbsp; </li>
+  </a>
+</ol>
+<p><a name="strict">The "#" character in the output is an indication of
+the loop
+detection mechanism backtracking over a "tail-biting" query.</a></p>
+<h3><a name="strict">TyNI: TyRuBa Native Interface</a></h3>
+<p><a name="strict">This option is no longer available; however there
+is another
+way to declare predicates that interact with Java code. It is still
+quite experimental but if you would like more information on it,
+email me at <tt>kdvolder@cs.ubc.ca</tt></a></p>
+<hr>
+<p align="right"><a name="strict">Kris De Volder
+&lt;kdvolder@cs.ubc.ca&gt;</a></p>
+</body>
+</html>

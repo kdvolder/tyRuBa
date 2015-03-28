@@ -1,0 +1,11 @@
+//
+// Visitor Pattern Browser
+//		
+// Shows a view
+//   Visitor
+//     \_____ Visited
+//                 \____ visit method
+topQuery("Visitor", 
+		"re_name(?m,/^visit/),arg(?m,?Visited),child(?Visitor,?m)",
+		["?Visited", "?Visitor", "?m"]).
+

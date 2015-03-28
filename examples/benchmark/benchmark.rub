@@ -1,0 +1,20 @@
+//
+// To put tyruba through its paces.
+
+#include "string_games.rub"    // Lots of string appending and splitting
+#include "toposort.rub"        // topological sorting, lot's of list operations, some
+                               // fact retrival on a small factbase.
+                               // combinatorial explosion.
+#include "primes.rub"          // Calculation of prime number. Recurisve construction of
+                               // set of primes < bound
+#include "perms.rub"           // Compute permutations... in a way that depends on the
+                               // recursion detection feature of the query cache
+
+// older benchmark with lots of facts
+//
+// This is mainly a test of the tyruba optimized factbase
+//
+
+#include "factgen.rub"      
+#include "test_facts.rub"
+

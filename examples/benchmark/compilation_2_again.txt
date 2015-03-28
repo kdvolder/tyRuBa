@@ -1,0 +1,12 @@
+----- results for tests in benchmark.qry -------
+splatter(abcdefghijklmnop,?x),splatter(?y,?x)  #results = 32768  seconds = 25.164
+topo_sort(?x)  #results = 27388  seconds = 6.08
+prime(?x,250)  #results = 53  seconds = 0.295
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 11.356
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 1.244
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_forward(?x,?bork)  #results = 32647  seconds = 3.588
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_backward(?bork,?x)  #results = 32647  seconds = 3.721
+permutation([a,b,c,d,e,f,g],?x)  #results = 5040  seconds = 2.118
+perm([1,2,3,4,5,6,7],?x)  #results = 5040  seconds = 37.045
+TOTAL : 90.61100000000002
+

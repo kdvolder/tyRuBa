@@ -1,0 +1,73 @@
+/*============================================================
+  Basic functionality (no aspect stuff)
+  ============================================================*/
+
+/** The class BoundedStack */
+class_(JCore,BoundedStack).
+extends_(JCore,BoundedStack,Object).
+
+/** Instance Variables */
+var_(JCore,BoundedStack,int,MAX,{static final int MAX = 10;}).
+var_(JCore,BoundedStack,{Object[]},contents,
+  {Object[] contents = new Object[MAX];}).
+var_(JCore,BoundedStack,int,pos,{int pos = 0;}).
+
+constructor_(JCore,BoundedStack,[],{public BoundedStack()},{}).
+
+method_(JCore,BoundedStack,boolean,full,[],{
+   public boolean full()},{
+      return pos==MAX;}).
+
+method_(JCore,BoundedStack,boolean,empty,[],{  
+   public boolean empty()},{ 
+      return pos==0;}).
+
+method_(JCore,BoundedStack,void,push,[Object],{
+   public void push(Object e)},{ 
+     contents[pos++]=e; }).
+
+method_(JCore,BoundedStack,Object,pop,[],{
+   public Object pop()},{ 
+     return contents[--pos]; }).
+
+method_(JCore,BoundedStack,Object,peek,[],{
+   public Object peek()},{ 
+     return contents[pos]; }).
+
+method_(JCore,BoundedStack,void,print,[],{
+   public void print()},{
+      System.out.print("[");
+      for (int i=0;i<pos;i++) {
+         System.out.print(contents[i]+" ");
+      }
+      System.out.print("]");
+   }).
+
+/*============================================================
+  Synchronization Aspect Declarations 
+  ============================================================*/
+
+//selfExclusive(BoundedStack,push).
+//selfExclusive(BoundedStack,pop).
+//selfExclusive(BoundedStack,print).
+
+//mutuallyExclusive(BoundedStack,[push,pop,peek]).
+//mutuallyExclusive(BoundedStack,[push,pop,empty]).
+//mutuallyExclusive(BoundedStack,[push,pop,full]).
+//mutuallyExclusive(BoundedStack,[push,pop,print]).
+
+requires(BoundedStack,push,{!full()}).
+requires(BoundedStack,pop,{!empty()}).
+
+/* Another way of expressing the outcommented lines above 
+  (The advantage here is that the declarations do not "cross cut"
+   methods. Adding a new method is easy and does not require
+   reconsidering all of the "mutuallyExclusive" declarations 
+*/	
+modifies(BoundedStack,push,this).
+modifies(BoundedStack,pop,this).
+inspects(BoundedStack,peek,this).
+inspects(BoundedStack,empty,this).
+inspects(BoundedStack,full,this).
+modifies(BoundedStack,print,SystemOut).
+inspects(BoundedStack,print,this).

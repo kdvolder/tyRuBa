@@ -1,0 +1,1205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>TyRuBa Manual</title>
+</head>
+<body>
+<h1>
+<center>Logic Programming and Logic Meta Programming in TyRuBa</center>
+</h1>
+<h3>
+<center>Tutorial</center>
+</h3>
+<h2>1. What is TyRuBa?</h2>
+<p><tt>TyRuBa</tt> is a logic programming language. It was originally
+built to support logic meta programming: to write meta programs that
+generate Java code. However, <tt>TyRuBa</tt> is essentially just a
+simple logic programming language. So you can use it to write logic
+programs which are not necessarily meta programs. If you know
+<tt>Prolog</tt>, than you have a pretty good idea what <tt>TyRuBa</tt>
+is since it is very similar. <tt>TyRuBa</tt> has a few peculiarities
+in
+its syntax and its implementation that facilitate meta programming.
+<tt>TyRuBa</tt> also tries to be more declarative than <tt>Prolog</tt>
+and omits most of the impure features of <tt>Prolog</tt> such as the
+cut. If you don't understand this, don't worry, just read on,
+<tt>TyRuBa</tt> will be explained below and you don't need to know what
+is not in <tt>TyRuBa</tt> to use it :-)</p>
+<p>This tutorial explains the <tt>TyRuBa</tt> logic programming
+language and system. It doesn't try to be a complete course in logic
+programming but tries to explain enough of the basics for a novice
+logic programmer to start messing around with <tt>TyRuBa</tt>.</p>
+<h2>2. Logic Programming, a Brief Introduction</h2>
+<p>If you are used to writing programs in <tt>Java</tt>, <tt>C</tt>,
+<tt>C++</tt>, <tt>Pascal</tt>, etc. then logic programming may be a
+little unusual for you. The programming languages just mentioned are
+all imperative programming languages. That means that programs written
+in them are sequences of commands to be carried out. The language has a
+number of control structures to determine when, how many times and in
+what order the instructions are carried out. These are the kinds of
+programming languages that most people know and use.</p>
+<p>A logic language doesn't really have control structures and it
+doesn't work in terms of instructions to be carried out. So, how is
+that possible? How can a program "do" anything? A logic program is a
+description of what is "true". This description takes the form of a
+number of <b>facts</b> and <b>rules</b>. Facts are like phrases that
+declare something which is a true statement (within the context of
+the program). Rules are rules of inference which roughly say
+something like if "<tt>X</tt>" is true then "<tt>Y</tt>" is true. So
+these rules can be used to deduce true statements from other true
+statements. To make a logic program "do something" you ask it a
+question (usually called a query) in the style of "is it true that
+...?". The systems inference engine will start looking for an answer to
+that question, using the rules and facts in the program. The search
+process that results is a computation. Logic programming languages are
+real programming languages in the sense that they are Turing
+Equivalent.</p>
+<h3>2.1 Facts</h3>
+<p>Let's have a look at our very first, very simple logic program.
+We'll start with some facts.</p>
+<pre>#include "predicate_declaration.rub"<br><br>human(Socrates).<br>human(Kris).<br>livesIn(Kris,Vancouver).<br>alive(Kris).<br>human(John).<br>livesIn(John,Denver).<br>human(Jacques).<br>livesIn(Jacques,Paris).<br>human(Jeanette).<br>livesIn(Jeanette,Paris).<br>dog(Fifi).<br>livesIn(Fifi,Vancouver).<br>city(Vancouver).<br>city(Paris).<br>city(Denver).<br>city(HongKong).</pre>
+<p>The first statement <tt>#include "predicate_declaration.rub"</tt>
+tells <tt>TyRuBa</tt> to load the file
+"<tt>predicate_declaration.rub</tt>" before loading any other
+statement.
+"<tt>predicate_declaration.rub</tt>" contains some declarations needed
+for this example. We will explain these declarations later on. For now
+simply ignore the contents of this file.</p>
+<p>The lines after the <tt>#include</tt> are facts. Facts have the
+following syntactic structure:</p>
+<pre>&lt;Fact&gt; ::= &lt;keyword&gt; "(" [ &lt;argument&gt; ( "," &lt;argument&gt; )* ] ")"</pre>
+<p>The keyword with which every fact starts is a "predicate" symbol and
+can be interpreted as a function which assigns a truth value when given
+the appropriate number of arguments. In our example, the arguments to
+all predicates are symbols (symbols are equivalent to strings in
+<tt>TyRuBa</tt>, but do not require quotes around them). Arguments can
+also be numbers, lists or compound objects. We will talk more about
+these later.</p>
+<p>The meaning of a fact is like a declaration which tells the
+<tt>TyRuBa</tt> engine that a given statement is true. For example we
+could interpret the <font color="#0000ff"><tt>human(...)</tt></font>
+predicate as "<tt>... is human</tt>", so what the declaration of the
+fact <font color="#0000ff"><tt>human(Socrates)</tt></font> tells the
+<tt>TyRuBa</tt> query engine is that the statement "Socrates is human"
+is true (i.e. this statement is a fact!).</p>
+<p>While it is useful to try and translate your logic programs into
+English phrases to understand intuitively what they mean, the natural
+language interpretation is arbitrary. <tt>TyRuBa</tt> doesn't really
+care what your natural language interpretation of the facts in the
+program is. All it does is manipulate them as symbolic expressions to
+which a truth value can be assigned.</p>
+<blockquote> <b>Note:</b> If you are used to <tt>Prolog</tt>, don't
+get confused by the syntax. <tt>TyRuBa</tt> has similar syntax to <tt>Prolog</tt>
+but uses different lexical conventions for variables. All of the
+symbols in the above program are constants; they are NOT variables.
+</blockquote>
+<p>To create your <tt>TyRuBa</tt> program, open your favorite text
+editor, create a file "<tt>socrates.rub</tt>", type in the facts you
+see above and save the file. (you can also find a copy of the file in
+the examples directory of the distribution package)</p>
+<h3>2.2 Simple Queries</h3>
+<p>Asking a question is done by typing a query. The syntactic structure
+of a query is much like a fact. Except that it starts with a
+"<font color="#0000ff"><tt>:-</tt></font>". Here is our first question:
+</p>
+<pre><font color="#0000ff">:- human(Socrates).</font></pre>
+<p>In English, this question reads as "<tt>Is it true that Socrates is
+human?</tt>", or, a simpler way of phrasing that "<tt>Is Socrates
+human?</tt>".</p>
+<p>To ask this question to the <tt>TyRuBa</tt> program saved in
+"<tt>socrates.rub</tt>" we could just add this question to the end of
+our <tt>socrates.rub</tt> file before loading it into <tt>TyRuBa</tt>.
+<tt>TyRuBa</tt> will then read all the facts and finally answer the
+question. A more convenient way of doing this is to use the
+"<font color="#0000ff"><tt>-i</tt></font>" option of the <tt>TyRuBa</tt>
+program. This option makes <tt>TyRuBa</tt> read from standard input,
+allowing "interactive" typing queries and seeing the results.</p>
+<pre><font color="#ff0000">[localhost:~/TyRuBa/examples] kdvolder% <font
+ color="#0000ff">tyruba socrates.rub -i</font>
+INCLUDING jar:file:/Users/kdvolder/tyruba/tyruba.jar!/lib/prolog.rub
+INCLUDING jar:file:/Users/kdvolder/tyruba/tyruba.jar!/lib/prolog.rub Done
+INCLUDING jar:file:/Users/kdvolder/tyruba/tyruba.jar!/lib/string.rub
+INCLUDING jar:file:/Users/kdvolder/tyruba/tyruba.jar!/lib/string.rub Done
+Loading file: socrates.rub
+** loading : socrates.rub
+INCLUDING jar:file:/Users/kdvolder/tyruba/tyruba.jar!/lib/predicate_declaration.rub
+INCLUDING jar:file:/Users/kdvolder/tyruba/tyruba.jar!/lib/predicate_declaration.rub Done
+
+--- Interactive mode... type queries!
+end with CTRL-D</font></pre>
+<p>When <tt>TyRuBa</tt> starts, the first thing it does is load a
+bunch
+of initialization files. These files contain a library of some useful
+rules. We are not going to bother with those right now. After loading
+the initialization files, <tt>TyRuBa</tt> processes the arguments from
+the command line from left to right. An argument typically is either a
+filename to be loaded or a special option, like <tt>-i</tt>. The order
+in which you list them is important. For example the <tt>-i</tt>
+option
+makes <tt>TyRuBa</tt> read from the standard input, so that you can
+type
+some queries from the console. Of course we want <tt>TyRuBa</tt> to
+first read our program so that we can ask it questions. The <tt>-i</tt>
+option therefore has to be the last one, so that loading of
+"<tt>socrates.rub</tt>" happens before we get to type our queries.
+After
+reading the <tt>Socrates</tt> program, <tt>TyRuBa</tt> switches to
+reading queries from the console. After we type the query <tt>TyRuBa</tt>
+searches the facts to answer the query.</p>
+<pre><font color="#0000ff">:- human(Socrates).</font>
+<font color="#ff0000">##QUERY : human(Socrates)<br>.<br>| SUCCESS |<br>##END QUERY</font></pre>
+<p>In this simple example, the query is a yes or no type question. The
+answer to our query in this case is "<tt>yes</tt>" or, the way
+<tt>TyRuBa</tt> prints this is "<tt>SUCCESS</tt>" signifying the
+predicate <tt>human(...)</tt> returns true with argument
+<tt>Socrates</tt>. Here is another example of a yes/no type question.
+</p>
+<pre><font color="#0000ff">:- human(Aristotle).</font>
+<font color="#ff0000">##QUERY : human(Aristotle)<br>.<br>FAILURE<br>##END QUERY</font></pre>
+<p>Now, the answer in this case is "<tt>FAILURE</tt>" which is another
+way to say "<tt>NO</tt>", or, more accurately, to say that
+<tt>TyRuBa</tt> failed to find a way to conclude from the logic program
+that Aristotle is human. Obviously, to us, Aristotle is human, but
+since there are no facts pertaining to Aristotle in the database it is
+unreasonable to assume the system can know that. Most logic languages,
+including <tt>TyRuBa</tt>, treat what cannot be concluded from the
+facts in the database as false. This is called the "closed world
+assumption".</p>
+<p>Now let's look at different type of query, one that contains
+variables. Here is one:</p>
+<pre><font color="#0000ff">:- human(?x).</font>
+<font color="#ff0000">##QUERY : human(?x)<br>.<br>| ?x=Jeanette |<br>| ?x=Kris |<br>| ?x=John |<br>| ?x=Socrates |<br>| ?x=Jacques |<br>##END QUERY</font></pre>
+<p>Again, this query can be interpreted as a yes/no type question (i.e.
+asking about the truth value of a logical expression). The use of a
+variable should be treated as an existentially quantified variable. Or
+in more understandable words this query can be loosely translated into
+English as "Does there <b>exist</b> an <tt>?x</tt> such that
+<tt>human(?x)</tt>". Although this is a yes/no type of question, the
+"yes" answer to questions like this also tells what values of <tt>?x</tt>
+actually make the query true. Here are two more simple examples:</p>
+<pre><font color="#0000ff">:- livesIn(Kris,?city).</font>
+<font color="#ff0000">##QUERY : livesIn(Kris,?city)<br>.<br>| ?city=Vancouver |<br>##END QUERY<br><font
+ color="#0000ff">:- livesIn(?x,Chicago).</font>
+##QUERY : livesIn(?x,Chicago)
+.
+FAILURE
+##END QUERY</font></pre>
+<p>Again, in the second example the failure should be understood in
+relation to the closed world assumption. Our very simple database has
+no
+facts about people living in Chicago.</p>
+<h3>2.3 Composite Queries</h3>
+<p>The examples so far were all "simple queries". They were simple in
+the sense that they only involved a single predicate expression.
+Composite queries are queries which contain more complex logical
+expressions using logical operations like <b><tt>and</tt></b> and
+<b><tt>or</tt></b>. The syntax for these logic operations are "<font
+ color="#0000ff"><tt>,</tt></font>" (comma) and "<font color="#0000ff"><tt>;</tt></font>"
+(semicolon) respectively.</p>
+<pre><font color="#0000ff">:- livesIn(?x,Vancouver); livesIn(?x,Denver).</font>
+<font color="#ff0000">##QUERY : livesIn(?x,Vancouver);livesIn(?x,Denver)<br>..<br>| ?x=Kris |<br>| ?x=Fifi |<br>| ?x=John |<br>##END QUERY</font></pre>
+<p>The above question finds out whether there exists values for
+<tt>?x</tt> such that <tt>?x</tt> lives in <tt>Vancouver</tt> or
+<tt>?x</tt> lives in <tt>Denver</tt>. Three such values can be found:
+<tt>Kris</tt>, <tt>Fifi</tt> and <tt>John</tt>. Note that the query
+result does not allow one to distinguish who lives where.</p>
+<p>Now, to demonstrate the use of
+"<font color="#0000ff"><tt>,</tt></font>" let's see if we can find a
+friend for <tt>Jeanette</tt>. The friend should be living in the same
+city as <tt>Jeanette</tt> herself.</p>
+<pre><font color="#0000ff">:- livesIn(Jeanette,?city), livesIn(?x,?city).</font>
+<font color="#ff0000">##QUERY : livesIn(Jeanette,?city),livesIn(?x,?city)<br>..<br>| ?city=Paris ?x=Jeanette |<br>| ?city=Paris ?x=Jacques |<br>##END QUERY</font></pre>
+<p>This query asks if there are values <tt>?city</tt> and <tt>?x</tt>
+such that <tt>Jeanette</tt> lives in <tt>?city</tt> and <tt>?x</tt>
+lives in (the same) <tt>?city</tt>. Curiously, the answer to the query
+indicates that <tt>Jeanette</tt> lives in the same city as herself.
+Although perfectly logical, this may not be what we expected. So, let's
+introduce the <tt><font color="#0000ff">NOT</font></tt> expression and
+refine the query to exclude this solution of the query.</p>
+<pre><font color="#0000ff">:- livesIn(Jeanette,?city), livesIn(?x,?city), NOT(equals(?x,Jeanette)).</font>
+<font color="#ff0000">##QUERY : livesIn(Jeanette,?city),livesIn(?x,?city),NOT(equals(?x,Jeanette))<br>HH..<br>| ?city=Paris ?x=Jacques |<br>##END QUERY</font></pre>
+<blockquote> <u>Note</u>: The <tt>equals</tt> predicate used in the
+example above is defined in the <tt>TyRuBa</tt> library.
+</blockquote>
+<h3>2.5 Operational versus logical meaning of queries</h3>
+<p><tt>NOT</tt> is a rather peculiar expression and one cannot really
+understand how it works without knowing a little bit about the
+evaluation process. So now is the right time to explain this a little
+bit. Unlike in mathematical logic, the position of a <tt>NOT</tt>
+inside an <b><tt>and</tt></b> of several expressions matters for its
+meaning. In <tt>Prolog</tt> and also in older version of <tt>TyRuBa</tt>
+this is a notorious source of subtle bugs in logic programs. The
+current
+version of <tt>TyRuBa</tt> is equipped with a "mode system" which will
+make sure the <tt>NOT</tt> expression is executed in its proper turn
+and
+will produce a static "mode error" if this is not possible.</p>
+<p>Consider again the query from above:</p>
+<pre><font color="#0000ff">:- livesIn(Jeanette,?city), livesIn(?x,?city), NOT(equals(?x,Jeanette)).</font>
+<font color="#ff0000">##QUERY : livesIn(Jeanette,?city),livesIn(?x,?city),NOT(equals(?x,Jeanette))<br>HH..<br>| ?city=Paris ?x=Jacques |<br>##END QUERY</font></pre>
+<p>When composite <b><tt>and</tt></b> queries are executed the
+<tt>TyRuBa</tt> mode system will decide some specific order to evaluate
+the subexpressions. Evaluation of the first subexpression will produce
+a
+series of results that bind values to variables in that query. For
+example, suppose that the query <tt>livesIn(Jeanette,?city)</tt> is
+evaluated first. This would produce bindings for <tt>?city</tt> as if
+you had typed:</p>
+<pre><font color="#0000ff">:- livesIn(Jeanette,?city).</font>
+<font color="#ff0000">##QUERY : livesIn(Jeanette,?city)<br>.<br>| ?city=Paris |<br>##END QUERY</font></pre>
+<p>The result(s) for the first subexpression are then passed along to
+the evaluation of the next expression. The next expression is then
+evaluated as if the variables are replaced by the values they are bound
+to. For example, suppose that the next subexpression to be evaluated is
+<tt>livesIn(?x,?city)</tt>. Since the value for <tt>?city</tt> from
+the
+first query is <tt>Paris</tt> the second subexpression will be
+evaluated
+as if you had typed:</p>
+<pre><font color="#0000ff">:- livesIn(?x,Paris).</font>
+<font color="#ff0000">##QUERY : livesIn(?x,Paris)<br>.<br>| ?x=Jeanette |<br>| ?x=Jacques |<br>##END QUERY</font></pre>
+<p>So, now only one subexpression remains to be evaluated:</p>
+<pre><font color="#0000ff">:- NOT(equals(?x,Jeanette)).</font></pre>
+<p>Now the situation is a little more complicated than before because
+this time the preceding subexpression returned two results. In such a
+case it is as if you would evaluate the next expression once for each
+one of the results from the preceding subexpression, each time
+replacing the variables by their corresponding values. So, in this
+example it is as if you would run both:</p>
+<pre><font color="#0000ff">:- NOT(equals(Jeanette,Jeanette)).</font>
+<font color="#ff0000">##QUERY : NOT(equals(Jeanette,Jeanette))<br>.<br>FAILURE<br>##END QUERY</font></pre>
+<p>and</p>
+<pre><font color="#0000ff">:- NOT(equals(Jacques,Jeanette)).</font>
+<font color="#ff0000">##QUERY : NOT(equals(Jacques,Jeanette))<br>.<br>| SUCCESS |<br>##END QUERY</font></pre>
+<p>Logically/mathematically it may seem that the order in which the
+expressions of an <b><tt>and</tt></b> are evaluated does not matter
+all
+that much (since the logical <b><tt>and</tt></b> operation is
+commutative).</p>
+<p>Unfortunately, logic programming languages typically have some
+peculiarities in this respect because they are interpreted by an
+algorithm. For example, in terms of performance, the order in which
+subexpressions are evaluated may matter a great deal, since starting
+with a subexpression that returns a lot of results will require the
+subsequent expressions to be evaluated many times over. Also, some
+expressions simply cannot properly be evaluated if not enough variables
+have become bound beforehand. The <b><tt>NOT</tt></b> expression is
+such
+an expression. For example consider the following query:</p>
+<pre><font color="#0000ff">:- NOT(human(?x)).</font>
+<font color="#ff0000">##QUERY : NOT(human(?x))<br>Type or Mode Error: NOT(human(?x)) cannot be converted to any declared mode<br>   ERROR: Variables improperly left unbound in NOT: [?x]</font></pre>
+<p>Logically, this query is supposed to return any possible value for
+the variable <tt>?x</tt> such that <tt>NOT(human(?x))</tt> is true.
+Unfortunately the set of possible candidates is rather large (infinite
+in fact) and such a query therefore cannot be answered by
+<tt>TyRuBa</tt> in a sensible way.</p>
+<p>In our previous example we have a similar query:
+<tt>NOT(equals(?x,Jeanette))</tt>. <tt>TyRuBa</tt> can only sensibly
+answer such a query if <tt>?x</tt> has become bound as a result of
+evaluating other subexpressions before.</p>
+<p>If you write a query like:</p>
+<pre><font color="#0000ff">:- livesIn(Jeanette,?city), NOT(equals(?x,Jeanette)), livesIn(?x,?city).</font>
+<font color="#ff0000">##QUERY : livesIn(Jeanette,?city),NOT(equals(?x,Jeanette)),livesIn(?x,?city)<br>HH..<br>| ?city=Paris ?x=Jacques |<br>##END QUERY</font></pre>
+<p>This query could not actually have been evaluated with the
+subexpressions in the order they were typed. Luckily, <tt>TyRuBa</tt>
+(since version 6.x.x) has a mode system which statically analyzes the
+binding modes of expressions and variables and is smart enough to
+figure
+out the proper ordering for the subexpressions.</p>
+<p>The preceding example illustrated why <tt>TyRuBa</tt> will try to
+postpone the evaluation of a <tt>NOT</tt> expression until a time when
+all variables in it have become bound. If this is NOT possible, then
+the mode system will produce an error
+message as seen above.</p>
+<p>However, there are some situations in which you <i>do</i> want to
+have an unbound variable in a <b><tt>NOT</tt></b>. Here is an example,
+suppose we wanted to find out whether there are any cities in our
+factbase for which no inhabitants have been declared:</p>
+<pre><font color="#0000ff">:- city(?city), NOT(livesIn(?x,?city)).</font>
+<font color="#ff0000">##QUERY : city(?city), NOT(livesIn(?x,?city))<br>Type or Mode Error: city(?city), NOT(livesIn(?x,?city)) cannot be converted to any declared mode<br>   ERROR: Variables improperly left unbound in NOT: [?x]</font></pre>
+<p>How can we form a query that asks the same question then? There are
+two ways you can do it. The first one is to use a special variable
+"<tt>?</tt>". This variable is called the "ignored variable" because
+<tt>TyRuBa</tt> throws away the values that it would be bound to if
+it was an ordinary variable. When <tt>TyRuBa</tt> encounters
+"<tt>?</tt>" inside <tt>NOT</tt>, it knows that you did not mistakenly
+forget to assign a value to the variable and it would execute the
+expression:</p>
+<pre><font color="#0000ff">:- city(?city), NOT(livesIn(?,?city)).</font>
+<font color="#ff0000">##QUERY : city(?city), NOT(livesIn(?,?city))<br>...<br>| ?city=HongKong |..<br>##END QUERY</font></pre>
+<p>The second way to ask the same question is to use an explicit <i>existential
+quantifier</i> (<tt>EXISTS</tt>) inside the <tt>NOT</tt>.
+Using an existential quantifier declares to <tt>TyRuBa</tt> that you
+intend to test whether or not a value for the variable exists and thus
+it is (and in fact should be!) left unbound on purpose.</p>
+<pre><font color="#0000ff">:- city(?city), NOT(EXISTS ?x : livesIn(?x,?city)).</font>
+<font color="#ff0000">##QUERY : city(?city), NOT((EXISTS ?x : livesIn(?x,?city)))<br>H..<br>| ?city=HongKong |..<br>##END QUERY</font></pre>
+<p>This is a more intuitive way of asking the question, since the
+question can be reworded to "Is there a city where there does not exist
+anybody that lives in that city?". In most cases you have the option of
+using either a "<tt>?</tt>" (ignored) variable or an existential
+quantifier for these types of queries. However for more complex
+expressions sometimes using an existential quantifier is the only
+option. Here is an example: let's ask <tt>TyRuBa</tt> which city does
+not have anybody named <tt>Jeanette</tt> who lives there.</p>
+<pre><font color="#0000ff">:- city(?city), NOT(livesIn(?,?city), equals(?,Jeanette)).</font>
+<font color="#ff0000">##QUERY : city(?city), NOT(livesIn(?,?city), equals(?,Jeanette))<br>H.H@<br>| ?city=HongKong |HH<br>##END QUERY</font></pre>
+<p>But this is not the right answer. <tt>Jeanette</tt> only lives in
+<tt>Paris</tt>, so all other cities (<tt>Denver</tt>, <tt>HongKong</tt>
+and <tt>Vancouver</tt>) should have been the answers to our question.
+What happened? Every occurence of "<tt>?</tt>" is treated as a
+different variable. So the composite expression <tt>livesIn(?,?city),
+equals(?,Jeanette)</tt> can be thought of as <tt>livesIn(?1,?city),
+equals(?2,Jeanette)</tt>. The second subexpression
+<tt>equals(?2,Jeanette)</tt> will always succeed with <tt>?2</tt>
+being
+bound to <tt>Jeanette</tt>; therefore, the composite expression is
+actually the same as the simple expression <tt>livesIn(?1,?city)</tt>.
+In
+other words, the above query is exactly the same as <tt>:-
+city(?city),
+NOT(livesIn(?,?city))</tt> which correctly bind <tt>?city</tt> to
+<tt>HongKong</tt> as we have seen. The only way to ask the question we
+really wanted to ask is to use an explicit existential quantifier:</p>
+<pre><font color="#0000ff">:- city(?city), NOT(EXISTS ?x : livesIn(?x,?city), equals(?x,Jeanette)).</font>
+<font color="#ff0000">##QUERY : city(?city), NOT((EXISTS ?x : livesIn(?x,?city), equals(?x,Jeanette)))<br>converted to Mode: city(?city){(F) IS NONDET}, NOT((EXISTS ?x : equals(?x,Jeanette){(F,B) IS DET}, livesIn(?x,?city){(B,B) IS SEMIDET}))<br>H..H.<br>| ?city=HongKong |H.<br>| ?city=Vancouver |H.<br>| ?city=Denver |<br>##END QUERY</font></pre>
+<h3>2.6 Defining Rules</h3>
+<p>You have now been introduced to the basics of logic queries. Next
+we will look at how to define rules. Rules in logic programming
+languages are means to define how new truths can be derived from
+other truths. Rules in a logic language play the role of procedures
+in an imperative language and allow the definition of abstractions.
+Let's see how that works. Recall the query we ran for finding a
+friend for <tt>Jeanette</tt>:</p>
+<pre><font color="#0000ff">:- livesIn(Jeanette,?city), livesIn(?x,?city), NOT(equals(?x,Jeanette)).</font></pre>
+<p>Now, this kind of query may be generally useful for finding
+friends for other people as well. We might want to define an
+abstraction
+for the concept "neighbors", defining neighbors as two people who live
+in the same <tt>?city</tt>. So that we could write:</p>
+<pre><font color="#0000ff">:- neighbors(Jeanette,?x)</font></pre>
+<p>What we need is a mechanism to define what "<tt>neighbors</tt>"
+means. Rules are the mechanism for this. Here is what a rule to define
+"<tt>neighbors</tt>" could look like:</p>
+<pre><font color="#0000ff">neighbors(?x,?y) :- livesIn(?x,?city), livesIn(?y,?city), NOT(equals(?x,?y)).</font></pre>
+<p>The logical meaning of a rule is a logic implication "<tt>&lt;=</tt>".
+So a rule "<tt>A :- B</tt>" actually should be read
+as "if <tt>B</tt> is true than so is <tt>A</tt>". <tt>A</tt> is
+called
+the conclusion (or head) of the rule and <tt>B</tt> is called the
+condition (or body) of the rule (note the conclusion is the first
+part!). The conclusion of a rule basically looks like a simple (i.e.
+non-compound) query, the condition is an arbitrary query. So in
+English, the above rule defines that <tt>?x</tt> and <tt>?y</tt> are
+neighbors if it is true that <tt>?x</tt> and <tt>?y</tt> both live in
+the same <tt>?city</tt>, and <tt>?x</tt> and <tt>?y</tt> are not the
+same person.</p>
+<p>Since rules are like logic implication, it is possible to have
+several different rules which have a similar conclusion. That just
+means that different conditions can lead to the same conclusion. For
+example:</p>
+<pre><font color="#0000ff">mortal(?x) :- human(?x).</font>
+<font color="#ff0000">** rule added to rulebase **<br><font
+ color="#0000ff">mortal(?x) :- dog(?x).</font>
+** rule added to rulebase **
+<font color="#0000ff">:- mortal(?x).</font>
+##QUERY : mortal(?x)
+...
+| ?x=Jeanette |
+| ?x=Kris |
+| ?x=John |
+| ?x=Socrates |
+| ?x=Jacques |
+| ?x=Fifi |
+##END QUERY</font></pre>
+<p>In the above dialogue with the <tt>TyRuBa</tt> engine, we defined
+two rules with a conclusion that <tt>?x</tt> is mortal. The first rule
+asserts that all humans are mortals. The second rule is similar, but
+asserts that all dogs are mortals. After defining these rules we can
+proceed and find mortals in the database with a query. The output
+includes both a number of people's names, as well as the dog
+<tt>Fifi</tt>.</p>
+<p>Note that the <tt>TyRuBa</tt> engine was not really built for
+interactive usage like this. In practice you probably would not enter
+rules in interactive mode but type them into a file. The reason is
+that, while <tt>TyRuBa</tt> allows you to add new facts and rules by
+simply entering them interactively, you cannot retract them if you
+happen to have made a mistake. So, you should probably make a habit of
+typing rules and facts into a file and loading it with a command line:
+<tt><font color="#0000ff">tyruba myrules.rub -i</font></tt> and then
+play around typing queries. You can go back and edit the file and then
+simply use the command line history of your shell (for example) to
+rerun the <tt>TyRuBa</tt> command each time you make a change to the
+file. It may even be convenient to add a few testing queries to the
+file as well, so you don't have to retype them every time.</p>
+<a name="recursion">
+<h3>2.7 Recursion in Rules</h3>
+</a>
+<p>In this section we are going to do some "real" logic programming
+using recursive rules to describe iterative processes. But, before that
+we need some structures to iterate over. So let's introduce lists here.
+Lists in <tt>TyRuBa</tt>, like in many other logic (and functional)
+programming languages, are composed out of pairs. A pair is denoted
+like this "<tt>[ ?part1 | ?part2 ]</tt>". Here, <tt>?part1</tt> and <tt>?part2</tt>
+can be arbitrary terms. For example numbers, variables,
+or other pairs. The <tt>?part1</tt> is typically the first element of
+the list and <tt>?part2</tt> is the list of remaining elements, also
+represented with pairs. So for example a list of three elements
+<tt>1,2,3</tt> would be denoted like this:</p>
+<blockquote> <tt>[ 1 | [ 2 | [ 3 | [] ] ] ]</tt>
+</blockquote>
+<p>The "<tt>[]</tt>" is a special term denoting an empty list. This
+notation for lists is a bit cumbersome, so to make it more convenient
+there is some syntactic sugar that allows you to write the same list
+like this:</p>
+<blockquote><tt>[1,2,3]</tt></blockquote>
+<p>This is really just syntactic sugar and both notations are
+equivalent. For example:</p>
+<pre><font color="#0000ff">:- equals([1,2,3],[1|[2|[3|[]]]]).</font>
+<font color="#ff0000">##QUERY : equals([1,2,3],[1,2,3])<br>.<br>| SUCCESS |</font></pre>
+<p>Also, as with queries and facts before, variables can be used to do
+"pattern matching". A variable can occur in any place in a list
+notation. For example, we add the following test facts to our logic
+fact base:</p>
+<pre><font color="#0000ff">test([1]).</font>
+<font color="#ff0000">** fact added to rulebase **<br><font
+ color="#0000ff">test([1,2]).</font>
+** fact added to rulebase **
+<font color="#0000ff">test([1,2,3]).</font>
+** fact added to rulebase **</font></pre>
+<p>Now we can run queries to match these lists. For example using a
+"pair pattern" <tt>[?x|?r]</tt> which matches any pair (and thus any
+list with at least one element).</p>
+<pre><font color="#0000ff">:- test([?x|?r]).</font>
+<font color="#ff0000">##QUERY : test([?x|?r])<br>.<br>| ?r=[] ?x=1 |<br>| ?r=[2] ?x=1 |<br>| ?r=[2,3] ?x=1 |<br>##END QUERY</font></pre>
+<p>Or, if we just want to match lists with exactly one element:</p>
+<pre><font color="#0000ff">:- test([?x]).</font>
+<font color="#ff0000">##QUERY : test([?x])<br>.<br>| ?x=1 |<br>##END QUERY</font></pre>
+<p>Or, if we want to match any list which has a <tt>2</tt> as its
+second element:</p>
+<pre><font color="#0000ff">:- test([?x,2|?r]).</font>
+<font color="#ff0000">##QUERY : test([?x,2|?r])<br>.<br>| ?r=[] ?x=1 |<br>| ?r=[3] ?x=1 |<br>##END QUERY</font></pre>
+<p>Note how this uses the "<tt>|</tt>" to match the "rest" of the list
+to variable <tt>?r</tt>. Thus, it can match lists of any length of at
+least <tt>2</tt>. Since the pattern has a variable in the first
+element, that can match anything, but the second element has to be <tt>2</tt>.
+Also note the effect of using different variables versus
+the same variable in the following examples:</p>
+<pre><font color="#0000ff">:- test([?x,?x]).</font>
+<font color="#ff0000">##QUERY : test([?x,?x])<br>.<br>FAILURE<br>##END QUERY<br><br><font
+ color="#0000ff">:- test([?x,?y]).</font>
+##QUERY : test([?x,?y])
+.
+| ?y=2 ?x=1 |
+##END QUERY</font></pre>
+<p>Both patterns match only lists of length <tt>2</tt>. The first one
+matches only when both elements in the list are identical. The second
+pattern uses two different variables and thus can match any list of
+<tt>2</tt> elements (different or the same).</p>
+<p>Now that we have introduced list notation, we can start doing some
+interesting things with lists. For example we can define rules to
+easily access the last element of a list. (Note that we cannot do that
+using pattern matching syntax unless we know the length of the list -
+e.g. the last element of a list of three could be found like this <tt>[?a,?b,?last]</tt>,
+but something like <tt>[?x|?last]</tt> would
+not work as it would bind <tt>?last</tt> to the list of remaining
+elements after the first).</p>
+<p>In comparison to procedural or functional languages we cannot define
+a function "<tt>last</tt>" which takes a list as an argument and
+"returns" the last element. That is because in a logic language we do
+not have the notion of a function. We only have the notion of a
+"predicate". Predicates are like functions, but they can only return
+true or false, or in other words when "called" they can succeed, or
+they can fail. Looking back on all the previous examples, you can see
+that this nevertheless allows to return values in some sense, because
+when a query succeeds it also binds values to variables in the query.
+So instead of a function of one argument that returns a result, we will
+define a predicate of two arguments, the second argument is actually
+the "result". So to get the last element of a list we write a query
+like:</p>
+<pre><font color="#0000ff">:- last([1,2,3],?last).</font></pre>
+<p>and this would succeed, binding <tt>?last</tt> to <tt>3</tt>. So,
+what we really do here is turn a function into a predicate by adding
+the result of the function as an extra argument. <tt>last(?list,?l)</tt>
+really means "The last element of <tt>?list</tt> is <tt>?l</tt>" and
+this is a statement which can be
+assigned a truth value depending on what <tt>?list</tt> and <tt>?l</tt>
+are bound to. Our query above means "<tt>exists ?last :
+last([1,2,3],?last)</tt>". Like before we expect the logic engine to
+search for a binding for <tt>?last</tt> so that this statement becomes
+true. If we have the proper definition of rules to define "last",
+then this will succeed, binding <tt>?last</tt> to <tt>3</tt>.</p>
+<p>So, what are the rules to define to make this work? If we think of a
+"normal" programming language, we probably imagine a recursive
+procedure, walking to the end of the list and returning the last
+element. Likewise, we will have a recursive rule to walk the list.
+Let's write that recursive rule first:</p>
+<pre><font color="#0000ff">last([?f|?r],?l) :- last(?r,?l).</font></pre>
+<p>Actually, this rule by itself already works for walking the list but
+it won't yet return a result. Unlike a functional or procedural
+language we do not need to explicitly express a "stop
+condition" to make the recursion stop when it reaches the end of the
+list. For example after adding this rule, if we type a query:</p>
+<pre><font color="#0000ff">:- last([1,2,3],?l).</font>
+<font color="#ff0000">##QUERY : last([1,2,3],?l)<br>....<br>FAILURE<br>##END QUERY</font></pre>
+<p>We can see that the engine did some work, walking the list to the
+end. The "<tt>....</tt>" means that four queries were tried before
+failing. These correspond to the recursive steps walking down the list
+like this:</p>
+<pre>:- last([1,2,3],?l)<br>	:- last([2,3],?l)<br>		:- last([3],?l)<br>			:- last([],?l)<br>				:- FAIL</pre>
+<p>The reason why the last query finally failed was because there is no
+rule or fact of any kind in the database that matches the pattern
+<tt>last([],?l)</tt>. The only rule which vaguely resembles the pattern
+is the one we just entered, but that only matches when the list has at
+least one element, it does not match the empty list. Thus, the
+recursion finally bottoms out and fails. Of course, what we really want
+is for the query to succeed somehow and bind the last element of the
+list to <tt>?l</tt>. So we need to define a "base case" for the rule
+nevertheless. It is important to realize however that this "base case"
+has nothing to do with termination of the recursion, as many people
+would probably expect. Ok, now that we know all that let's add the base
+case and try our query again:</p>
+<pre><font color="#0000ff">last([?l],?l).</font>
+<font color="#ff0000">** fact added to rulebase **<br><font
+ color="#0000ff">:- last([1,2,3],?l).</font>
+##QUERY : last([1,2,3],?l)
+....
+| ?l=3 |
+##END QUERY</font></pre>
+<p>Note that we added a fact instead of a rule. A fact can be thought
+of as a rule which has no condition and therefore is always true. Thus
+what this fact/rule says is that the last element of a list of only one
+element is that element itself. By adding this rule, the recursion can
+succeed before bottoming out on the empty list. This is what the "chain
+of execution" looks like:</p>
+<pre>:- last([1,2,3],?l)<br>	:- last([2,3],?l)<br>		:- last([3],?l)<br>			:- last([],?l)<br>				:- FAIL<br>			:- SUCCEED with ?l=3</pre>
+<p>So, now from <tt>last([3],?l)</tt> there are two possible paths,
+the
+first is still as before (to <tt>last([],?l)</tt> and will fail. The
+other one matches to our newly introduced fact, binds <tt>?l</tt> to <tt>3</tt>
+and succeeds.</p>
+<p>We will do one more recursive rule example. This time we will define
+a predicate "<tt>element</tt>" with two arguments, an element and a
+list. It is true when the element occurs in the list.</p>
+<pre><font color="#0000ff">element(?x,[?x|?r]).</font>
+<font color="#ff0000">** fact added to rulebase **<br><font
+ color="#0000ff">element(?x,[?y|?r]) :- element(?x,?r).</font>
+** rule added to rulebase **
+<font color="#0000ff">:- element(2,[1,2,3]).</font>
+##QUERY : element(2,[1,2,3])
+..
+| SUCCESS |
+##END QUERY
+<font color="#0000ff">:- element(?x,[1,2,3]).</font>
+##QUERY : element(?x,[1,2,3])
+..
+| ?x=1 |.
+| ?x=2 |.
+| ?x=3 |
+##END QUERY</font></pre>
+<p>This implementation is in fact very similar to our "<tt>last</tt>"
+predicate. It's recursive rule is identical (except for the name). Only
+the 'base-case' differs. Rather than just matching a list of one
+element, it matches any list of at least one element because the first
+element of any list is (indeed :-) an element of the list. Thus, at
+every point in the recursive chain there is the choice to succeed with
+the first element:</p>
+<pre>:- element(?x,[1,2,3]) <br>	:- SUCCEED with ?x=1 (and ?r=[2,3])<br>	:- element(?x,[2,3])<br>		:- SUCCEED with ?x=2 (and ?r=[3])<br>		:- element(?x,[3])<br>			:- SUCCEED with ?x=3 (and ?r=[])<br>			:- element(?x,[])<br>				:- FAIL</pre>
+<p>Because it can "choose" to stop the recursion and succeed at any
+point in the list you can use the element predicate to "get all
+elements" from a list as was shown in the example above.</p>
+<a name="predicate_declaration">
+<h3>2.8 Predicate Declaration</h3>
+</a>
+<p>Now that we know more or less what facts and rules are, let's start
+learning about predicate declarations.</p>
+<p>Before any predicate is used (in facts, rules or queries), it must
+be
+declared. (But note that each predicate can only be declared once). For
+example, if we want to add the fact that "Felix is a cat":</p>
+<pre><font color="#0000ff">cat(Felix).</font>
+<font color="#ff0000">Type or Mode Error: Unknown predicate cat/1</font></pre>
+<p>We get the above error because we haven't declared the predicate
+<tt>cat</tt> yet. (The "<tt>/1</tt>" after "<tt>cat</tt>" indicates
+that the predicate <tt>cat</tt> has one argument.) All the predicates
+that we have been using in examples so far have been declared in
+<tt>predicate_declaration.rub</tt>. Here is the first predicate
+declaration in the file:</p>
+<pre><font color="#0000ff">human :: String<br>MODES<br>  (F) IS NONDET<br>END</font></pre>
+<p>The first line <font color="#0000ff"><tt>human :: String</tt></font>
+is the predicate type declaration and it tells <tt>TyRuBa</tt> that
+the
+predicate <tt>human</tt> has one argument and this argument must
+belong
+to the domain <tt>String</tt>. Imagine we draw all possible values
+that
+<tt>TyRuBa</tt> accepts as arguments with squares. The ones that will
+cause <tt>human</tt> to succeed are blue and all the rest are red.
+Then
+we try to draw a circle such that all the blue squares would be inside
+it. The picture would look something like:</p>
+<img src="type_system_human.gif">
+<p>There are many such circles that can be drawn (both the circles
+labelled <tt>String</tt> and <tt>Object</tt> would work). How do we
+choose which type to declare <tt>human</tt> with? If we have a type in
+which any possible value would belong to, then we can always declare
+a predicate to take arguments of this type. But then the
+<tt>TyRuBa</tt>'s type system will be completely useless. In order for
+<tt>TyRuBa</tt>'s type system to be useful, we should try to be as
+precise as possible. In other words, we should try to draw the
+smallest circle around the blue squares. For the predicate
+<tt>human</tt>, that circle corresponds to the type <tt>String</tt>
+and that is what we will declare to be the type of <tt>human</tt>'s
+argument. After this declaration, <tt>TyRuBa</tt> will give an error
+message if you try to pass a value into <tt>human</tt> that has a type
+which has an empty intersection with <tt>String</tt>. For example, if
+you try to pass an <tt>Integer</tt> into the prediate <tt>human</tt>,
+<tt>TyRuBa</tt> will not allow you to proceed and it will give you
+an error message since this predicate can never succeed. From the
+picture, we can see that <tt>Integer</tt> and <tt>String</tt> have an
+empty intersection since they do not overlap each other (i.e. there is
+no square that is in both circles). Any argument with a type that has a
+non-empty intersection with <tt>String</tt> can be passed to the
+predicate <tt>human</tt>. For example, passing in a value from the
+<tt>Object</tt> domain would be allowed.</p>
+<p>The remaining lines form the predicate mode declaration which tells
+<tt>TyRuBa</tt> that if the argument is unbound/free (the argument
+contains at least one variable that has not become bound), then this
+predicate can fail (meaning none of the variables will become bound to
+any values), or each variable can become bound to <tt>&gt;=1</tt>
+value(s). This mode of execution is said to be <i>nondeterministic</i>
+(<tt>NONDET</tt>). There is one mode that <tt>TyRuBa</tt>
+automatically
+knows about: if a predicate is executed with all its arguments bound,
+then it can fail, or succeed with one result (since arguments are all
+bound, no new bindings can be formed; if the predicate does succeed,
+the only result that the variables get bound to is what they were bound
+to before). This execution mode is said to be <i>semideterministic</i>
+(<tt>SEMIDET</tt>). If a predicate is only intended to be executed with
+all its arguments bound, then only the predicate type declaration is
+necessary when declaring a predicate and you can omit the predicate
+mode declaration.</p>
+<p>Let's take a look at another predicate declaration:</p>
+<pre><font color="#0000ff">livesIn :: String, String<br>MODES<br>  (B,F) IS SEMIDET<br>  (F,B) IS NONDET<br>END</font></pre>
+<p>The first line
+<tt><font color="#0000ff">livesIn :: String, String</font></tt>
+tells <tt>TyRuBa</tt> that the predicate <tt>livesIn</tt> takes two
+arguments and they both belong to the domain <tt>String</tt>.</p>
+<p>The predicate <tt>livesIn</tt> can be translated into two
+questions,
+depending on what information was known before hand. If we have a
+person's name (let's say Jeanette), the question becomes "Which city
+does Jeanette live in?" which has exactly one result if Jeanette is
+part of our database (there is also an assumption that everyone has a
+unique name). On the other hand, if we have a city (let's say
+Vancouver),
+the question becomes "Who lives in Vancouver?" and there can be more
+than
+one result to the question. To reflect the two translations for the
+predicate <tt>livesIn</tt>, there are two execution modes for
+<tt>livesIn</tt>. The first line of the mode declaration: <tt><font
+ color="#0000ff">(B,F) IS SEMIDET</font></tt> tells <tt>TyRuBa</tt>
+that
+if the predicate <tt>livesIn</tt> is executed with its first argument
+bound to a value belonging to the declared domain (<tt>String</tt>) and
+the second argument free (i.e. we are asking the question "Which city
+does ... live in?"), then it can fail (our database has no record of
+which city the person lives in), or the variables in the second
+argument
+will be bound to exactly one value. (i.e. the variables in the second
+argument can be bound to <tt>0</tt> or <tt>1</tt> result after
+evaluation
+of the predicate <tt>livesIn</tt> in this mode.) </p>
+<p>One thing to note when declaring a predicate to have an
+execution mode that binds at most one value to each variable is that
+<tt>TyRuBa</tt> will throw away any other values if one value has
+been found to satisfy the predicate. For example if there is another
+person named <tt>Jeanette</tt> that lives in Vancouver and we add
+this fact into our database and ask <tt>TyRuBa</tt> where
+<tt>Jeanette</tt> lives in, we'll get the following result:</p>
+<pre><font color="#0000ff">livesIn(Jeanette,Vancouver).</font>
+<font color="#ff0000">** assertion added to rulebase **<br><font
+ color="#0000ff">:- livesIn(Jeanette,?city).</font>
+##QUERY : livesIn(Jeanette,?city)
+converted to Mode: livesIn(Jeanette,?city){(B,F) IS SEMIDET}
+.
+| ?city=Paris |
+##END QUERY</font></pre>
+<div style="margin-left: 40px;"><span style="font-weight: bold;">Implementation
+Note: </span>Normally, it would be
+up to the mode system to verify that the facts entered into the system
+are conistent with the declared modes and therefore a complete
+implementation of the mode system should reject the second
+declaration of Jeanette's place of residence. However,
+the current implementation of the factbase is unaware of declared
+modes and thus will silently accept the additional fact).
+<br>
+</div>
+<br>
+This is because <tt>TyRuBa</tt> uses the information that the
+predicate <tt>livesIn</tt> is <tt>SEMIDET</tt> to speed up its
+evaluation time by stopping the evaluation immediately after one
+result has been found. If we are to allow two people to have the same
+name, we will have to change the first predicate mode declaration for
+<tt>livesIn</tt> to:
+<pre><font color="#0000ff">(B,F) IS NONDET</font></pre>
+<p>The second execution mode for <tt>livesIn</tt> is
+<font color="#0000ff"><tt>(F,B) IS NONDET</tt></font>. This means that
+if the first argument is free and the second argument is bound to a
+value in the domain <tt>String</tt> (i.e. we are asking the question
+"Who lives in the city ...?") then <tt>livesIn</tt> can fail, or
+succeed with any number of results (i.e. the first argument can be
+bound to <tt>0</tt> or more results after executing <tt>livesIn</tt>).
+</p>
+<p>The mode declaration is needed while declaring a predicate because
+<tt>TyRuBa</tt> needs the information to detect invalid use of
+predicates and it tries to optimize performance. When you insert a rule
+or perform a query, <tt>TyRuBa</tt> checks that every predicate that
+is
+used can be executed in one of its declared execution modes. If this is
+not the case, it tries to rearrange the predicates such that the
+predicate that has a declared execution mode that can be satisfied is
+executed first. Each time a predicate is executed, more variables
+become bound and predicates that do not have any available exeuction
+mode before may have one now. If there is no way to rearrange an
+expression to satisfy all the predicates' execution modes, then
+<tt>TyRuBa</tt> will display a <tt>Mode Error</tt>. For example the
+following query results in an error since we only define two execution
+modes and they both require one of the arguments to be bound:</p>
+<pre><font color="#0000ff">:- livesIn(?name,?city).</font>
+<font color="#ff0000">##QUERY : livesIn(?name,?city)<br>Type or Mode Error: livesIn(?name,?city) cannot be converted to any declared mode<br>   ERROR: there is no rulebase that allows livesIn(F,F)</font></pre>
+<p>The following is an example of <tt>TyRuBa</tt> rearranging the
+order
+in which the predicates are evaluated to satisfy all the predicates'
+declared execution modes:</p>
+<pre><font color="#0000ff">:- livesIn(?name,?city),human(?name).</font>
+<font color="#ff0000">##QUERY : livesIn(?name,?city), human(?name)<br>converted to Mode: human(?name){(F) IS NONDET}, livesIn(?name,?city){(B,F) IS SEMIDET}<br>..<br>| ?city=Paris ?name=Jeanette |.<br>| ?city=Vancouver ?name=Kris |.<br>| ?city=Denver ?name=John |..<br>| ?city=Paris ?name=Jacques |<br>##END QUERY</font></pre>
+<p>From the previous example (<tt>:- livesIn(?name,?city)</tt>) we
+know that the predicate <tt>livesIn</tt> can not be evaluated if
+both of its arguments are not bound. By evaluating the predicate
+<tt>human</tt> first, <tt>?name</tt> will become bound and
+<tt>livesIn</tt> can be evaluated. This can be seen from the "converted
+to Mode" query: <tt>human(?name){(F) IS NONDET},
+livesIn(?name,?city){(B,F) IS SEMIDET}</tt>. This rearranged query
+shows us that the predicate <tt>human</tt> is evaluated first with
+its only argument free. This predicate will bind <tt>?city</tt> to
+<tt>0</tt> or more values. If <tt>?city</tt> does not become bound to
+any value after evaluating the first predicate, then the second
+predicate will not be evaluated (since this is an <tt><b>and</b></tt>
+expression, meaning all subexpressions must be satisfied in order
+for the whole expression to succeed). If <tt>?city</tt> does become
+bound to <tt>1</tt> or more values, then each value of <tt>?city</tt>
+will be substituted for <tt>?city</tt> in the evaluation of the
+predicate <tt>livesIn</tt>; therefore, <tt>livesIn</tt> will be
+evaluated in its <tt>(B,F)</tt> execution mode.</p>
+<p><tt>TyRuBa</tt> also uses the predicate mode declaration to optimize
+performance. This is done by executing predicates that are expected
+to have the least number of results first. For example:</p>
+<pre><font color="#0000ff">:- city(?city), livesIn(Kris,?city).</font>
+<font color="#ff0000">##QUERY : city(?city), livesIn(Kris,?city)<br>converted to Mode: livesIn(Kris,?city){(B,F) IS SEMIDET}, city(?city){(B) IS SEMIDET}<br>..<br>| ?city=Vancouver |<br>##END QUERY</font></pre>
+<p>The above query is rearranged since the predicate <tt>city</tt>
+with
+one free argument can have more than one result but <tt>livesIn</tt>
+with its first argument bound can return at most one result. Let's look
+at the execution steps to see why this is an optimization.</p>
+<pre>:- city(?city), livesIn(Kris,?city)<br>	:- livesIn(Kris,Vancouver) [city(?city) succeeds with ?city=Vancouver]<br>		:- SUCCEED<br>	:- livesIn(Kris,Paris) [city(?city) succeeds with ?city=Paris]<br>		:- FAIL<br>	:- livesIn(Kris,Denver) [city(?city) succeeds with ?city=Denver]<br>		:- FAIL<br>	:- livesIn(Kris,HongKong) [city(?city) succeeds with ?city=HongKong]<br>		:- FAIL</pre>
+<pre>:- livesIn(Kris,?city), city(?city)<br>	:- city(Vancouver) [livesIn(Kris,?city) succeeds with ?city=Vancouver]<br>		:- SUCCEED</pre>
+<p>Clearly the second way to evaluate the query was more efficient
+than the first (first composite query needed <tt>5</tt> steps
+whereas the second one only needed <tt>2</tt> steps).</p>
+<p>Let's look at one more example. We will look at the implementation
+of some rules for concatenating lists. Actually <tt>TyRuBa</tt>
+already has a predicate for this in its standard library called
+"<tt>append</tt>" (you can find the definition of <tt>append</tt> in
+<tt>prolog.rub</tt> in the <tt>lib</tt> directory. Here is how it
+works:</p>
+<pre><font color="#0000ff">:- append([1,2,3],[4,5],?l).</font>
+<font color="#ff0000">##QUERY : append([1,2,3],[4,5],?l)<br>converted to Mode: append([1,2,3],[4,5],?l){(B,B,F) IS DET}<br>....<br>| ?l=[1,2,3,4,5] |<br>##END QUERY</font></pre>
+<p>As you probably guessed we have to add an extra argument to the
+predicate to represent the result of the <tt>append</tt> operation. So
+the query above means "Does there exist an <tt>?l</tt> such that the
+<tt>append</tt> of <tt>[1,2,3]</tt> and <tt>[4,5]</tt> equals
+<tt>?l</tt>". The query engine answers this query by providing the
+value for <tt>?l</tt> that makes this true.</p>
+<p>Now, we can also use the same predicate in different ways by putting
+variables in different places. For example, all possible ways of
+splitting a list in two can be found like this:</p>
+<pre><font color="#0000ff">:- append(?x,?y,[1,2,3]).</font>
+<font color="#ff0000">##QUERY : append(?x,?y,[1,2,3])<br>converted to Mode: append(?x,?y,[1,2,3]){(F,F,B) IS MULTI}<br>..<br>| ?y=[1,2,3] ?x=[] |.<br>| ?y=[2,3] ?x=[1] |.<br>| ?y=[3] ?x=[1,2] |<br>| ?y=[] ?x=[1,2,3] |<br>##END QUERY</font></pre>
+<p>Most different ways of using this predicate, putting a mix of
+variables and lists in the different arguments work as expected,
+binding the other variables to all possible solutions. Here is an
+example that doesn't work out as nicely.</p>
+<pre><font color="#0000ff">:- append(?begin,[4],?lst).</font>
+<font color="#ff0000">##QUERY : append(?begin,[4],?lst)<br>Type or Mode Error: append(?begin,[4],?lst) cannot be converted to any declared mode<br>   ERROR: there is no rulebase that allows append(F,B,F)</font></pre>
+<p>But why is this query not allowed? Clearly the set of possible
+answers to such a query is infinite (list of any length can satisfy
+such a query as long as the last element is <tt>4</tt>). That's the
+reason the predicate does not have <tt>(F,B,F)</tt> as a valid
+execution mode.</p>
+<p> Now that we know what the predicate <tt>append</tt> does, let's
+try to understand its predicate declaration:</p>
+<pre><font color="#0000ff">append :: [?x], [?x], [?x]<br>MODES<br>  (B,B,F) IS DET<br>  (B,F,B) IS SEMIDET<br>  (F,B,B) REALLY IS SEMIDET<br>  (F,F,B) IS MULTI<br>END</font></pre>
+<p>You can probably guess that <tt>[...]</tt> represents lists. The
+type between the square brackets represents the type of the elements of
+a list. For example a list of strings is represented by
+<tt>[String]</tt>, a list of lists of integers is represented by
+<tt>[[Integer]]</tt>, etc. But what kind of lists does <tt>append</tt>
+accept as arguments? <tt>append</tt> accepts lists of any type.
+Here we introduce another typing concept: the type variable. A type
+variable represents
+a <i>polymorphic type</i>. It can take on any type. After it is
+assigned a type, it can grow or shrink, but it cannot take on a
+completely different type. For example when appending a list of
+integers
+and strings, <tt>?x</tt> will first take on the type <tt>Integer</tt>,
+then it will grow to the type <tt>Object</tt> to include the type
+<tt>String</tt>. On the other hand if you try to append a list of
+integers and a list of lists of integers, it will result in a
+<tt>Type Error</tt> since there is no type that is a supertype of both
+<tt>Integer</tt> and <tt>List of Integers</tt>.</p>
+<a name="strict_type">
+</a>
+<p><a name="strict_type">One thing to note about list types is that
+they are <b>Strict</b>
+types. When a predicate is declared to have strict argument types,
+<tt>TyRuBa</tt> will only allow the type of the arguments to be
+subtypes of what are declared. Some predicates, like <tt>append</tt>
+only work properly with arguments within a certain domain, but it
+behaves unexpectedly if an argument is outside of this domain. For
+example since lists are represented as pairs in <tt>TyRuBa</tt>,
+if you pass in a list (say <tt>[1,2]</tt>) and an integer <tt>3</tt>
+as the first two arguments of <tt>append</tt>, the third argument will
+be bound to a strange value - <tt>[1,2|3]</tt> - which is not really
+the concatenation of a list and an integer because the notion of
+concatenation only works if the things we are concatenating are lists.
+<tt>TyRuBa</tt> tries to eliminate these unexpected results by
+rejecting any evaluation of predicates that may contain values outside
+of the declared strict type.</a></p>
+<p><a name="strict_type">If we try to have an illustration for strict
+types, it will look
+something like this:</a></p>
+<a name="strict_type"><img src="type_system_append.gif">
+</a>
+<p><a name="strict_type">The red crosses in the pictures represent
+values that would
+make the predicate <tt>append</tt> behave unexpectedly. (Think of
+each cross or square as a tuple of three types.) All of these values
+are outside of the declared type <tt>[?x]</tt>. For all values inside
+of this domain, they will be evaluated as usual and will either cause
+<tt>append</tt> to succeed or fail.</a></p>
+<p><a name="strict_type">There are predicates that use strict types
+that are not list
+types. For example there is a predicate called "<tt>sum</tt>"
+defined in the <tt>TyRuBa</tt> library that succeeds if the sum of the
+first two arguments is equal to the third argument. The following are
+the types of this predicate's arguments: (You can see the
+descriptions of all the predicates in the <tt>TyRuBa</tt> library </a><a
+ href="tyruba_library.html" target="_blank">here</a>.)</p>
+<pre>sum(?num1, ?num2, ?sum)<br>Arguments: ?num1 :: =Integer<br>           ?num2 :: =Integer<br>           ?num3 :: =Integer</pre>
+<p>The "<tt>=</tt>" in front of <tt>Integer</tt> indicates that it is
+a strict type. This restriction is necessary for the sum predicate
+because it is implementd using Java method calls. If anything other
+than integers are passed as arguments into <tt>sum</tt>, there will be
+a Java ClassCastException and the TyRuBa engine would crash. To prevent
+this from happening,
+the <tt>TyRuBa</tt> type system rejects any evaluation of this
+predicate
+with arguments that might be outside of <tt>Integer</tt>. Let's try to
+use this predicate.</p>
+<pre><font color="#0000ff">:- element(?x,[1,2,3,4]), sum(?x,?x,?2x)</font>
+<font color="#ff0000">##QUERY : element(?x,[1,2,3,4]), sum(?x,?x,?2x)<br>converted to Mode: element(?x,[1,2,3,4]){(F,B) IS NONDET}, sum(?x,?x,?2x){(B,B,F) IS DET}<br>....<br>| ?2x=2 ?x=1 |..<br>| ?2x=4 ?x=2 |..<br>| ?2x=6 ?x=3 |..<br>| ?2x=8 ?x=4 |<br>##END QUERY</font></pre>
+<pre><font color="#0000ff">:- element(?x,[1,2,a,b]), sum(?x,x,?2x).</font>
+<font color="#ff0000">##QUERY : element(?x,[1,2,a,b]), sum(?x,?x,?2x)<br>Type or Mode Error: Incompatible types: Object, =Integer<br>in sum(?x,?x,?2x)<br>in element(?x,[1,2,a,b]), sum(?x,?x,?2x)</font></pre>
+<p>It should be pretty clear why the first query was successful but the
+second resulted in an error. In the first query, <tt>TyRuBa</tt>'s
+type
+system knows that <tt>?x</tt> will be in the domain Integer after
+evaluating the first subexpression <tt>element(?x,[1,2,3,4])</tt>;
+therefore, it knows that nothing unexpected would result in evaluating
+<tt>sum(?x,?x,?2x)</tt>, and it allows the query to be evaluated.
+In the second query, <tt>TyRuBa</tt>'s type system deduced that the
+type of <tt>?x</tt> after evaluting the first subexpression is Object.
+It then rejects the query since there is a possibility for the
+evaluation
+of the second subexpression to give an unexpected results (and indeed
+it
+would if <tt>a</tt> or <tt>b</tt> are passed into the predicate
+<tt>sum</tt>.</p>
+<p>But what if we do want to find all the integers of a list and
+manipulate them with <tt>sum</tt>. Let's try using the predicate
+<tt>Integer</tt>. There is a predicate for every "atomic" type that
+takes
+one argument and succeeds if the argument is of that type. (An atomic
+type
+is a type that describes any constant literal term, e.g. Object,
+Integer,
+String, etc.). By using this new predicate <tt>Integer</tt>, the
+following
+should guarantee that <tt>?x</tt> is of type Integer:</p>
+<pre><font color="#0000ff">:- element(?x,[1,2,a,b]), Integer(?x), sum(?x,?x,?2x)</font>
+<font color="#ff0000">##QUERY : element(?x,[1,2,a,b]), Integer(?x), sum(?x,?x,?2x)<br>Type or Mode Error: Incompatible types: Object, =Integer<br>in sum(?x,?x,?2x)<br>in element(?x,[1,2,a,b]), Integer(?x), sum(?x,?x,?2x)</font></pre>
+<p>Why is it giving us an error? <tt>TyRuBa</tt>'s type system wants
+to guarantee that no matter how the subexpressions of a composite
+expression are rearranged (remember the mode system may chose to change
+the order!), there will not be any unexpected result
+in the evaluation. In the order that the above query was typed, it is
+true that <tt>?x</tt> is of type Integer before being passed
+into the predicate <tt>sum</tt>. However, another possible
+rearrangement is the following:<br>
+</p>
+<pre><font color="#0000ff">:- element(?x,[1,2,a,b]), sum(?x,?x,?2x), Integer(?x).</font></pre>
+<p>There must be a way to manipulate only integers in a list. This is
+where
+we will introduce the <tt>convertTo<i>Type</i></tt> predicate. Again
+there
+is a <tt>convertTo<i>Type</i></tt> predicate for each atomic type.
+This
+predicate takes two arguments and succeeds if the two arguments are
+equal
+and they are of type <i>Type</i>. Using this new predicate, we can
+finally
+manipulate the list using the following:</p>
+<pre><font color="#0000ff">:- element(?x,[1,2,a,b]), sum(?xInt,?xInt,?2x), convertToInteger(?x,?xInt).</font>
+<font color="#ff0000">##QUERY : element(?x,[1,2,a,b]), sum(?xInt,?xInt,?2x), convertToInteger(?x,?xInt)<br>converted to Mode: element(?x,[1,2,a,b]){(F,B) IS NONDET}, convertToInteger(?x,?xInt){(B,F) IS SEMIDET}, sum(?xInt,?xInt,?2x){(B,B,F) IS DET}<br>.....<br>| ?2x=2 ?xInt=1 ?x=1 |...<br>| ?2x=4 ?xInt=2 ?x=2 |....<br>##END QUERY</font></pre>
+<p>Notice that we need to introduce another variable <tt>?xInt</tt> in
+order for the above query to work. But by introducing the new variable,
+we guarantee that the arguments to the predicate <tt>sum</tt> will be
+integers. <tt>convertToInteger</tt> must be evaluated before the
+evaluation of the predicate <tt>sum</tt> since <tt>sum</tt> requires
+<tt>?xInt</tt> to be bound in its evaluation. And since the value of
+<tt>?xInt</tt> causes <tt>convertToInteger</tt> to succeed, it must be
+of type Integer, and this will guarantee that the predicate <tt>sum</tt>
+will not behave unexpectedly.</p>
+<p>We took a little detour in introducing strict types, so now let's
+go back to looking at the predicate declaration of <tt>append</tt>.
+Now that we understand <tt>append</tt> takes arguments of type lists,
+the next question is "which subset of lists should these arguments
+belong to?". There is no limitation on the types of the lists that
+can be passed as arguments into <tt>append</tt> except one: there
+must be a common list type that all three arguments belong to. This
+is declared with type variables (polymorphic types) and the three
+arguments are lists parameterized by the same type variable. So the
+type variable can take on the form of any type but the three list
+types must have elements of the type of this type variable. For
+example the following are all legal according to the predicate
+declaration (note: just because a query is type correct does not
+mean that the query will succeed):</p>
+<pre><font color="#0000ff">:- append([1,2],[3,5],[1,2,3,4]). // this query will fail<br>:- append([1,2],[a,b],[1.1,2.2]).  // this query will fail<br>:- append([a],[],[1]).             // this query will fail<br>:- append([[]],[],[[]]).<br>:- append([[1],[1,2]],[[3]], [[1],[1,2],[3]]).</font></pre>
+<p>But the following are not:</p>
+<pre><font color="#0000ff">:- append([[1]],[2],[[1],2]).<br>:- append([[]],[a],?x).</font></pre>
+<p>There are four mode declarations for <tt>append</tt>:</p>
+<pre><font color="#0000ff">  (B,B,F) IS DET<br>  (B,F,B) IS SEMIDET<br>  (F,B,B) REALLY IS SEMIDET<br>  (F,F,B) IS MULTI</font></pre>
+<p>The first mode declaration states that if the first two arguments
+of <tt>append</tt> are bound to values inside the declared domain and
+the third argument is free, then this predicate can never fail and the
+the third argument will be bound to exactly one value. This execution
+mode is called <i>deterministic</i> (<tt>DET</tt>). The second mode
+declaration states that if the first and third arguments are bound to
+values inside the declared domain, then this predicate can fail, or
+succeed by binding the second argument to exactly one value. The third
+mode declaration states that if the second and third argument are bound
+to values inside the declared domain, then this predicate can fail or
+succeed by binding the first argument to exactly one argument. The last
+mode declaration states that if the first two arguments are free and
+the
+third one is bound to a value within the declared domain, then this
+predicate will never fail and the first and second arguments will be
+bound
+to one or more values. This execution mode is called "<tt>MULTI</tt>".</p>
+<p>You might be wondering why the third mode declaration has a
+"<tt>REALLY</tt>" in front of "<tt>IS</tt>". Let's look at what happens
+if
+we take it out of the declaration. (The <tt>append</tt> predicate is
+located in <tt>prolog.rub</tt> in the <tt>/lib</tt> directory) We get
+the following error message:</p>
+<pre><font color="#ff0000">while converting append([?x|?xs],?ys,[?x|?zs]) :- append(?xs,?ys,?zs). to mode: (F,B,B) IS SEMIDET<br>Inferred mode exceeds declared mode in append<br>inferred mode: NONDET	declared mode: SEMIDET</font></pre>
+<p>Let's take a closer look at the two rules that form the predicate
+<tt>append</tt>:</p>
+<pre><font color="#0000ff">append([],?x,?x).<br>append([?x|?xs],?ys,[?x|?zs]) :- append(?xs,?ys,?zs).</font></pre>
+<p>For the mode <tt>(B,F,B)</tt>, <tt>TyRuBa</tt> knows that the
+fact and the rule can not be satisfied simultaneously since the
+fact requires the first argument to be an empty list but the fact
+requries the first argument to be a list of at least one element.
+<tt>TyRuBa</tt> also deduces that the fact can bind the free
+variable to at most one result and the rule can bind the free
+variable to at most one result; therefore, it deduces that the
+second argument can be bound to at most one result if evaluated
+in the mode <tt>(B,F,B)</tt>, and the declaration of <tt>SEMIDET</tt>
+is correct.</p>
+<p>How about the mode <tt>(F,B,B)</tt>? We know that it should have
+a <tt>SEMIDET</tt> execution mode also since <tt>append</tt> is
+symmetrical (we can always reverse the lists and therefore the order
+of the first and second arguments) and the execution mode for
+<tt>(B,F,B)</tt> is <tt>SEMIDET</tt>. But from <tt>TyRuBa</tt>'s type
+system's point of view, this is not apparent. Both the fact and the
+rule above expect arguments of type lists and there is no apparant
+indication of the impossibility that both the fact and the rule succeed
+simultaneously; therefore, <tt>TyRuBa</tt> deduces that more than
+one value might be bound to the first argument after evaluating the
+predicate <tt>append</tt>. That's why the error message states that
+the "inferred mode" was <tt>SEMIDET</tt>. In order to let <tt>TyRuBa</tt>
+know that we did not make a mistake in our mode declaration, we
+put "<tt>REALLY</tt>" before "<tt>IS</tt>". When <tt>TyRuBa</tt>
+encounters a "<tt>REALLY</tt>" declaration, it only checks that
+there exists legal execution modes for all subexpressions but does
+not check that the declared execution mode returns less result than
+the inferred mode.</p>
+<p>The <tt>append</tt> predicate in the library only works for
+appending two lists. What if we want to append three lists? Well, easy,
+we define another predicate which takes <tt>4</tt> arguments, the
+first <tt>3</tt> are lists to append and it binds the result to the
+<tt>4</tt>th. There is only one way to append <tt>3</tt> lists
+together but there are multiple ways to split a list. So type the
+following to define our new predicate <tt>append3</tt>:</p>
+<pre><font color="#0000ff">append3 :: [?x], [?x], [?x], [?x]<br>MODES<br>  (B,B,B,F) IS DET<br>  (F,F,F,B) IS MULTI<br>END</font>
+<font color="#ff0000">** predicate info added to db **<br><font
+ color="#0000ff">append3(?x,?y,?z,?xyz) :- append(?x,?y,?xy), append(?xy,?z,?xyz).</font>
+(B,B,B,F) IS DET ==&gt; append3(?x,?y,?z,?xyz) :- append(?x,?y,?xy){(B,B,F) IS DET}, append(?xy,?z,?xyz){(B,B,F) IS DET}.
+(F,F,F,B) IS MULTI ==&gt; append3(?x,?y,?z,?xyz) :- append(?xy,?z,?xyz){(F,F,B) IS MULTI}, append(?x,?y,?xy){(F,F,B) IS MULTI}.
+** assertion added to rulebase **</font></pre>
+<p>The <tt>append3</tt> rule we added defines the append of <tt>3</tt>
+lists in terms of the append of <tt>2</tt> lists. But notice that for
+the execution mode <tt>(F,F,F,B)</tt>, the two calls to <tt>append</tt>
+are switched. Let's try to understand why that is the case. If we want
+to find out the ways to split the list <tt>[1,2,3]</tt> into three
+lists, we would perform the following query:</p>
+<pre><font color="#0000ff">:- append3(?x,?y,?z,[1,2,3]).</font></pre>
+<p>If we evaluate the condition of the rule of <tt>append3</tt> as it
+was typed, then we first have to evalute the subexpression
+<tt>append(?x,?y,?xy)</tt>. But none of the three variables are bound.
+There are infinitely many lists that <tt>?x</tt> and <tt>?y</tt> can
+be bound to; therefore, there are inifinitely many lists that
+can be formed by appending <tt>?x</tt> and <tt>?y</tt>. But what if
+we evaluate the second subexpression <tt>append(?xy,?z,?xyz)</tt>
+first? <tt>?xyz</tt> is the third argument of <tt>append3</tt> so
+it is bound to <tt>[1,2,3]</tt>; therefore, we are in fact evaluating
+the following:</p>
+<pre><font color="#0000ff">:- append(?xy,?z,[1,2,3]).</font>
+<font color="#ff0000">##QUERY : append(?xy,?z,[1,2,3])<br>converted to Mode: append(?xy,?z,[1,2,3]){(F,F,B) IS MULTI}<br>..<br>| ?z=[1,2,3] ?xy=[] |.<br>| ?z=[2,3] ?xy=[1] |H<br>| ?z=[3] ?xy=[1,2] |<br>| ?z=[] ?xy=[1,2,3] |<br>##END QUERY</font></pre>
+<p>After evaluating <tt>append(?xy,?z,[1,2,3])</tt>, <tt>?xy</tt>
+and <tt>?z</tt> both become bound and the evaluation of the first
+subexpression <tt>append(?x,?y,?xy)</tt> can be evaluated in the mode
+<tt>(F,F,B)</tt>. The following is the "execution chain" for the query
+<tt>:- append3(?x,?y,?z,[1,2,3])</tt>:</p>
+<pre>:- append3(?x,?y,?z,[1,2,3])<br>	:- append(?xy,?z,[1,2,3]), append(?x,?y,?xy)<br>		:- append(?x,?y,[1,2,3]) (append(?xy,?z,[1,2,3]) succeeds with ?xy=[1,2,3], ?z=[])<br>			:- SUCCEED with ?x=[1,2,3], ?y=[]<br>			:- SUCCEED with ?x=[1,2], ?y=[3]<br>			:- SUCCEED with ?x=[1], ?y=[2,3]<br>			:- SUCCEED with ?x=[], ?y=[1,2,3]<br>		:- append(?x,?y,[1,2]) (append(?xy,?z,[1,2,3]) succeeds with ?xy=[1,2], ?z=[3])<br>			:- SUCCEED with ?x=[1,2], ?y=[]<br>			:- SUCCEED with ?x=[1], ?y=[2]<br>			:- SUCCEED with ?x=[], ?y=[1,2]<br>		:- append(?x,?y,[1]) (append(?xy,?z,[1,2,3]) succeeds with ?xy=[1], ?z=[2,3])<br>			:- SUCCEED with ?x=[1], ?y=[]<br>			:- SUCCEED with ?x=[], ?y=[]<br>		:- append(?x,?y,[]) (append(?xy,?z,[1,2,3] succeeds with ?xy=[], ?z=[1,2,3])<br>			:- SUCCEED with ?x=[], ?y=[]<br></pre>
+<p>Here is a table of all the possible modes that can be used in
+a predicate mode declaration and what their meanings are:</p>
+<blockquote>
+  <table border="1">
+    <tbody>
+      <tr>
+        <td>
+        <p><b>Mode</b></p>
+        </td>
+        <td align="center">
+        <p><b>Minimum # of Result(s)</b></p>
+        </td>
+        <td align="center">
+        <p><b>Maximum # of Result(s)</b></p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <p><tt>SEMIDET</tt></p>
+        </td>
+        <td align="center">
+        <p><tt>0</tt></p>
+        </td>
+        <td align="center">
+        <p><tt>1</tt></p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <p><tt>DET</tt></p>
+        </td>
+        <td align="center">
+        <p><tt>1</tt></p>
+        </td>
+        <td align="center">
+        <p><tt>1</tt></p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <p><tt>NONDET</tt></p>
+        </td>
+        <td align="center">
+        <p><tt>0</tt></p>
+        </td>
+        <td align="center">
+        <p><tt>&gt; 1</tt></p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <p><samp>MULTI</samp></p>
+        </td>
+        <td align="center">
+        <p><tt>1</tt></p>
+        </td>
+        <td align="center">
+        <p><tt>&gt; 1</tt></p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<a name="compound_term">
+<h3>2.9 Compound Terms</h3>
+</a>
+<p>Instead of using <tt>TyRuBa</tt> built in list structures, we
+can also define our own list structures by using compound terms
+and composite types.</p>
+<p>Each compound term has a name, and a tuple or a list of arguments.
+For example "<tt>Tree&lt;?key,?value&gt;</tt>" and "<tt>List&lt;elementType&gt;</tt>"
+are compound terms. Before a compound term can be used, its type
+must be declared. Let us try to define our own data structure to
+represent a
+list. A list can either be empty, or non-empty. The non-empty list is
+formed
+with an element and a list. For example a list of <tt>1</tt> and <tt>2</tt>
+can be represented as <tt>NonEmptyList&lt;1, NonEmptyList&lt;2,
+EmptyList&lt;&gt;&gt;&gt;</tt>. Here is the type declarations for out
+list
+structure:</p>
+<pre><font color="#0000ff">TYPE List&lt;?value&gt; = EmptyList&lt;&gt; | NonEmptyList&lt;?value&gt;<br>TYPE NonEmptyList&lt;?value&gt; AS &lt;?value,List&lt;?value&gt;&gt;<br>TYPE EmptyList&lt;&gt; AS &lt;&gt;</font></pre>
+<p>The first line tells <tt>TyRuBa</tt> that a list of type <tt>?value</tt>
+is either an empty list (notice it does not have any arguments since
+an empty list can be thought of as a list of any type) and a non
+empty list of type <tt>?value</tt>. The second line tells <tt>TyRuBa</tt>
+that
+if a compound term has the name "<tt>NonEmptyList</tt>" and has 2
+arguments
+where the first argument is of type <tt>?value</tt> and the second
+argument
+is of type <tt>List&lt;?value&gt;</tt>, then this compound term is of
+type
+<tt>NonEmptyList&lt;?value&gt;</tt>. The final line is the easiest to
+understand:
+any compound term that has the name <tt>EmptyList</tt> and has no
+argument is
+of the type <tt>EmptyList&lt;&gt;</tt>.</p>
+<p>Now let's try to write our own predicate that appends two lists:</p>
+<pre><font color="#0000ff">ourAppend :: List&lt;?a&gt;, List&lt;?a&gt;, List&lt;?a&gt;<br>MODES<br>  (B,B,F) IS DET<br>  (F,F,B) IS MULTI<br>END<br><br>ourAppend(EmptyList&lt;&gt;,?x,?x).<br>ourAppend(NonEmptyList&lt;?x,?xs&gt;,?y,NonEmptyList&lt;?x,?xys&gt;) :- ourAppend(?xs,?y,?xys).</font></pre>
+<p>If we compare the above rules to the two rules for the append
+predicate in the library:</p>
+<pre>append([],?x,?x).<br>append([?x|?xs],?y,[?x|?xys]) :- append(?xs,?y,?xys).</pre>
+<p>We can see that they are almost identical except for different
+representation
+for empty lists and non empty lists. Let's look at one more example.
+Another useful
+data structures is a Tree structure. A tree can be empty, a leaf (has
+only one element),
+or a node (a key, a left subtree and a right subtree). Here is the type
+declarations:</p>
+<pre><font color="#0000ff">TYPE Tree&lt;?key,?value&gt; = EmptyTree&lt;&gt;, Leaf&lt;?value&gt;, Node&lt;?key,?value&gt;<br>TYPE EmptyTree&lt;&gt; AS &lt;&gt;<br>TYPE Leaf&lt;?value&gt; AS &lt;?value&gt;<br>TYPE Node&lt;?key,?value&gt; AS &lt;?key,Tree&lt;?key,?value&gt;,Tree&lt;?key,?value&gt;&gt;</font></pre>
+<p>Let's define a predicate <tt>sumAllLeaves</tt> for adding up all
+the leaf values of a tree:</p>
+<pre><font color="#0000ff">sumAllLeaves :: Tree&lt;?key,=Integer, =Integer&gt;<br>MODES<br>  (B,F) IS DET<br>END<br><br>sumAllLeaves(EmptyTree&lt;&gt;,0).<br>sumAllLeaves(Leaf&lt;?value&gt;,?value).<br>sumAllLeaves(Node&lt;?key,?leftTree,?rightTree&gt;,?sum) :-<br>	sumAllLeaves(?leftTree,?leftSum), sumAllLeaves(?rightTree,?rightSum),<br>	sum(?leftSum,?rightSum,?sum).</font></pre>
+<p><font size="+4" color="#ff0000">To be continued</font></p>
+<hr>
+<p align="right">Kris De Volder &lt;kdvolder@users.sourceforge.net&gt;</p>
+</body>
+</html>

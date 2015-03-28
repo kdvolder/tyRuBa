@@ -1,0 +1,24 @@
+----- results for tests in benchmark.qry -------
+splatter(abcdefghijklmnop,?x),splatter(?y,?x)  #results = 32768  seconds = 11.361
+topo_sort(?x)  #results = 27388  seconds = 8.899
+prime(?x,250)  #results = 53  seconds = 0.351
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 6.07
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x)  #results = 32768  seconds = 1.005
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_forward(?x,?bork)  #results = 32647  seconds = 2.761
+selection(?lx,[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]),implode(?lx,?x),bench_backward(?bork,?x)  #results = 32647  seconds = 2.969
+permutation([a,b,c,d,e,f,g],?x)  #results = 5040  seconds = 1.465
+perm([1,2,3,4,5,6,7],?x)  #results = 5040  seconds = 11.678
+TOTAL : 46.559
+
+Singletons = 16018
+Singletons from SemiDetCompiled = 34
+Singletons from Succeed = 0
+Singletons from Disjunction of semidet and nondet = 15984
+Singletons from Disjunction of semidet and semidet = 0
+Empty frames appended = 9
+SemiDetCachedRuleBase = 8
+CachedRuleBase = 23
+First called = 3
+First called from:
+{class tyRuBa.engine.compilation.CompiledFactBase=3}
+

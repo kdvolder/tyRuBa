@@ -1,0 +1,18 @@
+#!/bin/sh
+
+#
+# Grab JQuery logs bring them here.
+#
+# Usage: ./grab <filename>.tar.gz <db_file_number>
+#
+# Example: ./grab jhotdraw_bm.tar.gz 100
+
+WORKSPACE=${HOME}/Desktop/eclipse/workspace
+ECLIPSE=${HOME}/Desktop/eclipse
+HERE=`pwd`
+
+cp -r ${ECLIPSE}/plugins/ca.ubc.jquery/rules .
+
+cd ${WORKSPACE}/.metadata/.plugins/ca.ubc.jquery
+tar zcf  ${HERE}/$1 $2/ $2_log*.qry
+rm $2_log*.qry

@@ -1,0 +1,45 @@
+//
+// General coding rules for generated code.
+//
+
+//
+// Fields.
+//
+// By default (unless declared otherwise), fields are private.
+
+private_(var<?c,?n>) :- NOT( public_(var<?c,?n>); protected_(var<?c,?n>) ).
+
+//
+// Constructors and methods.
+//
+// By default, constructors and methods are public.
+
+public_(constructor<?c,?Ts>) :- NOT( private_(constructor<?c,?Ts>)   ; 
+                                     protected_(constructor<?c,?Ts>) ).
+
+// All methods are public.
+public_(method<?c,?n,?Ts>) :- NOT( private_(method<?c,?n,?Ts>)   ;
+                                   protected_(method<?c,?n,?Ts>) ).
+//
+// Classes and interfaces.
+//
+
+public_(?c) :- (class_(?c) ; interface_(?c)).
+
+//
+// Singelton design pattern.
+// 
+//   To generate a "singleton" implementation pattern, the following
+//   fact must be declared for a class ?c
+//
+// singleton_class(?c).
+//
+//   => constructors are made private.
+//      final public static field "the" which holds the instance.
+
+static_(var<?c,the>).
+public_(var<?c,the>).
+final_(var<?c,the>).
+var_(?c,?c,the,{new ?c()}) :- singleton_class(?c).
+
+private_(constructor<?c,?Ts>) :- singleton_class(?c).

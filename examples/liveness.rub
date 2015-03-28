@@ -1,0 +1,27 @@
+//
+// liveness.rub
+//
+// An example that show how tyruba's tabling make it
+// possible to write recursive propagation rules
+// to propagate properties over dependency structures
+// that may contain cycles.
+
+//
+// These rules are supposed to work within JQuery computing transitive closures
+// of callgraphs.
+//
+
+refers :: Block, Callable
+MODES 
+  (B,F) IS NONDET 
+  (F,B) IS NONDET 
+END
+
+refers(?X,?Y) :- calls(?X,?Y,?) ; overrides(?Y,?X).
+
+reachable :: Block, Callable
+MODES (B,F) IS NONDET END
+
+reachable(?X,?Y) 
+:- refers(?X,?Y) ; 
+   reachable(?X,?M), refers(?M,?Y).

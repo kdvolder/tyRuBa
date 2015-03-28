@@ -1,0 +1,21 @@
+#library "gen_initfile.rub"
+#include "termgen.rub"
+#include "termprint.rub"
+#include "termunify.rub"
+#include "termvar.rub"        
+// #include "termmatcher.rub" broken
+#include "stack.rub"
+
+term_package(tyRuBa.engine.generatedterms).
+
+term_production(Term,     Pair).
+term_production(Pair,     [ [Term,car], [Term,cdr] ]).
+
+term_production(Term,     Nil).
+term_production(Nil,      []).
+
+term_list_print(Pair,Nil, "[" , "," , "|" , "]" ).
+
+term_production(Term,     JavaTerm).
+
+term_terminal(JavaTerm,   java.lang.Object).

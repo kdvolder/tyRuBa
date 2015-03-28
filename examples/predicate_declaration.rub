@@ -1,0 +1,51 @@
+human :: String
+MODES
+  (F) IS NONDET
+END
+
+dog :: String
+MODES
+  (F) IS NONDET
+END
+
+alive :: String
+MODES
+  (F) IS NONDET
+END
+
+mortal :: String
+MODES
+  (F) IS NONDET
+END
+
+city :: String
+MODES
+  (F) IS NONDET
+END
+
+livesIn :: String, String
+MODES
+  (B,F) IS SEMIDET
+  (F,B) IS NONDET
+END
+
+neighbors :: String, String
+MODES
+  (B,F) IS NONDET
+  (F,B) IS NONDET
+END
+
+test :: [Integer]
+MODES
+  (F) IS NONDET
+END
+
+last :: [?x], Integer
+MODES
+  (B,F) REALLY IS SEMIDET
+END
+
+element :: ?x, [?x]
+MODES
+  (F,B) IS NONDET
+END

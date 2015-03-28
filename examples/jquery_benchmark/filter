@@ -1,0 +1,7 @@
+#!/bin/sh
+
+#
+# A shell command that filters .qry file to remove GUI related queries. 
+#
+
+grep -v "label\\|adornmentFlags\\|baseImage\\|category\\|topQuery\\|menuItems\\|sourceLocation(" $1
