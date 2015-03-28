@@ -68,7 +68,8 @@ final class MapElementSource extends ElementSource {
 //System.err.println("MapElementSource::advance():1");
     while ( (next==null) && (result=remaining.status())==ELEMENT_READY) {
 //System.err.println("MapElementSource::advance():2");
-      next = action.compute(remaining.nextElement());
+    	Object val = remaining.nextElement();
+      next = val==null?null:action.compute(val);
     }
 //System.err.println("MapElementSource::advance():3");
 	if (result==NO_MORE_ELEMENTS) {

@@ -1,5 +1,11 @@
 package tyRuBa.engine;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+
+import annotations.Export;
+import annotations.Feature;
 import tyRuBa.engine.compilation.CompilationContext;
 import tyRuBa.engine.compilation.Compiled;
 import tyRuBa.modes.Mode;
@@ -55,16 +61,19 @@ public abstract class RBComponent {
 		return getPredId().getName();
 	}
 
+	@Export(to="./BDB")
 	public abstract RBTuple getArgs();
 
 	public RBComponent convertToNormalForm() {
 		return this;
 	}
 
+	@Export(to="./BDB")
 	public boolean isGroundFact() {
 		return false; // must be overriden by RBFact!
 	}
 
+	@Export(to="./BDB")
 	public boolean isValid() {
 		// All components are always valid... except for ValidatorComponents.
 		return true;
@@ -72,8 +81,25 @@ public abstract class RBComponent {
 	
 	public abstract Compiled compile(CompilationContext c);
 
-    public Validator getValidator() {
-        return null;
+	@Export(to="./BDB")
+    public IValidator getValidator() {
+        return Validator.theAlwaysValid;
     }
+
+	/**
+	 * Unparse an RBComponent onto a character based output destination.
+	 * <p>
+	 * The intent of this method is to produce an output format that can be
+	 * read back in by the parser. The implementation down below is the
+	 * default implementation but it is not fully correct (will not always
+	 * be parsable again). Subclasses should override and provide a
+	 * correct implementation.
+	 * 
+	 * @param out
+	 * @throws IOException 
+	 */
+	public void unparse(PrintWriter out) throws IOException {
+		out.append(this.toString());
+	}
 	
 }

@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import annotations.Feature;
+
+import tyRuBa.engine.IValidator;
 import tyRuBa.engine.Validator;
 
 /**
@@ -21,6 +24,7 @@ import tyRuBa.engine.Validator;
  * @category FactBase
  * @author riecken
  */
+@Feature(names="Validator")
 public class FileBasedValidatorManager implements ValidatorManager {
 
     /** The directory in which this validator manager is persisted. */
@@ -54,6 +58,7 @@ public class FileBasedValidatorManager implements ValidatorManager {
         this.validatorCounter = 0;
 
         File validatorFile = new File(storagePath + "/validators.data");
+    	add(Validator.theAlwaysValid, "%valid%");
         if (validatorFile.exists()) {
             try {
                 FileInputStream fis = new FileInputStream(validatorFile);
@@ -75,41 +80,11 @@ public class FileBasedValidatorManager implements ValidatorManager {
                 ois.close();
                 fis.close();
             } catch (IOException e) {
-                throw new Error("Could not load validators because of IOException");
+                throw new Error("Could not load validators because of IOException",e);
             } catch (ClassNotFoundException e) {
-                throw new Error("Could not load validators because of ClassNotFoundException");
+                throw new Error("Could not load validators because of ClassNotFoundException",e);
             }
 
-        }
-    }
-
-    /**
-     * Creates a new FileBasedValidatorManager.
-     * @param url url to stored validator manager.
-     */
-    public FileBasedValidatorManager(URL url) {
-        this.storagePath = url.toString();
-        this.validators = new HashMap();
-        this.identifiers = new HashMap();
-        this.handles = new HashMap();
-        try {
-            ObjectInputStream ois = new ObjectInputStream(url.openStream());
-            int size = ois.readInt();
-            for (int i = 0; i < size; i++) {
-                String id = (String) ois.readObject();
-                Validator validator = (Validator) ois.readObject();
-                Long handle = new Long(validator.handle());
-                handles.put(handle, id);
-                identifiers.put(id, handle);
-                validators.put(handle, validator);
-            }
-            lastInvalidateTime = ois.readLong();
-            validatorCounter = ois.readLong();
-            ois.close();
-        } catch (IOException e) {
-            throw new Error("Could not load validators because of IOException");
-        } catch (ClassNotFoundException e) {
-            throw new Error("Could not load validators because of ClassNotFoundException");
         }
     }
 
@@ -117,7 +92,7 @@ public class FileBasedValidatorManager implements ValidatorManager {
      * @see tyRuBa.engine.factbase.ValidatorManager#add(tyRuBa.engine.Validator,
      * java.lang.String)
      */
-    public void add(Validator v, String identifier) {
+    private void add(Validator v, String identifier) {
         v.setHandle(validatorCounter++);
         Long handle = new Long(v.handle());
         if (!validators.containsKey(handle)) {
@@ -128,27 +103,11 @@ public class FileBasedValidatorManager implements ValidatorManager {
     }
 
     /**
-     * @see tyRuBa.engine.factbase.ValidatorManager#update(long,
-     * java.lang.Boolean, java.lang.Boolean)
-     */
-    public void update(long validatorHandle, Boolean outdated, Boolean hasFacts) {
-        Validator v = (Validator) validators.get(new Long(validatorHandle));
-        if (v != null) {
-            if (outdated != null) {
-                v.setOutdated(outdated.booleanValue());
-            }
-            if (hasFacts != null) {
-                v.setHasAssociatedFacts(hasFacts.booleanValue());
-            }
-        }
-    }
-
-    /**
      * @see tyRuBa.engine.factbase.ValidatorManager#remove(long)
      */
-    public void remove(long validatorHandle) {
+    private void remove(long validatorHandle) {
         Long handle = new Long(validatorHandle);
-        Validator v = (Validator) validators.get(handle);
+        IValidator v = (IValidator) validators.get(handle);
         validators.remove(handle);
         String identifier = (String) handles.get(handle);
         identifiers.remove(identifier);
@@ -157,34 +116,26 @@ public class FileBasedValidatorManager implements ValidatorManager {
     }
 
     /**
-     * @see tyRuBa.engine.factbase.ValidatorManager#remove(java.lang.String)
-     */
-    public void remove(String identifier) {
-        Long handle = (Long) identifiers.get(identifier);
-        if (handle != null) {
-            identifiers.remove(identifier);
-            remove(handle.longValue());
-        }
-    }
-
-    /**
      * @see tyRuBa.engine.factbase.ValidatorManager#get(long)
      */
-    public Validator get(long validatorHandle) {
+    public IValidator get(long validatorHandle) {
         Long handle = new Long(validatorHandle);
         Validator result = (Validator) validators.get(handle);
-        return result;
+        if (result==null)
+        	return Validator.theNeverValid;
+        else
+        	return result;
     }
 
     /**
      * @see tyRuBa.engine.factbase.ValidatorManager#get(java.lang.String)
      */
-    public Validator get(String identifier) {
+    public IValidator get(String identifier) {
         Long handle = (Long) identifiers.get(identifier);
         if (handle != null) {
             return get(handle.longValue());
         } else {
-            return null;
+            return Validator.theNeverValid;
         }
     }
 
@@ -201,7 +152,7 @@ public class FileBasedValidatorManager implements ValidatorManager {
     public void printOutValidators() {
         Iterator it = validators.values().iterator();
         while (it.hasNext()) {
-            Validator v = (Validator) it.next();
+            IValidator v = (IValidator) it.next();
             System.err.println("[Validator] " + v);
         }
     }
@@ -234,7 +185,7 @@ public class FileBasedValidatorManager implements ValidatorManager {
             oos.close();
             fos.close();
         } catch (IOException e) {
-            throw new Error("Could not backup validator manager because of IOException");
+            throw new Error("Could not backup validator manager",e);
         }
 
     }
@@ -245,5 +196,22 @@ public class FileBasedValidatorManager implements ValidatorManager {
     public long getLastInvalidatedTime() {
         return lastInvalidateTime;
     }
+
+	public void invalidate(IValidator validator) {
+		Validator v = (Validator)validator;
+		v.invalidate();
+		remove(v.handle());
+	}
+
+	public IValidator newValidator(String identifier) {
+		Validator v = new Validator();
+		add(v, identifier);
+		return v;
+	}
+
+	public void setOutdated(IValidator validator, boolean isOutdated) {
+		Validator v = (Validator)validator;
+		v.setOutdated(isOutdated);
+	}
 
 }

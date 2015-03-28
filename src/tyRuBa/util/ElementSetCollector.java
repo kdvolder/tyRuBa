@@ -61,26 +61,4 @@ public class ElementSetCollector extends ElementCollector {
 		} while (true);
 	}
             
-  /** Small test Application */
-  public static void main(String args[]) {
-    final ElementSetCollector testSet = new ElementSetCollector();
-    testSet.setSource(
-       testSet.elements().map(new Action() {
-	 public Object compute(Object a) {
-	   int i = ((Integer)a).intValue();
-	   i = (i+1)%10; 
-	   return new Integer(i);
-	 }
-       })
-       .append(
-	       ElementSource.singleton(new Integer(1))
-       ));
-    RemovableElementSource testSetEls = new ElementSetCollector(testSet.elements()).elements();
-    //RemovableElementSource testSetEls = testSet.elements();
-    while (testSetEls.status()==ElementSource.ELEMENT_READY) {
-      System.out.println(testSetEls.peekNextElement());
-      testSetEls.removeNextElement();
-    }
-  }
-
 }

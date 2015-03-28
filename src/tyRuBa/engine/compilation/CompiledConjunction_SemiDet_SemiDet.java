@@ -23,7 +23,7 @@ public class CompiledConjunction_SemiDet_SemiDet extends SemiDetCompiled {
 	}
 
 	public String toString() {
-		return "(" + right + " ==> " + left + ")";
+		return "(" + left + " ==> " + right + ")";
 	}
 
 }

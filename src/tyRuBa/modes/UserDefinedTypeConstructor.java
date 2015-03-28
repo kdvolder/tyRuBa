@@ -1,6 +1,10 @@
 package tyRuBa.modes;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import junit.framework.Assert;
 
 import tyRuBa.engine.MetaBase;
 
@@ -79,11 +83,13 @@ public class UserDefinedTypeConstructor extends TypeConstructor implements Seria
 		if (metaBase!=null) metaBase.assertRepresentation(this,repType);
 	}
 	
-	public TypeConstructor getSuperTypeConstructor() {
+	public List<TypeConstructor> getSuperTypeConstructor() {
+		ArrayList<TypeConstructor> result = new ArrayList<TypeConstructor>(1);
         if (superConst!=null)
-            return superConst;
+            result.add(superConst);
         else
-            return TypeConstructor.theAny;
+            result.add(theAny);
+        return result;
 	}
 	
 	public String getName() {
@@ -170,11 +176,27 @@ public class UserDefinedTypeConstructor extends TypeConstructor implements Seria
 			this.mapping = mapping;
 	}
 	
+	@Override
+	public TypeConstructor union(TypeConstructor other) throws TypeModeError  {
+		if (this.isSuperTypeOf(other))
+			return this;
+		else if (other.isSuperTypeOf(this)) 
+			return other;
+		else { //try to find a common supertype
+			List<TypeConstructor> supr = this.getSuperTypeConstructor();
+			if (supr.isEmpty())
+				throw new TypeModeError("Cannot find a common supertype for "
+						+this + " and "+other);
+			Assert.assertEquals("Multiple direct supertypes for userdefined types not supported", 1, supr.size());
+			return supr.get(0).union(other);
+		}
+	}
+	
 	public Class javaEquivalent() {
 		if (getMapping()==null)
 			return null;
 		else
 			return getMapping().getMappedClass();
 	}
-	
+
 }

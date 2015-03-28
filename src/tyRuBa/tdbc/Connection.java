@@ -7,13 +7,10 @@
 package tyRuBa.tdbc;
 
 import tyRuBa.engine.QueryEngine;
+import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 
-/**
- * @author dsjanzen
- *
- */
 public class Connection {
 
 	private QueryEngine queryEngine;
@@ -32,7 +29,17 @@ public class Connection {
 	
 	public PreparedQuery prepareQuery(String qry) throws TyrubaException {
 		try {
-			return queryEngine.prepareForRunning(qry);
+			return queryEngine.prepareForRunning(qry,true);
+		} catch (ParseException e) {
+			throw new TyrubaException(e);
+		} catch (TypeModeError e) {
+			throw new TyrubaException(e);
+		}
+	}
+
+	public PreparedQuery prepareNoTypeCheckQuery(String qry) throws TyrubaException {
+		try {
+			return queryEngine.prepareForRunning(qry,false);
 		} catch (ParseException e) {
 			throw new TyrubaException(e);
 		} catch (TypeModeError e) {
@@ -42,6 +49,24 @@ public class Connection {
 
 	public PreparedInsert prepareInsert(String fact) throws ParseException, TypeModeError {
 		return queryEngine.prepareForInsertion(fact);		
+	}
+
+	public Object parseTerm(String string) throws TyrubaException {
+		try {
+			return queryEngine.makeTermFromString(string).up();
+		} catch (ParseException e) {
+			throw new TyrubaException(e);
+		} catch (TypeModeError e) {
+			throw new TyrubaException(e);
+		}
+	}
+
+	public Type findType(String name) throws TyrubaException {
+		try {
+			return queryEngine.findType(name);
+		} catch (TypeModeError e) {
+			throw new TyrubaException(e);
+		}
 	}
 
 }

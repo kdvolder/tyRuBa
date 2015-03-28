@@ -15,14 +15,10 @@ public class UserDefinedAtomicTypesTest extends TyrubaTest {
 		super(arg0);
 	}
 	
-	/**
-	 * This test is known to fail at this time, it is testing a feature we wish to support in
-	 * the future.
-	 */
 	public void testUnification() throws ParseException, TypeModeError {
 		frontend.parse("TYPE Foo AS String");
 		frontend.parse(
-				"foo2string :: Foo, String \n" +
+				"foo2string :: Foo, =String \n" +
 				"MODES (B,F) IS DET (F,B) IS DET END");
 		
 		frontend.parse("foo2string(?s::Foo,?s).");

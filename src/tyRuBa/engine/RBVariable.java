@@ -96,7 +96,7 @@ public class RBVariable extends RBSubstitutable {
 		return makeUnique(name);
 	}
 
-	protected Type getType(TypeEnv env) {
+	public Type getType(TypeEnv env) {
 		return env.get(this);
 	}
 

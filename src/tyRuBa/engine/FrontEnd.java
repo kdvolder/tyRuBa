@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,26 +17,31 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import junit.framework.Assert;
-
-import tyRuBa.engine.factbase.FactLibraryManager;
-import tyRuBa.engine.factbase.FileBasedValidatorManager;
+import tyRuBa.engine.factbase.FileBasedPersistence;
 import tyRuBa.engine.factbase.NamePersistenceManager;
+import tyRuBa.engine.factbase.PersistenceStrategy;
 import tyRuBa.engine.factbase.ValidatorManager;
+//import tyRuBa.engine.factbase.berkeley_db.BerkeleyDBBasedPersistence;
+import tyRuBa.jobs.ProgressMonitor;
 import tyRuBa.modes.ConstructorType;
 import tyRuBa.modes.PredInfo;
+import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
+import tyRuBa.tests.TypeAliasTest;
 import tyRuBa.util.Aurelizer;
 import tyRuBa.util.ElementSource;
-import tyRuBa.util.NullQueryLogger;
-import tyRuBa.util.QueryLogger;
+import tyRuBa.util.Files;
 import tyRuBa.util.SynchPolicy;
 import tyRuBa.util.SynchResource;
 import tyRuBa.util.pager.Pager;
+import annotations.Export;
+import annotations.Feature;
 
 public class FrontEnd extends QueryEngine 
 implements SynchResource {
+
+	private TyRuBaConf conf;
 	
 	public long updateCounter = 0;
 
@@ -61,36 +67,35 @@ implements SynchResource {
     /** Global pager for all frontends */
     private static Pager pager;
 	
-	private ValidatorManager validatorManager;
+	private PersistenceStrategy persistenceStrategy;
 	private NamePersistenceManager namePersistenceManager;
-	private FactLibraryManager factLibraryManager;
 	
 	private File path;
 	private String identifier;
-	public static final int defaultPagerCacheSize = 5000;
-    private static final int defaultPagerQueueSize = 1000;
 	private long lastBackupTime;
 	
-	/**
-	 * @codegroup metadata
-	 */
-	public FrontEnd(boolean loadInitFile, File path, boolean persistent, ProgressMonitor mon,boolean clean,boolean enableBackgroundCleaning) {
-        
-        progressMonitor = mon;
-        this.path = path;
+	private static Collection makeBucketCollection() {
+		return new LinkedHashSet();
+	}
 
-        if (pager != null) {
-            pager.shutdown();
-        }
-        
+	@Feature(names={"./JDBC","./BDB"})
+	public FrontEnd(TyRuBaConf conf) {
+		this.conf = conf;
+		
+		boolean clean = conf.getCleanStart();
+        progressMonitor = conf.getProgressMonitor();
+    	this.path = conf.getStoragePath();
+
+    	this.persistenceStrategy = conf.createPersistenceStrategy(this);
+    	
         if (!checkAndFixConsistency()) {
 		    clean = true;
         }
 
         if (clean) {
-            deleteDirectory(path);
+            persistenceStrategy.clean();
+            Files.deleteDirectory(path);
         }
-        pager = new Pager(defaultPagerCacheSize,defaultPagerQueueSize, lastBackupTime, enableBackgroundCleaning);
 
         if (!path.exists()) {
         		path.mkdirs();
@@ -102,35 +107,22 @@ implements SynchResource {
             throw new Error("Could not create running \"lock\" file");
         }
 
-        this.validatorManager = new FileBasedValidatorManager(path.getPath());
 		this.namePersistenceManager = new NamePersistenceManager(path.getPath());
-		this.factLibraryManager = new FactLibraryManager(this);
 		
 		this.identifier = "**frontend**";
 		 
-		if(persistent)
+		if(conf.getPersistent())
 			rules = RuleBase.make(this, "GLOBAL", false);
 		else
 			rules = RuleBase.make(this);
 				
 		try {
-//			parse("__meta(version(5,14,unofficial)).");
-//			insert(
-//				makeCompound(
-//					makeName("__meta"),
-//					makeCompound(makeName("self"), makeObject(rules))));
-//			if (RuleBase.silent)
-//				parse("__meta(option(silent)).");
-//			if (RuleBase.useCache)
-//				parse("__meta(option(cache)).");
-//			if (RuleBase.softCache)
-//				parse("__meta(option(softcache)).");
-			System.err.println("Loading metabase decls");
-			parse(MetaBase.declarations);
-			MetaBase.addTypeMappings(this);
-			System.err.println("DONE Loading metabase decls");
+//			System.err.println("Loading metabase decls");
+//			parse(MetaBase.declarations);
+//			MetaBase.addTypeMappings(this);
+//			System.err.println("DONE Loading metabase decls");
 
-			if (loadInitFile) {
+			if (conf.getLoadInitFile()) {
 				boolean silent = RuleBase.silent;
 				RuleBase.silent = true;
 				NativePredicate.defineNativePredicates(this);
@@ -147,37 +139,18 @@ implements SynchResource {
 		} catch (TypeModeError e) {
 			System.err.println(e.getMessage());
 		}
-	}
-
-	private static Collection makeBucketCollection() {
-		return new LinkedHashSet();
-	}
-
-	/** If loadInitFile is true then the FrontEnd will automatically
-	 * load tyruba's standard init files included in its jar file.
-	 **/
-	public FrontEnd(boolean loadInitFile) {
-		this(loadInitFile, new File("./fdb/"), false, null, false, false);
+		System.err.println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
+		System.err.println("TyRuBa Engine is ready");
+		System.err.println(conf);
+		System.err.println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
 	}
 	
-	public FrontEnd(boolean loadInitFile, ProgressMonitor mon) {
-		this(loadInitFile, new File("./fdb/"), false, mon, false, false);
+	public void setCacheSize(int cacheSize) {
+		persistenceStrategy.setCacheSize(cacheSize);
 	}
 	
-	/**
-     * @param initfile
-     * @param clean  Force old files to be deleted, start with a "clean" database.
-     */
-    public FrontEnd(boolean initfile, boolean clean) {
-        this(initfile, new File("./fdb/"), false, null, clean,false);
-    }
-
-    public void setCacheSize(int cacheSize) {
-		pager.setCacheSize(cacheSize);
-	}
-	
-	public int getCacheSize() {
-	    return pager.getCacheSize();
+	public long getCacheSize() {
+	    return persistenceStrategy.getCacheSize();
 	}
 
 	private boolean checkAndFixConsistency() {
@@ -198,7 +171,8 @@ implements SynchResource {
 				//it crashed and we hadn't backed up yet, *delete* the old data
 				System.err.println("We hadn't backed up before....");
 				System.err.println("Data is in an inconsistent state, must delete everything.");
-				deleteDirectory(path);
+				persistenceStrategy.clean();
+				Files.deleteDirectory(path);
 				path.mkdirs();
 			} else {
 				long backupTime = checkFile.lastModified();
@@ -206,7 +180,8 @@ implements SynchResource {
 				System.err.println("Trying to restore backup files.");
 				if (!restoreBackups(path,backupTime)) {
 					System.err.println("Data is in an inconsistent state, must delete everything.");
-					deleteDirectory(path);
+					persistenceStrategy.clean();
+					Files.deleteDirectory(path);
 					path.mkdirs();
 					result = false;
 				} else {
@@ -233,64 +208,47 @@ implements SynchResource {
 	}
 	
 	private boolean restoreBackups(File f, long backupTime) {
-		if (f.isDirectory()) {
-			boolean success = true;
-			File[] files = f.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				success &= restoreBackups(files[i], backupTime);
-			}
-			return success;
-		} else {
-			String name = f.getName();
-			if (!(name.endsWith(".bup") || name.endsWith(".data"))) {
-				long fileModifiedTime = f.lastModified();
-				if (fileModifiedTime > backupTime) {
-					File backup = new File(f.getAbsolutePath() + ".bup");
-					if (backup.exists()) {
-						f.delete();
-						backup.renameTo(f);
-						return true;
-					} else {
-						//bad stuff, can't restore backups.  crash must have happened in the middle of an update.
-						System.err.println(f.getAbsolutePath() + ": " + backupTime + " ::: " + fileModifiedTime);
-						return false;
-					}
-				} else {
-					return true;
-				}
-			} else {
-				return true;
-			}			
-		}
+		return false;
+//		if (f.isDirectory()) {
+//			boolean success = true;
+//			File[] files = f.listFiles();
+//			for (int i = 0; i < files.length; i++) {
+//				success &= restoreBackups(files[i], backupTime);
+//			}
+//			return success;
+//		} else {
+//			String name = f.getName();
+//			if (!(name.endsWith(".bup") || name.endsWith(".data"))) {
+//				long fileModifiedTime = f.lastModified();
+//				if (fileModifiedTime > backupTime) {
+//					File backup = new File(f.getAbsolutePath() + ".bup");
+//					if (backup.exists()) {
+//						f.delete();
+//						backup.renameTo(f);
+//						return true;
+//					} else {
+//						//bad stuff, can't restore backups.  crash must have happened in the middle of an update.
+//						System.err.println(f.getAbsolutePath() + ": " + backupTime + " ::: " + fileModifiedTime);
+//						return false;
+//					}
+//				} else {
+//					return true;
+//				}
+//			} else {
+//				return true;
+//			}			
+//		}
 	}
 	
-	private void deleteDirectory(File dir) {
-	    if (dir.isDirectory()) {
-	        File[] children = dir.listFiles();
-	        for (int i = 0; i < children.length; i++) {
-	            deleteDirectory(children[i]);
-	        }
-	    }  
-	    dir.delete();
-	}
-	
-	Validator obtainGroupValidator(Object identifier,boolean temporary) {
+	IValidator obtainGroupValidator(Object identifier, boolean temporary) {
 	    if (!(identifier instanceof String)) throw new Error("[ERROR] - obtainGroupValidator - ID needs to be a String");
-	    Validator result = validatorManager.get((String) identifier);
+	    IValidator result = getValidatorManager().get((String) identifier);
 	    
-	    if (result != null) {
-	        if (!result.isValid()) {
-	            validatorManager.remove((String) identifier);
-	            result = null;
-	        }
+	    if (result.isValid()) 
+	    	return result;
+	    else {
+	    	return getValidatorManager().newValidator((String) identifier);
 	    }
-	    
-	    if (result == null) {
-	        result = new Validator();
-            validatorManager.add(result, (String) identifier);
-	    } 
-	    
-	    return result;
 	}
 
 	/**
@@ -307,7 +265,8 @@ implements SynchResource {
 	 * @throws BackupFailedException if backup was attempted but failed for some reason.
 	 */
 	public boolean fastBackupFactBase() throws BackupFailedException {
-		if (pager.isDirty())
+		
+		if (!persistenceStrategy.canDoFastBackup())
 			return false;
 		else {
 			backupFactBase();
@@ -329,9 +288,9 @@ implements SynchResource {
                 bucket.backup(); //XXX: This might not be necessary anymore
             }
             
-            pager.backup();
-            validatorManager.backup();
+            getValidatorManager().backup(); //XXX: This should eventually be moved into persistenceStrategy implementation
             namePersistenceManager.backup();
+            persistenceStrategy.backup();
             
             //Assert.assertTrue(SynchPolicy.busySources==0);
             File lastBackup = new File(path.getPath() + "/lastBackup.data");
@@ -370,15 +329,26 @@ implements SynchResource {
                     }
                 }
             }
-            pager.backup();
-	        validatorManager.backup();
+	        getValidatorManager().backup();
 	        namePersistenceManager.backup();
 
+		    getPersistenceStrategy().shutdown();
 	        //delete the running "lock" file
 			new File(path.getPath() + "/running.data").delete();
 	    } finally {
 	        getSynchPolicy().allowSources();
 	    }
+	    conf = null;
+	    holdingPen = null;
+	    identifier = null;
+	    myBuckets = null;
+	    namePersistenceManager = null;
+	    os = null;
+	    path = null;
+	    persistenceStrategy = null;
+	    progressMonitor = null;
+	    rules = null;
+	    synchPol = null;
 	    System.err.println("[DEBUG] - shutdown - Done shutdown method");
 	}
 	
@@ -505,7 +475,7 @@ implements SynchResource {
 	/**
 	 * @see tyRuBa.engine.QueryEngine#frontend()
 	 */
-	FrontEnd frontend() {
+	public FrontEnd frontend() {
 		return this;
 	}
 
@@ -542,7 +512,7 @@ implements SynchResource {
 		return myBuckets.size() + (holdingPen==null?0:holdingPen.size());
 	}
 
-	ModedRuleBaseIndex rulebase() {
+	public ModedRuleBaseIndex rulebase() {
 		return rules;
 	}
 
@@ -553,6 +523,13 @@ implements SynchResource {
 		if (someOutdated) {
 			getSynchPolicy().stopSources();
 			try {
+				if (!someOutdated) return; 
+				// often many threads get into simulatenously
+				// waiting for stopSources to perform an update but
+				// really only one thread should actually perform the update.
+				// whichever threads gets past here first will have the lock on the frontend
+				// instance and will set someoutDated to false when its performed the
+				// update successfully.
                  startTime = System.currentTimeMillis();
 			    System.err.println("[DEBUG] - updateBuckets() - start updating buckets");
 				if (progressMonitor!=null)
@@ -566,13 +543,13 @@ implements SynchResource {
 					updateSomeBuckets(bucketColl);
 				}
 				someOutdated = false;
+				System.err.println("[DEBUG] - updateBuckets() - done updating buckets (" + (System.currentTimeMillis() - startTime) + "ms)");
+                persistenceStrategy.printStats();
 			}
 			finally {
 				getSynchPolicy().allowSources();
 				if (progressMonitor!=null)
 					progressMonitor.done();		
-				System.err.println("[DEBUG] - updateBuckets() - done updating buckets (" + (System.currentTimeMillis() - startTime) + "ms)");
-                pager.printStats();
 			}
 		}
 	}
@@ -588,7 +565,7 @@ implements SynchResource {
 		    		bucket.clear();
 		    	}	
 		}
-		for (Iterator buckets = bucketColl.iterator(); buckets.hasNext();) {
+		for (Iterator buckets = bucketColl.iterator(); buckets.hasNext() && !updateCanceled();) {
 			RuleBaseBucket bucket = (RuleBaseBucket) buckets.next();
 			if (bucket.isOutdated()) {
 				bucket.doUpdate();
@@ -604,7 +581,11 @@ implements SynchResource {
 		}
 	}
 
-	void autoUpdateBuckets() throws TypeModeError, ParseException {
+	private boolean updateCanceled() {
+		return progressMonitor!=null && progressMonitor.isCanceled();
+	}
+
+	public void autoUpdateBuckets() throws TypeModeError, ParseException {
 		if (RuleBase.autoUpdate)
 			updateBuckets();
 	}
@@ -613,35 +594,24 @@ implements SynchResource {
 	///// For the implementation of SynchResource
 	
 	private SynchPolicy synchPol = null;
-	
+
 	public SynchPolicy getSynchPolicy() {
 		if (synchPol==null)
 			synchPol = new SynchPolicy(this);
 		return synchPol;
 	}
-	
-	////////
-	
-	
+		
 	public String getStoragePath() {
 	    return path.getPath();	    
 	}
 	
 	public ValidatorManager getValidatorManager() {
-	    return validatorManager;
+	    return persistenceStrategy.getValidatorManager();
 	}
 	
 	public NamePersistenceManager getNamePersistenceManager() {
 		return namePersistenceManager;
 	}
-	
-	public FactLibraryManager getFactLibraryManager() {
-		return factLibraryManager;
-	}
-    
-    public Pager getPager() {
-        return pager;
-    }
 	
 	public String getIdentifier() {
 	    return identifier;
@@ -654,19 +624,38 @@ implements SynchResource {
 	 * Used for testing purposes (see testBackup 
 	 */
 	public void crash() {
-		pager.crash();
-		pager = null;
-		
+		getPersistenceStrategy().crash();
 	}
 
-	/**
-	 * This enables metaData facts for the FrontEnd. 
-	 * You must enableMetaData separately for buckets to get
-	 * metaData for the declarations entered via buckets.
-	 * @codegroup metadata
-	 */
-	public void enableMetaData() {
-		rules.enableMetaData();
+//	/**
+//	 * This enables metaData facts for the FrontEnd. 
+//	 * You must enableMetaData separately for buckets to get
+//	 * metaData for the declarations entered via buckets.
+//	 * @codegroup metadata
+//	 */
+//	public void enableMetaData() {
+//		rules.enableMetaData();
+//	}
+
+	public PersistenceStrategy getPersistenceStrategy() {
+		return persistenceStrategy;
+	}
+
+	public TyRuBaConf getConf() {
+		return conf;
+	}
+
+	public ProgressMonitor getProgressMonitor() {
+		return progressMonitor;
+	}
+
+	public void setProgressMonitor(ProgressMonitor progressMonitor) {
+		this.progressMonitor = progressMonitor;
+	}
+
+	public Type defineTypeAlias(String name, Class<?> aClass) throws TypeModeError {
+		rulebase().defineTypeAlias(name, aClass);
+		return findType(name);
 	}
 
 }

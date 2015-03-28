@@ -11,6 +11,7 @@ import java.util.Map;
 import junit.framework.Assert;
 
 import tyRuBa.engine.Frame;
+import tyRuBa.engine.IValidator;
 import tyRuBa.engine.QueryEngine;
 import tyRuBa.engine.RBComponent;
 import tyRuBa.engine.RBContext;
@@ -193,7 +194,7 @@ public class HashTableFactBase extends FactBase {
         Assert.assertTrue("Only ground facts should be insterted in to FactBases", f.isGroundFact());
         isEmpty = false;
 
-        Validator v = f.getValidator();
+        IValidator v = f.getValidator();
 
         for (Iterator iter = indexes.entrySet().iterator(); iter.hasNext();) {
             Map.Entry entry = (Map.Entry) iter.next();

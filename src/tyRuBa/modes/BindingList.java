@@ -7,16 +7,20 @@ package tyRuBa.modes;
 
 import java.util.ArrayList;
 
-/** 
- * A BindingList is a list of BindingModes 
- */
+import annotations.Feature;
 
+/** 
+ * A BoundTuple is the BindingMode for a Tuple
+ */
 public class BindingList {
 	
-	private ArrayList parts;
+	private ArrayList<BindingMode> parts;
+	
+	@Feature(names="./partialKey")
+	private int partialKeySize = -1; // cache value for getPartialKeySize
 
 	public BindingList() {
-		parts = new ArrayList();
+		parts = new ArrayList<BindingMode>();
 	}
 	
 	public BindingList(BindingMode bm) {
@@ -66,11 +70,7 @@ public class BindingList {
 		StringBuffer result = new StringBuffer();
 		int size = this.size();
 		for(int i = 0; i < size; i++) {
-			if (get(i).isBound()) {
-				result.append("B");
-			} else {
-				result.append("F");
-			}
+			result.append(get(i).getBFString());
 		}
 		return result.toString();
 	}
@@ -78,25 +78,15 @@ public class BindingList {
 	/** add newPart to the end of the list */
 	public void add(BindingMode newPart) {
 		parts.add(newPart);
+		partialKeySize = -1;
 	}
 
 	public BindingMode get(int i) {
-		return (BindingMode) parts.get(i);
+		return parts.get(i);
 	}
 
 	public int size() {
 		return parts.size();
-	}
-
-	/** return true if this BindingList has no Free at a position where other
-	 *  has Bound */
-	public boolean satisfyBinding(BindingList other) {
-		for (int i = 0; i < size(); i++) {
-			if (!(get(i).satisfyBinding(other.get(i)))) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	public boolean hasFree() {
@@ -127,5 +117,93 @@ public class BindingList {
     public int getNumFree() {
         return size() - getNumBound();
     }
-	
+
+	public int[] getBoundIndexes() {
+		int[] indexes = new int[getNumBound()];
+		int b = 0;
+		for (int i = 0; i < size(); i++) {
+			if (get(i).isBound())
+				indexes[b++]=i;
+		}
+		return indexes;
+	}
+
+	public int[] getFreeIndexes() {
+		int[] indexes = new int[getNumFree()];
+		int b = 0;
+		for (int i = 0; i < size(); i++) {
+			if (get(i).isFree())
+				indexes[b++]=i;
+		}
+		return indexes;
+	}
+
+	public BindingList approximateBFWithF() {
+		BindingList result = new BindingList();
+		for (int i = 0; i < size(); i++) {
+			BindingMode current = get(i);
+			result.add(current.isBound()?Factory.makeBound():Factory.makeFree());
+		}
+		return result;
+	}
+
+	/** 
+	 * return true if this BindingMode has no Free at a position where other
+	 * has Bound 
+	 */
+	public boolean satisfyBinding(BindingList other) {
+		for (int i = 0; i < size(); i++) {
+			if (!(get(i).satisfyBinding(other.get(i)))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Feature(names="./partialKey")
+	public boolean usePartialKeyExtraction() {
+		for (int i = 0; i < size(); i++) {
+			if (get(i).usePartialKeyExtraction())
+				return true;
+		}
+		return false;
+	}
+
+	@Feature(names="./partialKey")
+	public int getPartialKeySize() {
+		if (partialKeySize<0)
+			computePartialKeySize();
+		return partialKeySize;
+	}
+
+	@Feature(names="./partialKey")
+	private void computePartialKeySize() {
+		partialKeySize = 0;
+		for (int i = 0; i < size(); i++) {
+			BindingMode b = get(i);
+			if (b.isBound() || b.usePartialKeyExtraction())
+				partialKeySize++;
+		}
+	}
+
+	/**
+	 * Creates a BindingList from a string like "BFB" (B: bound, F: free).
+	 */
+	public static BindingList convertFromString(String string) {
+		BindingList paramModes = Factory.makeBindingList();
+		
+		for (int i = 0; i < string.length(); i++) {
+			char currChar = string.charAt(i);
+			if (currChar == 'b' || currChar == 'B') {
+				paramModes.add(Factory.makeBound());
+			} else if (currChar == 'f' || currChar == 'F'){
+				paramModes.add(Factory.makeFree());
+			}
+			else {
+				throw new Error("unknown binding mode " + currChar);
+			}
+		}
+		
+		return paramModes;
+	}
 }

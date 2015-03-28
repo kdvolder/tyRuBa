@@ -23,7 +23,8 @@ public class GrowableType extends Type {
 	}
 	
 	public int hashCode() {
-		return lowerBound.hashCode() + 13 * (upperBound.hashCode());
+		return lowerBound.hashCode() + 
+		  13 * (upperBound.hashCode());
 	}
 	
 	public boolean equals(Object other) {
@@ -37,7 +38,7 @@ public class GrowableType extends Type {
 	}
 	
 	public String toString() {
-		return upperBound.toString();
+		return lowerBound.toString();
 	}
 
 	public void checkEqualTypes(Type other, boolean grow) throws TypeModeError {
@@ -54,8 +55,9 @@ public class GrowableType extends Type {
 		} else {
 			check(other instanceof BoundaryType, this, other);
 			BoundaryType b_other = (BoundaryType) other;
-			BoundaryType new_lowerBound = (BoundaryType) this.lowerBound.union(b_other);
 			if (grow) {
+				BoundaryType new_lowerBound = (BoundaryType) this.lowerBound.union(b_other);
+				new_lowerBound.checkEqualTypes(b_other);
 				lowerBound = new_lowerBound;
 				upperBound = lowerBound;
 			}
@@ -67,7 +69,9 @@ public class GrowableType extends Type {
 	}
 
 	public Type intersect(Type other) throws TypeModeError {
-		if (other instanceof GrowableType) {
+		if (other instanceof TVar)
+			return other.intersect(this);
+		else if (other instanceof GrowableType) {
 			GrowableType sother = (GrowableType) other;
 			BoundaryType max =
 				(BoundaryType)upperBound.union(sother.upperBound);
@@ -92,7 +96,9 @@ public class GrowableType extends Type {
 				}
 			}
 		} else {
-			return lowerBound.intersect(other);
+			return new GrowableType(
+					(BoundaryType) lowerBound.intersect(other),
+					(BoundaryType) upperBound.union(other));
 		}
 	}
 	
@@ -128,7 +134,7 @@ public class GrowableType extends Type {
 	}
 
 	public Type copyStrictPart() {
-		throw new Error("This should not be called!");
+		return lowerBound.copyStrictPart();
 	}
 
 	public boolean hasOverlapWith(Type other) {
@@ -145,6 +151,11 @@ public class GrowableType extends Type {
 		} else {
 			return lowerBound.getParamType(currName, repAs);
 		}
+	}
+
+	@Override
+	public Type makeStrict() {
+		throw new Error("Not supported");
 	}
 
 }

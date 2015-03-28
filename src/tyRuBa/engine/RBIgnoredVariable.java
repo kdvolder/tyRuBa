@@ -44,7 +44,7 @@ public class RBIgnoredVariable extends RBVariable {
 		return this;
 	}
 	
-	protected Type getType(TypeEnv env) {
+	public Type getType(TypeEnv env) {
 		return Factory.makeTVar("");
 	}
 	

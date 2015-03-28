@@ -47,9 +47,12 @@ public class GeneralTest extends TyrubaTest {
 
 	public void testPersistentRBQuotedInFact() throws ParseException, TypeModeError {
 		frontend.parse("test :: String PERSISTENT MODES (F) IS NONDET END");
+		frontend.parse("eq :: Object,Object " +
+				"MODES (B,B) IS SEMIDET END " +
+				"eq(?x,?x).");
 		frontend.parse("test({Hola Pola!}).");
-		test_must_succeed("test({Hola Pola!})");
 		test_must_succeed("test(\"Hola Pola!\")");
+//		test_must_succeed("test(?x),eq(?x,\"Hola Pola!\")");
 	}
 	
 	public void testGetVars() throws ParseException, TypeModeError {

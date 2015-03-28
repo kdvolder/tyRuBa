@@ -6,14 +6,11 @@ import java.util.Vector;
 
 abstract public class Type implements Cloneable, Serializable {
 
-	public static final Type integer =
-		Factory.makeStrictAtomicType(Factory.makeTypeConstructor(Integer.class));
-	public static final Type string =
-		Factory.makeStrictAtomicType(Factory.makeTypeConstructor(String.class));
-	public static final Type number =
-		Factory.makeStrictAtomicType(Factory.makeTypeConstructor(Number.class));
-	public static final Type object =
-		Factory.makeStrictAtomicType(Factory.makeTypeConstructor(Object.class));	
+	public static final Type integer = Factory.makeStrictJavaType(Integer.class);
+	public static final Type longint = Factory.makeStrictJavaType(Long.class);
+	public static final Type string = Factory.makeStrictJavaType(String.class);
+	public static final Type number = Factory.makeStrictJavaType(Number.class);
+	public static final Type object = Factory.makeStrictJavaType(Object.class);	
 
 	/** check if this type is equal to other, if not, throw TypeError */
 	public void checkEqualTypes(Type other) throws TypeModeError {
@@ -82,5 +79,7 @@ abstract public class Type implements Cloneable, Serializable {
     public boolean isJavaType() {
         return false;
     }
+
+	public abstract Type makeStrict();
 
 }

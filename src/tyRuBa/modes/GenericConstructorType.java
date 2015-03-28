@@ -75,5 +75,11 @@ public class GenericConstructorType extends ConstructorType implements Serializa
     public int hashCode() {
     		return args.hashCode() + identifier.hashCode()*13 + result.hashCode()*31;
     }
+
+	@Override
+	public String toString() {
+		return ""+identifier;
+	}
+    
 }
 

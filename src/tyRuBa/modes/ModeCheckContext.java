@@ -28,9 +28,10 @@ public class ModeCheckContext implements Cloneable {
 		this.rulebases = rulebases;
 	}
 
-	/** return ModedRuleBase with the "best" mode that allow for term */
+	/** return ModedRuleBase with the "best" mode that allow for term 
+	 * @throws TypeModeError */
 	public RuleBase getBestRuleBase(PredicateIdentifier predId,
-	RBTuple args, BindingList bindings) {
+	RBTuple args, BindingList bindings) throws TypeModeError {
 		for (int i = 0; i < args.getNumSubterms(); i++) {
 			bindings.add(args.getSubterm(i).getBindingMode(this));
 		}

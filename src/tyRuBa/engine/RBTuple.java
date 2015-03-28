@@ -1,8 +1,13 @@
 package tyRuBa.engine;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import annotations.Export;
+import annotations.Feature;
+
 import tyRuBa.engine.visitor.TermVisitor;
+import tyRuBa.modes.BindingList;
 import tyRuBa.modes.BindingMode;
 import tyRuBa.modes.Factory;
 import tyRuBa.modes.ModeCheckContext;
@@ -109,7 +114,16 @@ public class RBTuple extends RBTerm implements TwoLevelKey {
 		}
 		return Factory.makeBound();
 	}
-	
+
+	public BindingList getBindingModes(ModeCheckContext context) {
+		BindingList result = Factory.makeBindingList();
+		for (int i = 0; i < getNumSubterms(); i++) {
+			result.add(getSubterm(i).getBindingMode(context));
+		}
+		return result;
+	}
+
+
 	public boolean isGround() {
 		for (int i = 0; i < getNumSubterms(); i++) {
 			if (! getSubterm(i).isGround()) {
@@ -132,6 +146,7 @@ public class RBTuple extends RBTerm implements TwoLevelKey {
 		return true;
 	}
 
+	@Export(to="./BDB")
 	public Frame unify(RBTerm other, Frame f) {
 		if (!(other instanceof RBTuple))
 			if (other instanceof RBVariable)
@@ -150,18 +165,18 @@ public class RBTuple extends RBTerm implements TwoLevelKey {
 		return f;
 	}
 
-	public String toString() {
-		StringBuffer result = new StringBuffer("<");
+	@Override
+	public void unparse(PrintWriter out) {
+		out.print("<");
 		for (int i = 0; i < subterms.length; i++) {
 			if (i > 0)
-				result.append(",");
-			result.append(subterms[i].toString());
+				out.append(", ");
+			subterms[i].unparse(out);
 		}
-		result.append(">");
-		return result.toString();
+		out.append(">");
 	}
 
-	protected Type getType(TypeEnv env) throws TypeModeError {
+	public Type getType(TypeEnv env) throws TypeModeError {
 		TupleType tlst = Factory.makeTupleType();
 		for (int i = 0; i < subterms.length; i++) { 
 			tlst.add(subterms[i].getType(env));
@@ -234,4 +249,36 @@ public class RBTuple extends RBTerm implements TwoLevelKey {
 		}
 		return objs;
 	}
+
+    /**
+     * Extracts a subset of an RBTuple into a new RBTuple.
+     * @param toExtract parts of tuple to extract.
+     * @param from tuple to extract from
+     */
+	@Export(to="./BDB")
+	public RBTuple project(int[] toExtract) {
+        RBTerm[] extracted = new RBTerm[toExtract.length];
+        for (int i = 0; i < extracted.length; i++) {
+            extracted[i] = this.getSubterm(toExtract[i]);
+        }
+        return FrontEnd.makeTuple(extracted);
+	}
+
+	@Feature(names="./partialKey")
+	public RBTerm project(BindingList bindings) {
+		RBTerm[] projected = new RBTerm[bindings.getPartialKeySize()];
+		int pos = 0;
+		for (int i = 0; i < bindings.size(); i++) {
+			BindingMode b = bindings.get(i);
+			if (b.isBound()) {
+				projected[pos++] = this.getSubterm(i);
+			}
+			else if (b.usePartialKeyExtraction()) {
+				projected[pos++] = b.extractPartialKey(this.getSubterm(i));
+			}
+		}
+		assert pos==projected.length;
+		return new RBTuple(projected);
+	}
+
 }

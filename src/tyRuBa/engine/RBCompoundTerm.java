@@ -1,13 +1,16 @@
 package tyRuBa.engine;
 
+import java.io.PrintWriter;
 import java.util.NoSuchElementException;
 
 import tyRuBa.engine.visitor.TermVisitor;
+import tyRuBa.modes.BindingList;
 import tyRuBa.modes.ConstructorType;
 import tyRuBa.modes.BindingMode;
 import tyRuBa.modes.Factory;
 import tyRuBa.modes.ModeCheckContext;
 import tyRuBa.modes.RepAsJavaConstructorType;
+import tyRuBa.modes.TupleType;
 import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeConstructor;
 import tyRuBa.modes.TypeEnv;
@@ -94,6 +97,10 @@ public abstract class RBCompoundTerm extends RBTerm {
 		BindingMode bm = getArg().getBindingMode(context);
 		if (bm.isBound()) {
 			return bm;
+		} else if (getArg() instanceof RBTuple) {
+			RBTuple args = (RBTuple) getArg();
+			BindingList argModes = args.getBindingModes(context);
+			return Factory.makePartiallyBoundCompound(getConstructorType(),argModes);
 		} else {
 			return Factory.makePartiallyBound();
 		}
@@ -132,12 +139,22 @@ public abstract class RBCompoundTerm extends RBTerm {
 			}
 		}
 	}
-
-	public String toString() {
-		return getConstructorType().getFunctorId().toString() + getArg();
+	
+	@Override
+	public void unparse(PrintWriter out) {
+		RBTerm arg = getArg();
+		if (arg instanceof RBTuple) {
+			out.append(getConstructorType().getFunctorId().getName());
+			arg.unparse(out);
+		}
+		else {
+			arg.unparse(out);
+			out.append("::");
+			out.append(getConstructorType().getFunctorId().getName());			
+		}
 	}
 
-	protected Type getType(TypeEnv env) throws TypeModeError {
+	public Type getType(TypeEnv env) throws TypeModeError {
 		Type argType = getArg().getType(env);
 		return getConstructorType().apply(argType);
 	}
@@ -207,5 +224,5 @@ public abstract class RBCompoundTerm extends RBTerm {
     public boolean isOfType(TypeConstructor t) {
         return t.isSuperTypeOf(getConstructorType().getTypeConst());
     }
-
+    
 }

@@ -10,7 +10,28 @@ package tyRuBa.modes;
  * 
  * It is represented by a range of Multiplicities.
  */
-public class Mode implements Cloneable {
+public class Mode {
+
+	/**
+	 * 1..1 
+	 */
+	public static final Mode DET = makeDet();
+
+	/**
+	 * 0..1
+	 */
+	public static final Mode SEMIDET = makeSemidet();
+	
+	/**
+	 * 0..n
+	 */
+	public static final Mode NONDET = makeNondet();
+	
+	/**
+	 * 1..n
+	 */
+	public static final Mode MULTI = makeMulti();
+	
 
 	// Note at all times, lo should be <= hi
 	final public Multiplicity lo;
@@ -56,6 +77,11 @@ public class Mode implements Cloneable {
 		}
 	}
 	
+	public Mode withFreeBound(int numFree, int numBound)
+	{
+		return new Mode(lo, hi, numFree, numBound);
+	}
+	
 	public static Mode makeFail() {
 		return new Mode(Multiplicity.zero, Multiplicity.zero, 0, 0);
 	}
@@ -99,7 +125,7 @@ public class Mode implements Cloneable {
 	public static Mode makeConvertTo() {
 		return new Mode(Multiplicity.zero, Multiplicity.one, 1, 1);
 	}
-
+	
 	public static Mode convertFromString(String modeString) {
 		if (modeString.equals("DET")) {
 			return makeDet();
@@ -250,14 +276,6 @@ public class Mode implements Cloneable {
 			} else {
 				numFree++;
 			}
-		}
-	}
-	
-	public Object clone() {
-		try {
-			return super.clone();
-		} catch (CloneNotSupportedException e) {
-			throw new Error("This should not happen");
 		}
 	}
 

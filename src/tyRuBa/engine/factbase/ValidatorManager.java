@@ -3,7 +3,9 @@
  */
 package tyRuBa.engine.factbase;
 
-import tyRuBa.engine.Validator;
+import annotations.Export;
+import annotations.Feature;
+import tyRuBa.engine.IValidator;
 
 /**
  * A ValidatorManager persists the Validators that indicate whether facts for a
@@ -11,53 +13,25 @@ import tyRuBa.engine.Validator;
  * handles, so mappings are implemented in the ValidatorManager that allow
  * retrieval of a validator by giving its handle.
  * @category FactBase
- * @author riecken
  */
+@Export @Feature(names="Validator")
 public interface ValidatorManager {
-
-    /**
-     * Adds a validator to this manager.
-     * @param v the Validator
-     * @param identifier an identifier for this validator
-     */
-    public void add(Validator v, String identifier);
-
-    /**
-     * Updates the specified validator.
-     * @param validatorHandle the validator's handle
-     */
-    public void update(long validatorHandle, Boolean outdated, Boolean hasFacts);
-
-    /**
-     * Removes the validator identified by the specified handle.
-     * @param validatorHandle the validator's handle
-     */
-    public void remove(long validatorHandle);
-
-    /**
-     * Removes a validator.
-     * @param identifier identifier for the validator to remove.
-     */
-    public void remove(String identifier);
-
+	
+	public IValidator newValidator(String identifier);
+	
     /**
      * Retrieves a validator by its handle.
      * @param validatorHandle validator to retrieve.
+     * @return the validator or null if Validator is unknown.
      */
-    public Validator get(long validatorHandle);
+    public IValidator get(long validatorHandle);
 
     /**
      * Retrieves a validator by its identifier.
      * @param identifier Identifier of validator to retrieve.
+     * @return the validator or null if Validator is unknown.
      */
-    public Validator get(String identifier);
-
-    /**
-     * Retrieves the identifer for a given validator.
-     * @param validatorHandle handle for the validator whose identifier you
-     * want.
-     */
-    public String getIdentifier(long validatorHandle);
+    public IValidator get(String identifier);
 
     /**
      * Prints out all the validators.
@@ -73,4 +47,20 @@ public interface ValidatorManager {
      * Returns the last time a validator was invalidated.
      */
     public long getLastInvalidatedTime();
+
+    /**
+     * Invalidate a given validator and remove it from the manager.
+     * 
+     * @param validator
+     */
+	public void invalidate(IValidator validator);
+
+	/**
+	 * Set a validator's outdated status flag.
+	 * 
+	 * @param validator
+	 * @param isOutdated
+	 */
+	public void setOutdated(IValidator validator, boolean isOutdate);
+
 }

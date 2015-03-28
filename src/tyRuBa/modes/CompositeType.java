@@ -158,11 +158,11 @@ public class CompositeType extends BoundaryType {
 					return otherTypeConst.apply(resultArg, false);
 				}
 			} else if (typeConst.isSuperTypeOf(otherTypeConst)) {
-				return cother.intersect(this);
+				return cother.union(this);
 			} else {
 				check(!isStrict(), this, other);
 				check(!cother.isStrict(), this, other);
-				TypeConstructor superTypeConst = typeConst.lowerBound(otherTypeConst);
+				TypeConstructor superTypeConst = typeConst.union(otherTypeConst);
 				Map params = new HashMap();
 				for (int i = 0; i < typeConst.getTypeArity(); i++) {
 					params.put(typeConst.getParameterName(i), args.get(i));
@@ -242,12 +242,12 @@ public class CompositeType extends BoundaryType {
 				for (int i = 0; i < otherTypeConst.getTypeArity(); i++) {
 					Type paramValue = (Type) params.get(otherTypeConst.getParameterName(i));
 					if (paramValue != null) {
-						if (cother.args.get(i).hasOverlapWith(paramValue)) {
-							return true;
+						if (!cother.args.get(i).hasOverlapWith(paramValue)) {
+							return false;
 						}
 					}
 				}
-				return false;
+				return true;
 			} else if (otherTypeConst.isSuperTypeOf(typeConst)) {
 				return other.hasOverlapWith(this);
 			} else {
@@ -284,8 +284,8 @@ public class CompositeType extends BoundaryType {
 		}
 	}
 	
-	public void makeStrict() {
-		this.strict = true;
+	public Type makeStrict() {
+		return new CompositeType(typeConst,true,(TupleType) args.makeStrict());
 	}
 	
 	public void addSubType(Type subType) throws TypeModeError {
@@ -394,4 +394,5 @@ public class CompositeType extends BoundaryType {
     public boolean isJavaType() {
         return getTypeConstructor().isJavaTypeConstructor();
     }
+
 }

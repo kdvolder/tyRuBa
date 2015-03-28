@@ -1,5 +1,6 @@
 package tyRuBa.engine.visitor;
 
+import java.util.Collection;
 import java.util.HashSet;
 
 import tyRuBa.engine.RBCountAll;
@@ -45,12 +46,16 @@ public class CollectFreeVarsVisitor extends AbstractCollectVarsVisitor {
 
 	public Object visit(RBFindAll findAll) {
 		findAll.getQuery().accept(this);
+		Collection boundVars = findAll.getExtract().getVariables();
+		vars.removeAll(boundVars);
 		findAll.getResult().accept(this);
 		return null;
 	}
 
 	public Object visit(RBCountAll count) {
 		count.getQuery().accept(this);
+		Collection boundVars = count.getExtract().getVariables();
+		vars.removeAll(boundVars);
 		count.getResult().accept(this);
 		return null;
 	}

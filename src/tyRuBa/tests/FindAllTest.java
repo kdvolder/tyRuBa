@@ -46,5 +46,23 @@ public class FindAllTest extends TyrubaTest {
 		catch (TypeModeError e) {
 		}
 	}
+	
+	public void testNestedFindAllCountAll() throws Exception {
+		String query = 
+			"member(?x,[a,b,c]), \n" +
+			"FINDALL(\n" +
+			"   COUNTALL( ( string_append(?x, ?, ?word), \n" +
+			"               member(?word, [aa,ab,bb,bc,cc]) ), \n" +
+			"             ?word, ?wordct),\n" +
+			"   ?wordct, ?list)";
+		//show_test_results(query);
+		
+		test_must_findall(query, new String[] { "?x", "?list" },
+				new String[][] { 
+				{"a", "[2]" },
+				{"b", "[2]" },
+				{"c", "[1]" }
+		});
+	}
 
 }

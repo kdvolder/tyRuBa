@@ -1,5 +1,7 @@
 package tyRuBa.engine;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +54,18 @@ public class RBFact extends RBComponent implements Cloneable {
 		return getPredName() + args + ".";
 	}
 
+	@Override
+	public void unparse(PrintWriter out) throws IOException {
+		out.print(pred.getName());
+		out.print("(");
+		for (int i = 0; i < args.getNumSubterms(); i++) {
+			if (i>0)
+				out.print(",");
+			args.getSubterm(i).unparse(out);
+		}
+		out.println(").");
+	}
+	
 	public boolean isGround() {
 		return args.isGround();
 	}

@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import tyRuBa.engine.RBCompoundTerm;
 import tyRuBa.engine.RBConjunction;
+import tyRuBa.engine.RBJavaObjectCompoundTerm;
 import tyRuBa.engine.RBModeSwitchExpression;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RBPair;
@@ -52,6 +53,10 @@ public abstract class AbstractCollectVarsVisitor implements ExpressionVisitor, T
 		return null;
 	}
 
+	public Object visit(RBJavaObjectCompoundTerm compoundTerm) {
+		return null;
+	}
+	
 	public Object visit(RBTuple tuple) {
 		for (int i = 0; i < tuple.getNumSubterms(); i++) {
 			tuple.getSubterm(i).accept(this);

@@ -1,5 +1,7 @@
 package tyRuBa.engine;
 
+import java.io.PrintWriter;
+
 /**
  * @author kdvolder
  */
@@ -19,8 +21,9 @@ public abstract class RBSubstitutable extends RBTerm {
 		return name.hashCode();
 	}
 
-	public String toString() {
-		return name;
+	@Override
+	public void unparse(PrintWriter out) {
+		out.print(name);
 	}
 
 	public boolean equals(Object obj) {

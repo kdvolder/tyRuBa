@@ -51,7 +51,7 @@ public class RBConjunction extends RBCompoundExpression {
 		for (int i = 0; i < getNumSubexps(); i++) {
 			try {
 				resultEnv = resultEnv.intersect(
-					getSubexp(i).typecheck(predinfo, resultEnv));
+					getSubexp(i).typecheck(predinfo, startEnv));
 			} catch (TypeModeError e) {
 				throw new TypeModeError(e, this);
 			}

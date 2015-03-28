@@ -72,7 +72,7 @@ public class RBTemplateVar extends RBSubstitutable {
 		throw new Error("Unsupported operation");
 	}
 
-	protected Type getType(TypeEnv env) throws TypeModeError {
+	public Type getType(TypeEnv env) throws TypeModeError {
 		// Just like a variable.
 		return env.get(this);
 	}

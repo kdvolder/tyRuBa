@@ -250,4 +250,9 @@ public class TVar extends Type {
             throw new TypeModeError("This type variable is empty, and therefore has no java equivalent");
         }
     }
+
+	@Override
+	public Type makeStrict() {
+		return this;
+	}
 }

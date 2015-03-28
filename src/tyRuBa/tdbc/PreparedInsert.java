@@ -7,6 +7,7 @@ import tyRuBa.modes.TypeEnv;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.tdbc.PreparedStatement;
 
+import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.QueryEngine;
 import tyRuBa.engine.RBPredicateExpression;
 

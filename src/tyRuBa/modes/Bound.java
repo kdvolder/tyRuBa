@@ -5,6 +5,8 @@
 \*****************************************************************/
 package tyRuBa.modes;
 
+import tyRuBa.engine.RBTerm;
+
 public class Bound extends BindingMode {
 	
 	static public Bound the = new Bound();
@@ -32,6 +34,20 @@ public class Bound extends BindingMode {
 	}
 	public boolean isFree() {
 		return false;
+	}
+
+	public String getBFString() {
+		return "B";
+	}
+
+	@Override
+	public RBTerm extractPartialKey(RBTerm term) {
+		return term;
+	}
+
+	@Override
+	public Type partialKeyType(Type type) {
+		return type;
 	}
 	
 }

@@ -1,8 +1,8 @@
 package tyRuBa.tests;
 
+import tyRuBa.jobs.ProgressMonitor;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
-import tyRuBa.engine.ProgressMonitor;
 import tyRuBa.engine.RuleBase;
 import tyRuBa.engine.SimpleRuleBaseBucket;
 
@@ -19,6 +19,13 @@ public class ParserTest extends TyrubaTest {
 		}
 		catch (ParseException e) {
 		}
+	}
+	
+	public void testEndOfFileComment() throws Exception {
+		frontend.parse("test :: String \n" +
+				"MODES (F) IS NONDET END\n" +
+				"test(Kris).\n" +
+				"//Should be ok");
 	}
 
 }

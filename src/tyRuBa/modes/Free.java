@@ -5,6 +5,9 @@
 \*****************************************************************/
 package tyRuBa.modes;
 
+import annotations.Feature;
+import tyRuBa.engine.RBTerm;
+
 public class Free extends BindingMode {
 	
 	static public Free the = new Free();
@@ -33,5 +36,21 @@ public class Free extends BindingMode {
 	}
 	public boolean isFree() {
 		return true;
+	}
+
+	public String getBFString() {
+		return "F";
+	}
+
+	@Override
+	@Feature(names="./partialKey")
+	public RBTerm extractPartialKey(RBTerm subterm) {
+		throw new Error("This shouldn't happen: nothing to extract here");
+	}
+
+	@Override
+	@Feature(names="./partialKey")
+	public Type partialKeyType(Type type) {
+		throw new Error("This shouldn't happen: nothing to extract here");
 	}
 }

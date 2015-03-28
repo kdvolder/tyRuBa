@@ -21,7 +21,7 @@ public class Aurelizer {
 
 	public static final Aurelizer debug_sounds 
 		// Say NO! no annoying sound effects
-		 = null;
+		= null;
 		// Say YES! to interesting sound effects
 		//= new Aurelizer();
 

@@ -2,6 +2,8 @@ package tyRuBa.tests;
 
 import java.io.Serializable;
 
+import annotations.Feature;
+
 import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.FunctorIdentifier;
 import tyRuBa.engine.RBTerm;
@@ -10,10 +12,13 @@ import tyRuBa.modes.ConstructorType;
 import tyRuBa.modes.TypeMapping;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
+import tyRuBa.tdbc.Connection;
 import tyRuBa.tdbc.PreparedInsert;
+import tyRuBa.tdbc.PreparedQuery;
+import tyRuBa.tdbc.ResultSet;
 import tyRuBa.tdbc.TyrubaException;
 
-public class TypeTest extends TyrubaTest implements Serializable {
+public class TypeTest extends TyrubaTest {
 
 	public TypeTest(String arg0) {
 		super(arg0);
@@ -26,6 +31,53 @@ public class TypeTest extends TyrubaTest implements Serializable {
 		super.setUp();
 	}
 
+	@Feature(names="./partialKey")
+	public void testPartialCompoundTermIndex() throws ParseException, TypeModeError, TyrubaException {
+		frontend.parse("TYPE SourceLocation<> AS <String,Integer,Integer,Integer> " +
+				"sourceLoc :: String, SourceLocation<> " +
+				"PERSISTENT MODES (F,F) IS NONDET END ");
+
+		frontend.parse("sourceLoc(Bar,SourceLocation<Bar.java,1,4,6>).");
+		frontend.parse("sourceLoc(Foo,SourceLocation<Foo.java,2,5,7>).");
+
+		Connection conn = new Connection(frontend);
+		
+		PreparedQuery q = 
+			conn.prepareQuery("sourceLoc(?it,SourceLocation<!name,?x,?y,?z>)");
+		
+		q.put("!name","Bar.java");
+		ResultSet results = q.executeQuery();
+		assertTrue(results.next());
+		assertEquals("Bar",results.getString("?it"));
+		assertEquals(1,results.getInt("?x"));
+		assertEquals(4,results.getInt("?y"));
+		assertEquals(6,results.getInt("?z"));
+		assertFalse(results.next());
+
+		q.put("!name","Foo.java");
+		results = q.executeQuery();
+		assertTrue(results.next());
+		assertEquals("Foo",results.getString("?it"));
+		assertEquals(2,results.getInt("?x"));
+		assertEquals(5,results.getInt("?y"));
+		assertEquals(7,results.getInt("?z"));
+		assertFalse(results.next());
+
+		q = conn.prepareQuery("sourceLoc(?it,SourceLocation<?name,?x,?y,?z>)");
+	}
+
+	public void testMyAppend() throws Exception {
+		frontend.parse("myappend :: [?t], [?t], [?t] " +
+				"MODES " +
+				"	(B,B,F) IS DET " +
+				"	(B,F,B) IS SEMIDET " +
+				"	(F,B,B) REALLY IS SEMIDET " +
+				"	(F,F,B) IS MULTI " +
+				"END ");
+		frontend.parse("myappend([],?x,?x).");
+		frontend.parse("myappend([?x|?xs],?ys,[?x|?zs]) :- myappend(?xs,?ys,?zs).");
+	}
+	
 	public void testIllegalCastToAbstractType() throws Exception {
 		frontend.parse(
 			"TYPE RefType AS String " +
@@ -49,6 +101,36 @@ public class TypeTest extends TyrubaTest implements Serializable {
 		
 	}
 	
+	public void testRepAsStringAndString() throws Exception {
+		frontend.parse("TYPE Foo AS String");
+		frontend.parse(
+				"foo :: Foo " +
+				"MODES (F) IS NONDET END ");
+		try {
+			frontend.parse("foo(Crap).");
+			fail("Should have thrown a type error");
+		}
+		catch (TypeModeError e) {
+			//ok!
+		}
+	}
+	
+	public void testRepAsStringAndString2() throws ParseException, TypeModeError {
+		frontend.parse("TYPE Foo AS String");
+		frontend.parse(
+				"foo :: Foo " +
+				"MODES (F) IS NONDET END ");
+		frontend.parse("foo(Crap::Foo).");
+		
+		test_must_succeed("foo(Crap::Foo)");
+		try {
+			test_must_fail("foo(Crap)");
+			fail("Should have a type error");
+		} catch (TypeModeError e) {
+			//ok
+		}
+	}
+
     public void testMixingCompositeAndAtomicTypes() throws Exception {
 
 		frontend.parse(
@@ -59,7 +141,7 @@ public class TypeTest extends TyrubaTest implements Serializable {
 		"MODES (B,F) IS SEMIDET END ");
 		
 		frontend.parse(
-		"re_name :: Element, org.apache.regexp.RE ");
+		"re_name :: Element, tyRuBa.util.RegularExpression ");
 
 		frontend.parse(
 		"TYPE Pattern     = RegExpPat" +
@@ -90,13 +172,13 @@ public class TypeTest extends TyrubaTest implements Serializable {
 		"name :: Element, String " +
 		"MODES (B,F) IS SEMIDET END " +
 		
-		"re_name :: Element, org.apache.regexp.RE " +
+		"re_name :: Element, tyRuBa.util.RegularExpression " +
 
 		"TYPE Pattern<>   = RegExpPat<>" +
 			"             | Name<> " +
 			"             | StarPat<> " +
 			"             | SubtypePat<> " +			
-			"TYPE RegExpPat<> AS <org.apache.regexp.RE>" +
+			"TYPE RegExpPat<> AS <tyRuBa.util.RegularExpression>" +
 			"TYPE Name<> AS <String> " +
 			"TYPE StarPat<> AS <> " +
 			"TYPE SubtypePat<> AS <Pattern<>> ");
@@ -109,7 +191,7 @@ public class TypeTest extends TyrubaTest implements Serializable {
 		frontend.parse(
 		"match(SubtypePat<?P>, ?X)   :- match(?P,?X). ");
     }
-    
+        
 	public void testBadAppend1() throws ParseException, TypeModeError {
 		try {
 			frontend.parse("append(?x,abc,?x).");
@@ -144,7 +226,7 @@ public class TypeTest extends TyrubaTest implements Serializable {
 		} catch (TypeModeError e) {
 		}
 	}
-
+	
 	public void testUndefinedPredError() throws ParseException, TypeModeError {
 		try {
 			frontend.parse("plannet(Earth).");
@@ -217,7 +299,7 @@ public class TypeTest extends TyrubaTest implements Serializable {
 	
 	public void testStrictTypesWithShrinkingTypes() throws ParseException, TypeModeError {
 		try {
-			test_must_fail("sum(?x,?x,?x), member(?x,[0,1,a]), Integer(?x)");
+			test_resultcount("sum(?x,?x,?x), member(?x,[0,1,a]), Integer(?x)",1);
 			fail("This should have thrown a TypeModeError since sum requires ?x to be " +				"strictly Integer");
 		} catch (TypeModeError e) {
 			System.err.println(e.getMessage()); 
@@ -359,7 +441,7 @@ public class TypeTest extends TyrubaTest implements Serializable {
 		}
 	}
 	
-	public void testUserDefinedListType2() throws ParseException, TypeModeError {
+	public void testMixedTypeListRule() throws ParseException, TypeModeError {
 		frontend.parse(
 		"TYPE Type AS String " +		"TYPE Method AS String " +		"TYPE Element = Type | Method " +		"method :: Type, Method " +		"MODES" +		"(F,F) IS NONDET " +		"(B,F) IS NONDET " +		"(F,B) IS SEMIDET " +		"END");
 
@@ -378,6 +460,27 @@ public class TypeTest extends TyrubaTest implements Serializable {
 		"methodizeHierarchy(?sig,[?C1|?CH],[?C1,?m|?mH]) :- " +		"  method(?C1,?m), signature(?m,?sig), " +		"  methodizeHierarchy(?sig,?CH,?mH).");   
 
 	}
+	
+	public void testAppendMixedTypeLists() throws ParseException, TypeModeError {
+		frontend.parse(
+		"TYPE Package AS String " +
+		"TYPE Type AS String " +
+		"TYPE Method AS String " +
+		"TYPE Element = Type | Method | Package ");
+
+		test_must_succeed(
+				"equals(?x,[pack::Package])," +
+				"equals(?y,[meth::Method])," +
+				"equals(?z,[type::Type])," +
+				"append(?x,?y,?xy)");
+		test_must_succeed(
+				"equals(?x,[pack::Package])," +
+				"equals(?y,[meth::Method])," +
+				"equals(?z,[type::Type])," +
+				"append(?x,?y,?xy)" +
+				"append(?xy,?z,?xyz)");
+	}
+	
 	
 	public void testUserDefinedListType() throws TypeModeError, ParseException {
 		frontend.parse("TYPE List<?element> = NonEmptyList<?element> | EmptyList<>");
@@ -407,7 +510,60 @@ public class TypeTest extends TyrubaTest implements Serializable {
 		test_must_equal("append1(NonEmptyList<1,EmptyList<>>," +			"NonEmptyList<2,EmptyList<>>,?list), sumList1(?list,?x)", "?x", "3");
 	}
 	
-    public static class SourceLocation implements Serializable {
+    private static final class SourceLocationMapping extends TypeMapping {
+		public Class getMappedClass() {
+		    return SourceLocation.class;
+		}
+
+		public Object toTyRuBa(Object obj) {
+		    SourceLocation sl_obj = (SourceLocation) obj;
+		    return new Object[] {
+		            sl_obj.f1,
+		            new Integer(sl_obj.f2),
+		            new Integer(sl_obj.f3),
+		            new Integer(sl_obj.f4)
+		    	};
+		}
+
+		public Object toJava(Object _parts) {
+				Object[] parts = (Object[])_parts;
+				return new SourceLocation(
+						(String)parts[0],
+					((Integer)parts[1]).intValue(),
+		            	((Integer)parts[2]).intValue(),
+					((Integer)parts[3]).intValue());
+		}
+	}
+
+    private static final class SourceRangeMapping extends TypeMapping {
+		public Class getMappedClass() {
+		    return SourceRange.class;
+		}
+
+		public Object toTyRuBa(Object obj) {
+			SourceRange sl_obj = (SourceRange) obj;
+		    return new Object[] {
+		            sl_obj.f1,
+		            new Integer(sl_obj.f2),
+		            new Integer(sl_obj.f3),
+		            new Integer(sl_obj.f4)
+		    	};
+		}
+
+		public Object toJava(Object _parts) {
+				Object[] parts = (Object[])_parts;
+				return new SourceRange(
+						(String)parts[0],
+					((Integer)parts[1]).intValue(),
+		            	((Integer)parts[2]).intValue(),
+					((Integer)parts[3]).intValue());
+		}
+	}
+
+	public static class AbstractLocation {
+	}
+
+	public static class SourceLocation extends AbstractLocation implements Serializable {
     	
 		private static final long serialVersionUID = 1L;
 
@@ -445,8 +601,60 @@ public class TypeTest extends TyrubaTest implements Serializable {
                     f3 == other.f3 &&
             		f4 == other.f4;
         }
+
+		@Override
+		public int hashCode() {
+			return f1.hashCode();
+		}
+        
     }
-	
+
+	public static class SourceRange extends AbstractLocation implements Serializable {
+    	
+		private static final long serialVersionUID = 1L;
+
+			public SourceRange(String parseFrom) {
+    			// parseFrom looks like:  f1(f2,f3,f4)
+    			int lparAt = parseFrom.indexOf('(');
+    			int comma1 = parseFrom.indexOf(',',lparAt);
+    			int comma2 = parseFrom.indexOf(',',comma1+1);
+    			int rparAt = parseFrom.indexOf(')',comma2);
+
+    			this.f1 = parseFrom.substring(0,lparAt);
+    			this.f2 = Integer.parseInt(parseFrom.substring(lparAt+1,comma1));
+    			this.f3 = Integer.parseInt(parseFrom.substring(comma1+1,comma2));
+    			this.f4 = Integer.parseInt(parseFrom.substring(comma2+1,rparAt));
+    		}
+
+        public SourceRange(String f1, int f2, int f3, int f4) {
+            this.f1 = f1;
+            this.f2 = f2;
+            this.f3 = f3;
+            this.f4 = f4;
+         }
+        
+        protected String f1;
+        protected int f2;
+        protected int f3;
+        protected int f4;
+
+        public boolean equals(Object _other) {
+            if (!this.getClass().equals(_other.getClass()))
+                return false;
+            SourceRange other = (SourceRange)_other; 
+            return  f1.equals(other.f1) &&
+                    f2 == other.f2 &&
+                    f3 == other.f3 &&
+            		f4 == other.f4;
+        }
+
+		@Override
+		public int hashCode() {
+			return f1.hashCode();
+		}
+        
+    }
+    
 	public void testMappedCompositeType() throws ParseException, TypeModeError, TyrubaException {
 	    
 	    frontend.parse("TYPE SourceLocation<> AS <String,Integer,Integer,Integer> " +
@@ -459,31 +667,7 @@ public class TypeTest extends TyrubaTest implements Serializable {
 	    		"MODES (F,F) IS NONDET END " +
 	    		"backLoc(?X,?Y) :- sourceLoc(?Y,?X). " +
 	    		"label :: Object, String");
-	    frontend.addTypeMapping(new FunctorIdentifier("SourceLocation", 0), new TypeMapping() {
-
-	        public Class getMappedClass() {
-	            return SourceLocation.class;
-	        }
-
-            public Object toTyRuBa(Object obj) {
-                SourceLocation sl_obj = (SourceLocation) obj;
-                return new Object[] {
-                        sl_obj.f1,
-                        new Integer(sl_obj.f2),
-                        new Integer(sl_obj.f3),
-                        new Integer(sl_obj.f4)
-                	};
-            }
-
-            public Object toJava(Object _parts) {
-            		Object[] parts = (Object[])_parts;
-            		return new SourceLocation(
-            				(String)parts[0],
-						((Integer)parts[1]).intValue(),
-                        	((Integer)parts[2]).intValue(),
-						((Integer)parts[3]).intValue());
-            }
-	    });
+	    frontend.addTypeMapping(new FunctorIdentifier("SourceLocation",0), new SourceLocationMapping());
 	    
 	    frontend.parse("label(SourceLocation<?,?,?,?>,tisASourceLocation).");
 	    frontend.parse("label(SourceLocation<foo,1,2,3>,niceOne).");
@@ -508,7 +692,63 @@ public class TypeTest extends TyrubaTest implements Serializable {
 	    assertEquals(frontend.getProperty(sl1,"backLoc").up(),"foo");
 	    
 	}
+	
+	public void testSeparatedSubTypedeclarations() throws ParseException, TypeModeError, TyrubaException {
+	    frontend.parse("TYPE Tree<?E> = EmptyTree<> ");
+	    frontend.parse("TYPE Tree<?E> = BinaryTree<?E> ");
+	    frontend.parse("TYPE BinaryTree<?E> AS < Tree<?E>, Tree<?E> >");
+	}
+	public void testBadSeparatedSubTypedeclarations() throws ParseException, TypeModeError, TyrubaException {
+	    frontend.parse("TYPE Tree<?A> = EmptyTree<> ");
+	    try {
+	    	frontend.parse("TYPE Tree<?E> = BinaryTree<?E> ");
+	    	fail("The above declaration is not consistent with previous declaration (different names for params)");
+	    }
+	    catch (TypeModeError e) {
+	    	assertTrue(e.getMessage(), e.getMessage().contains("inconsistent"));
+		}
+	}
+	
+	public void testCompatibleMappedCompositeType() throws ParseException, TypeModeError, TyrubaException {
+	    
+	    frontend.parse("TYPE SourceLocation<> AS <String,Integer,Integer,Integer> " +
+	    		"TYPE SourceRange<>    AS <String,Integer,Integer,Integer> " +
+	    		"TYPE AbstractLocation<> = SourceLocation<> " +
+	    		"TYPE AbstractLocation<> = SourceRange<>  " +
+	    		"" +
+	    		"location :: String, AbstractLocation<> " +
+	    		"PERSISTENT MODES (F,F) IS NONDET END " +
+	    		"backLoc :: Object, String " +
+	    		"MODES (F,F) IS NONDET END " +
+	    		"backLoc(?X,?Y) :- location(?Y,?X). "+
+				"label :: AbstractLocation, String");
+	    frontend.addTypeMapping(new FunctorIdentifier("SourceLocation",0), new SourceLocationMapping());
+	    frontend.addTypeMapping(new FunctorIdentifier("SourceRange",0), new SourceRangeMapping());
+	    
+	    frontend.parse("label(SourceLocation<foo,1,1,1>,tisASourceLocation).");
+	    frontend.parse("label(SourceRange<foo,1,2,3>,niceOne).");
+	    
+	    AbstractLocation sl1 = new SourceLocation("foo",1,2,3);
+	    AbstractLocation sl2 = new SourceRange("bar",2,3,4);
+	    
+	    PreparedInsert insertIt = frontend.prepareForInsertion("location(!name,!loc)");
+	    insertIt.put("!name","foo");
+	    insertIt.put("!loc",sl1);
+	    insertIt.executeInsert();
 
+	    insertIt.put("!name","bar");
+	    insertIt.put("!loc",sl2);
+	    insertIt.executeInsert();
+	    
+	    assertEquals(frontend.getProperty("foo","location").up(),sl1);
+	    assertEquals(frontend.getProperty("bar","location").up(),sl2);
+	    assertFalse(frontend.getProperty("foo","location").up().equals(sl2));
+	    assertFalse(frontend.getProperty("bar","location").up().equals(sl1));
+	    
+	    assertEquals(frontend.getProperty(sl1,"backLoc").up(),"foo");
+	    
+	}
+	
 	public void testJavaTypeConstructor() throws Exception {
 		frontend.parse(
 				"sourceLoc :: String, tyRuBa.tests.TypeTest$SourceLocation " +
@@ -559,4 +799,26 @@ public class TypeTest extends TyrubaTest implements Serializable {
 		}
     }
     
+	public interface Vehicle {
+	}
+
+	public class Car implements Vehicle {
+	}
+
+    public void testInterfaceType() throws Exception {
+    	frontend.parse(
+    			"vehic :: String, tyRuBa.tests.TypeTest$Vehicle " +
+    			"MODES (F,F) IS NONDET END");
+    	Connection conn = new Connection(frontend);
+    	PreparedInsert insert = conn.prepareInsert("vehic(!n,!v)");
+    	insert.put("!n","car");
+    	Vehicle theCar = new Car();
+		insert.put("!v", theCar);
+		insert.executeInsert();
+		
+		test_must_equal("vehic(car,?v)", "?v", theCar);
+    }
+    
+    
+        
 }

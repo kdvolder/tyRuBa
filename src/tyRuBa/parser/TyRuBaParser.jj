@@ -29,10 +29,6 @@ public class TyRuBaParser {
 	private URL baseURL = null;
 	private boolean interactive;
 
-	public TyRuBaParser(InputStream is,PrintStream os) {
-		this(is,os,null);      
-	}
-
 	public TyRuBaParser(InputStream is,PrintStream os, URL base) {
 		this(is);
 		outputStream = os;
@@ -78,34 +74,39 @@ public class TyRuBaParser {
 	/** Parsing from an InputStream (interactive mode) */
 	public static void parse(QueryEngine rules,InputStream is,PrintStream os)
 	throws ParseException, TypeModeError {
-		TyRuBaParser parser = new TyRuBaParser(is,os);
+		TyRuBaParser parser = new TyRuBaParser(is,os,null);
 		parser.CompilationUnit(rules);
 	}
 
     public static RBExpression parseExpression(InputStream is,PrintStream os,QueryEngine rules) 
 	throws ParseException, TypeModeError {
-		TyRuBaParser parser = new TyRuBaParser(is,os);
+		TyRuBaParser parser = new TyRuBaParser(is,os,null);
 		return parser.ExpressionAndEOF(rules);
 	}
 
-	/** Compute the string from the image of a string literal, quotes already 
-		removed before calling this method. */
-	static String internalStringLiteral(String src) {
-		StringBuffer trg = new StringBuffer(src.length());
-		for (int i = 0; i < src.length(); i++) {
-			if (src.charAt(i) == '\\') {
-				i++;
-				//This does not yet implement any of the special character code
-				//such as \t \n etc.
-				// \\ works however, also \" works. 
-				trg.append(src.charAt(i));
-			}
-			else {
-				trg.append(src.charAt(i));
-			}
-		}
-		return trg.toString();
-	}
+   /** Compute the string from the image of a string literal, quotes already 
+	removed before calling this method. */
+    static String internalStringLiteral(String src) {
+            StringBuffer trg = new StringBuffer(src.length());
+            for (int i = 0; i < src.length(); i++) {
+                    if (src.charAt(i) == '\\') {
+                            i++;
+                            //This does not yet implement all of the special character code
+                            //such as \t \n etc.
+                            // \n, \\ works and \" work. 
+                            if (src.charAt(i)=='n')
+                                trg.append('\n');
+                            else if (src.charAt(i)=='t')
+                            	trg.append('\t');
+                            else
+                                trg.append(src.charAt(i));
+                    }
+                    else {
+                            trg.append(src.charAt(i));
+                    }
+            }
+            return trg.toString();
+    }
 
 	/** Compute the string from the image of a string literal. */
 	static String stringLiteral(String src) {
@@ -205,7 +206,7 @@ SKIP : /* WHITE SPACE */
 SKIP : /* COMMENTS */
 { 
   <COMMENT: (<SINGLE_LINE_COMMENT> | <FORMAL_COMMENT> | <MULTI_LINE_COMMENT>) >
-| <SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+| <SINGLE_LINE_COMMENT: "//" (~["\n","\r"])*>
 | <FORMAL_COMMENT: "/**" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
 | <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
 }
@@ -591,9 +592,9 @@ Type AtomicType(QueryEngine rules) throws TypeModeError :
 	t = <IDENTIFIER>
 	{
 		if (strict)
-			type = Factory.makeStrictAtomicType(rules.findType(t.image));
+			type = Factory.makeStrictAtomicType(rules.findTypeConst(t.image));
 		else
-			type = Factory.makeAtomicType(rules.findType(t.image));
+			type = Factory.makeAtomicType(rules.findTypeConst(t.image));
 		return type;
 	}
 }
@@ -734,7 +735,7 @@ Mode NonDet() :
 TypeConstructor ExistingTypeAtomName(QueryEngine rules) throws TypeModeError :
 {	Token t; }
 {
-	t = <IDENTIFIER>		{ return rules.findType(t.image); }
+	t = <IDENTIFIER>		{ return rules.findTypeConst(t.image); }
 }
 
 

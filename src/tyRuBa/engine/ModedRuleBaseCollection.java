@@ -26,7 +26,6 @@ public class ModedRuleBaseCollection {
 	/** All the ground facts go in here, no separation based on modes! */
 	FactBase facts = null;
     private PredicateIdentifier predId;
-    private FactLibraryManager factLibraryManager;
 	
 	/** 
 	 * Keeps the unconverted rules so that we can create more
@@ -58,11 +57,10 @@ public class ModedRuleBaseCollection {
 		}
 	}
 		
-	public ModedRuleBaseCollection(QueryEngine qe, PredInfo p, String identifier) {
+	public ModedRuleBaseCollection(QueryEngine qe, PredInfo p, String identifier) throws TypeModeError {
 		this.engine = qe;
 		this.facts = p.getFactBase();
         this.predId = p.getPredId();
-        this.factLibraryManager = engine.frontend().getFactLibraryManager();
 		
 		for (int i = 0; i < p.getNumPredicateMode(); i++) {
 			PredicateMode pm = p.getPredicateModeAt(i);
@@ -100,7 +98,7 @@ public class ModedRuleBaseCollection {
 	}
 
 	private ModedRuleBase makeEmptyModedRuleBase(PredicateMode pm, FactBase facts) {
-		ModedRuleBase result = new ModedRuleBase(engine,pm, facts, factLibraryManager, predId);
+		ModedRuleBase result = new ModedRuleBase(engine, pm, facts, predId);
 		return result;
 	}
 
@@ -128,6 +126,8 @@ public class ModedRuleBaseCollection {
 	/** return the ModedRuleBase in this collection that has the "best"
 	 *  mode of execution that allow for bindings */
 	public RuleBase getBest(BindingList bindings) {
+		if (!engine.getPersistenceStrategy().useBFIndexing())
+			bindings = bindings.approximateBFWithF();
 		RuleBase result = null;
 		for (int i = 0; i < modedRBs.size(); i++) {
 			RuleBase currRulebase = (RuleBase)modedRBs.get(i);
@@ -146,8 +146,8 @@ public class ModedRuleBaseCollection {
 		if (result == null || result.getParamModes().equals(bindings)) {
 			return result;
 		} else {
+			// If it is not an exact match make new one on the fly!
 			if (bindings.hasFree()) {
-				// If it is not an exact match make new one on the fly!
 				result = newModedRuleBase(
 					Factory.makePredicateMode(bindings, result.getMode().moreBound(), false),
 					facts);

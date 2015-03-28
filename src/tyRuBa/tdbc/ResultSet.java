@@ -69,22 +69,28 @@ public class ResultSet {
 		}
 		RBVariable var = FrontEnd.makeVar(variableName);
 		RBTerm term = frame.get(var);
-		if (term instanceof RBCompoundTerm) {
-            if (term instanceof RBRepAsJavaObjectCompoundTerm) {
-                return ((RBRepAsJavaObjectCompoundTerm)term).getValue();
-            } else if (((RBCompoundTerm)term).getNumArgs() == 1) {
-                if (((RBCompoundTerm)term).getArg() != null) {
-                    return ((RBCompoundTerm)term).getArg().up();
-                } else {
-                    return term.up();
-                }
-            } else {
-                return term;
-            }
-        }
-		else {
-			return term;
-		}
+		
+		if( term == null ) 
+			return null;
+		else
+			return term.up();
+		
+//		if (term instanceof RBCompoundTerm) {
+//            if (term instanceof RBRepAsJavaObjectCompoundTerm) {
+//                return ((RBRepAsJavaObjectCompoundTerm)term).getValue();
+//            } else if (((RBCompoundTerm)term).getNumArgs() == 1) {
+//                if (((RBCompoundTerm)term).getArg() != null) {
+//                    return ((RBCompoundTerm)term).getArg().up();
+//                } else {
+//                    return term.up();
+//                }
+//            } else {
+//                return term;
+//            }
+//        }
+//		else {
+//			return term;
+//		}
 	}
 
 	public String getString(String variableName) throws TyrubaException {
@@ -107,6 +113,10 @@ public class ResultSet {
 
 	private TyrubaException wrongType(String varName, Object found, String expectedType) {
 		return new TyrubaException("Variable "+varName+" is bound to an object of type "+found.getClass().getName()+" not "+expectedType+".");
+	}
+	
+	public void close() {
+		eltSource.release();
 	}
 	
 }

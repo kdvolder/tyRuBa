@@ -25,7 +25,7 @@ public class RepAsJavaConstructorType extends ConstructorType implements Seriali
     public RepAsJavaConstructorType(FunctorIdentifier functorId, Type repAs, CompositeType result) {
         this.functorId = functorId;
         this.result = result;
-        this.repAsType = repAs;        
+        this.repAsType = repAs.makeStrict();       
     }
 
     public FunctorIdentifier getFunctorId() {
@@ -72,6 +72,10 @@ public class RepAsJavaConstructorType extends ConstructorType implements Seriali
 
     public int hashCode() {
     		return repAsType.hashCode() + 13 * functorId.hashCode() + 31*result.hashCode();
+    }
+    
+    public String toString() {
+    	return "::"+this.functorId.getName();
     }
     
 }

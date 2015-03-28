@@ -14,7 +14,7 @@ public class TypeModeError extends Exception {
 	}
 	
 	public TypeModeError(TypeModeError e, String str) {
-		this(e.getMessage() + "\nin " + str);
+		super(e.getMessage() + "\nin " + str, e);
 	}
 
 	public TypeModeError(TypeModeError e, RBComponent r) {

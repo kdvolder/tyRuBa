@@ -28,7 +28,7 @@ public class Insert {
 	}
 	
 	public void executeInsert(String insertString) throws TyrubaException {
-		TyRuBaParser parser = new TyRuBaParser(new ByteArrayInputStream(insertString.getBytes()),System.err);
+		TyRuBaParser parser = new TyRuBaParser(new ByteArrayInputStream(insertString.getBytes()),System.err, null);
 		try {
 			parser.Rule(queryEngine);
 		} catch (ParseException e) {

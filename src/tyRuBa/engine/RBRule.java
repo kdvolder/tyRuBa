@@ -102,27 +102,27 @@ public class RBRule extends RBComponent implements Cloneable {
 			PredInfo pInfo = predinfo.getPredInfo(pred);
 			if (pInfo == null)
 				throw new TypeModeError("Unknown predicate " + pred);
-
 			TupleType predTypes = pInfo.getTypeList();
-			RBTuple args = getArgs();
-			int numArgs = args.getNumSubterms();
-			TupleType startArgTypes = Factory.makeTupleType();
+			int numArgs = predTypes.size();
+			
 			for (int i = 0; i < numArgs; i++) {
 				Type currStrictPart = predTypes.get(i).copyStrictPart();
 				Type argType = args.getSubterm(i).getType(startEnv);
 				if (!(currStrictPart instanceof TVar)) {
 					argType.checkEqualTypes(currStrictPart, false);
 				}
-				startArgTypes.add(argType);
 			}
+			
+			startEnv = startEnv.copyStrictPart();
 
 			TypeEnv inferredTypeEnv = getCondition().typecheck(predinfo, startEnv);
 
 			TupleType argTypes = Factory.makeTupleType();
 			Map varRenamings = new HashMap();			
-			for (int i = 0; i < numArgs; i++) {
+			for (int i = 0; i < args.getNumSubterms(); i++) {
 				argTypes.add(args.getSubterm(i).getType(inferredTypeEnv));
 			}
+
 			if (!argTypes.isSubTypeOf(predTypes, varRenamings))
 				throw new TypeModeError("Inferred types " +
 					argTypes + " incompatible with declared types " + predTypes);
@@ -133,6 +133,46 @@ public class RBRule extends RBComponent implements Cloneable {
 			throw new TypeModeError(e, this);
 		}
 	}
+	
+//	public TupleType typecheck(PredInfoProvider predinfo) 
+//	throws TypeModeError {
+//		try {
+//			TypeEnv startEnv = new TypeEnv();
+//			PredicateIdentifier pred = getPredId();
+//			PredInfo pInfo = predinfo.getPredInfo(pred);
+//			if (pInfo == null)
+//				throw new TypeModeError("Unknown predicate " + pred);
+//
+//			TupleType predTypes = pInfo.getTypeList();
+//			RBTuple args = getArgs();
+//			int numArgs = args.getNumSubterms();
+//			TupleType startArgTypes = Factory.makeTupleType();
+//			for (int i = 0; i < numArgs; i++) {
+//				Type currStrictPart = predTypes.get(i).copyStrictPart();
+//				Type argType = args.getSubterm(i).getType(startEnv);
+//				if (!(currStrictPart instanceof TVar)) {
+//					argType.checkEqualTypes(currStrictPart, false);
+//				}
+//				startArgTypes.add(argType);
+//			}
+//
+//			TypeEnv inferredTypeEnv = getCondition().typecheck(predinfo, startEnv);
+//
+//			TupleType argTypes = Factory.makeTupleType();
+//			Map varRenamings = new HashMap();			
+//			for (int i = 0; i < numArgs; i++) {
+//				argTypes.add(args.getSubterm(i).getType(inferredTypeEnv));
+//			}
+//			if (!argTypes.isSubTypeOf(predTypes, varRenamings))
+//				throw new TypeModeError("Inferred types " +
+//					argTypes + " incompatible with declared types " + predTypes);
+//			else
+//				return argTypes;
+//		
+//		} catch (TypeModeError e) {
+//			throw new TypeModeError(e, this);
+//		}
+//	}
 
 	public RBComponent convertToNormalForm() {
 		return new RBRule(pred, args, cond.convertToNormalForm());

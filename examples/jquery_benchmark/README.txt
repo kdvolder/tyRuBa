@@ -57,7 +57,7 @@ E/tyruba/dist/tyruba.jar tyRuBa.applications.CommandLine $*
      user.rub    A copy of the user.rub file found in JQuery's metadata directory.
      100/ 		A captured benchmark database (in expanded form)
      run			a script to run the benchmarks in this example. (run setup first to
-                 unarchive the exaple database.
+                 unarchive the example database.
      setup		a script that untar's the test database archive for use.
   
   You can give the 1xx directories more meaningful names if you like.
@@ -85,4 +85,6 @@ E/tyruba/dist/tyruba.jar tyRuBa.applications.CommandLine $*
   To run a series of queries as a benchmark file create a .qry file which contains exactly 
   one query expression (without a leading ":-" or trailing "." per line of text.
   
-  A simple example is provided in example.qry
+  Then invoke tyruba from the commandline using the -benchmark option. For example:
+  
+    tyruba -dbdir 100 rules/initfile.rub user.rub -benchmark mybenchmark.qry

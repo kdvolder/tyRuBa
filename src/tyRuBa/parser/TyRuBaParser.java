@@ -15,10 +15,6 @@ public class TyRuBaParser implements TyRuBaParserConstants {
         private URL baseURL = null;
         private boolean interactive;
 
-        public TyRuBaParser(InputStream is,PrintStream os) {
-                this(is,os,null);
-        }
-
         public TyRuBaParser(InputStream is,PrintStream os, URL base) {
                 this(is);
                 outputStream = os;
@@ -64,34 +60,39 @@ public class TyRuBaParser implements TyRuBaParserConstants {
         /** Parsing from an InputStream (interactive mode) */
         public static void parse(QueryEngine rules,InputStream is,PrintStream os)
         throws ParseException, TypeModeError {
-                TyRuBaParser parser = new TyRuBaParser(is,os);
+                TyRuBaParser parser = new TyRuBaParser(is,os,null);
                 parser.CompilationUnit(rules);
         }
 
     public static RBExpression parseExpression(InputStream is,PrintStream os,QueryEngine rules)
         throws ParseException, TypeModeError {
-                TyRuBaParser parser = new TyRuBaParser(is,os);
+                TyRuBaParser parser = new TyRuBaParser(is,os,null);
                 return parser.ExpressionAndEOF(rules);
         }
 
-        /** Compute the string from the image of a string literal, quotes already 
-		removed before calling this method. */
-        static String internalStringLiteral(String src) {
-                StringBuffer trg = new StringBuffer(src.length());
-                for (int i = 0; i < src.length(); i++) {
-                        if (src.charAt(i) == '\\') {
-                                i++;
-                                //This does not yet implement any of the special character code
-                                //such as \t \n etc.
-                                // \\ works however, also \" works. 
+   /** Compute the string from the image of a string literal, quotes already 
+	removed before calling this method. */
+    static String internalStringLiteral(String src) {
+            StringBuffer trg = new StringBuffer(src.length());
+            for (int i = 0; i < src.length(); i++) {
+                    if (src.charAt(i) == '\\') {
+                            i++;
+                            //This does not yet implement all of the special character code
+                            //such as \t \n etc.
+                            // \n, \\ works and \" work. 
+                            if (src.charAt(i)=='n')
+                                trg.append('\n');
+                            else if (src.charAt(i)=='t')
+                                trg.append('\t');
+                            else
                                 trg.append(src.charAt(i));
-                        }
-                        else {
-                                trg.append(src.charAt(i));
-                        }
-                }
-                return trg.toString();
-        }
+                    }
+                    else {
+                            trg.append(src.charAt(i));
+                    }
+            }
+            return trg.toString();
+    }
 
         /** Compute the string from the image of a string literal. */
         static String stringLiteral(String src) {
@@ -482,9 +483,9 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     }
     t = jj_consume_token(IDENTIFIER);
                 if (strict)
-                        type = Factory.makeStrictAtomicType(rules.findType(t.image));
+                        type = Factory.makeStrictAtomicType(rules.findTypeConst(t.image));
                 else
-                        type = Factory.makeAtomicType(rules.findType(t.image));
+                        type = Factory.makeAtomicType(rules.findTypeConst(t.image));
                 {if (true) return type;}
     throw new Error("Missing return statement in function");
   }
@@ -689,7 +690,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
   final public TypeConstructor ExistingTypeAtomName(QueryEngine rules) throws ParseException, TypeModeError {
         Token t;
     t = jj_consume_token(IDENTIFIER);
-                                          {if (true) return rules.findType(t.image);}
+                                          {if (true) return rules.findTypeConst(t.image);}
     throw new Error("Missing return statement in function");
   }
 
@@ -1760,7 +1761,10 @@ public class TyRuBaParser implements TyRuBaParserConstants {
   private int jj_gc = 0;
 
   public TyRuBaParser(java.io.InputStream stream) {
-    jj_input_stream = new JavaCharStream(stream, 1, 1);
+     this(stream, null);
+  }
+  public TyRuBaParser(java.io.InputStream stream, String encoding) {
+    try { jj_input_stream = new JavaCharStream(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
     token_source = new TyRuBaParserTokenManager(jj_input_stream);
     token = new Token();
     jj_ntk = -1;
@@ -1770,7 +1774,10 @@ public class TyRuBaParser implements TyRuBaParserConstants {
   }
 
   public void ReInit(java.io.InputStream stream) {
-    jj_input_stream.ReInit(stream, 1, 1);
+     ReInit(stream, null);
+  }
+  public void ReInit(java.io.InputStream stream, String encoding) {
+    try { jj_input_stream.ReInit(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
     token_source.ReInit(jj_input_stream);
     token = new Token();
     jj_ntk = -1;
@@ -1973,6 +1980,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
   final private void jj_rescan_token() {
     jj_rescan = true;
     for (int i = 0; i < 6; i++) {
+    try {
       JJCalls p = jj_2_rtns[i];
       do {
         if (p.gen > jj_gen) {
@@ -1988,6 +1996,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
         }
         p = p.next;
       } while (p != null);
+      } catch(LookaheadSuccess ls) { }
     }
     jj_rescan = false;
   }

@@ -23,17 +23,15 @@ public class ModedRuleBase extends RuleBase {
 	private Mode			  currMode = null;
 	private Vector[]		  currTypes = null;
     private PredicateIdentifier predId;
-    private FactLibraryManager libraryManager;
 	
 	/** Constructor */
 	public ModedRuleBase(QueryEngine engine,
 		PredicateMode predMode, 
-		FactBase allTheFacts, FactLibraryManager libraryManager,PredicateIdentifier predId)
+		FactBase allTheFacts, PredicateIdentifier predId)
 	{
-		super(engine,predMode,allTheFacts.isPersistent());
+		super(engine,predMode);
 		this.facts = allTheFacts;
         this.predId = predId;
-        this.libraryManager = libraryManager;
 		ensureRuleBase();
 		currTypes = new Vector[predMode.getParamModes().getNumBound()];
 		for (int i = 0; i < currTypes.length; i++) {
@@ -130,19 +128,10 @@ public class ModedRuleBase extends RuleBase {
 
 	protected Compiled compile(CompilationContext context) {
 		if (rules != null) {
-            if (isPersistent()) {
-                return facts.compile(getPredMode(), context).disjoin(libraryManager.compile(getPredMode(), predId, context)).disjoin(rules.compile(context));    
-            } else {
-                return facts.compile(getPredMode(), context).disjoin(rules.compile(context));
-            }
-			
-		} else {
-            if (isPersistent()) {
-                return facts.compile(getPredMode(), context).disjoin(libraryManager.compile(getPredMode(), predId, context));    
-            } else {
-                return facts.compile(getPredMode(), context);
-            }
-			
+			return facts.compile(getPredMode(), context).disjoin(rules.compile(context));
+		} 
+		else {
+			return facts.compile(getPredMode(), context);
 		}
 	}
 

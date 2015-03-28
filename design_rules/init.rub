@@ -1,0 +1,50 @@
+//
+// Design Rules 
+//
+
+// Here we are going to attempt to collect a number of tyruba rules
+// and definitions that can be loaded into JQuery to find "desing rule"
+// violations in the TyRuBa code base.
+
+sourceType :: Type
+MODES (F) IS NONDET END
+
+sourceType(?T) :- type(?T), child+(?CU,?T), javaFile(?CU).
+
+designRule :: String, Element, [Object]
+MODES (F,F,F) IS NONDET END
+
+designRule("Equals but no hashcode",?m,[]) :-
+	sourceType(?C),
+    method(?C,?m), name(?m,equals),     NOT( EXISTS ?h : method(?C,?h), name(?h,hashCode)).
+
+designRule("Vector should be ArrayList",?Ctor,[?where]) :-
+    name(?Vector,Vector), creator(?Vector,?Ctor,?where).
+
+designRule("A shutdown method should set all instance fields to null",
+           ?sd, [?f]) :-
+   sourceType(?C),
+   method(?C,?sd), name(?sd,shutdown), 
+   field(?C,?f), NOT(modifier(?f,static)),
+   type(?f,?::RefType),
+   NOT(writes(?sd,?f,?)). // We can't check whether the value is null
+
+// Need more rules about shutdown:
+
+// If superclass has shutdown => must call it
+
+designRule("Shutdown method should call super.shutdown",
+           ?sd, [?f]) :-
+   sourceType(?C), method(?C,?sd), name(?sd,shutdown), 
+   field(?C,?f), NOT(modifier(?f,static)),
+   type(?f,?::RefType),
+   NOT(writes(?sd,?f,?)). // We can't check whether the value is null
+
+
+// If instance field's types have shutdown => must call it
+
+topQuery(["Design Rule Violations"],
+		"designRule(?msg,?violElement,?info), simplePathTo(?violElement,?P)",
+		["?msg","?P", "?info"]).
+
+

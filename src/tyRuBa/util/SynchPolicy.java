@@ -14,7 +14,6 @@ public final class SynchPolicy {
 		resource = res;
 	}
 
-	//TODO: This is not static and not public
 	int stopSources = 0;
 	int busySources = 0;
 

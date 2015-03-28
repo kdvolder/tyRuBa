@@ -6,9 +6,13 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 import tyRuBa.engine.FrontEnd;
-import tyRuBa.engine.ProgressMonitor;
 import tyRuBa.engine.QueryEngine;
 import tyRuBa.engine.RBTerm;
+import tyRuBa.engine.RuleBase;
+import tyRuBa.engine.TyRuBaConf;
+import tyRuBa.engine.factbase.berkeley_db.BerkeleyDBConf;
+import tyRuBa.engine.factbase.hashtable.FileBasedPersistenceConf;
+import tyRuBa.jobs.ProgressMonitor;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 import tyRuBa.util.ElementSource;
@@ -23,17 +27,40 @@ public abstract class TyrubaTest extends TestCase {
 	}
 
 	protected void setUp() throws Exception {
+		setUp(false); // default setup without reconnecting
+	}
+	
+	protected void setUp(boolean reconnect) throws Exception {
 		super.setUp();
-		frontend = new FrontEnd(initfile,true);
+//		frontend = new FrontEnd(initfile,true);
+		TyRuBaConf conf = new TyRuBaConf();
+//		conf.setPersistenceConf(new BerkeleyDBConf());
+//		conf.setPersistenceConf(new FileBasedPersistenceConf());
+		conf.setCleanStart(!reconnect);
+		frontend = new FrontEnd(conf);
+//		public FrontEnd(boolean loadInitFile, File storagePath, String dbURL, boolean persistent, ProgressMonitor mon,boolean clean,boolean enableBackgroundCleaning) {
+		//		RuleBase.silent = true;
+	}
+
+	protected void tearDown() throws Exception {
+		if (frontend!=null) {
+			frontend.shutdown();
+			frontend = null;
+		}
+		super.tearDown();
 	}
 
 	protected void setUpNoFrontend() throws Exception {
 		super.setUp();
+		RuleBase.silent = true;
 	}
 
 	protected void setUp(ProgressMonitor mon) throws Exception {
 		super.setUp();
-		frontend = new FrontEnd(initfile,mon);
+		TyRuBaConf conf = new TyRuBaConf();
+		conf.setLoadInitFile(initfile);
+		conf.setProgressMonitor(mon);
+		frontend = new FrontEnd(conf);
 	}
 
 	void test_must_succeed(String query) throws ParseException, TypeModeError {
@@ -50,7 +77,7 @@ public abstract class TyrubaTest extends TestCase {
 	void test_must_equal(String query, String var, String expected) throws ParseException, TypeModeError {
 		ElementSource result = frontend.varQuery(query, var);
 		assertEquals(frontend.makeTermFromString(expected), result.nextElement());
-		assertFalse(result.hasMoreElements());
+		assertFalse("More elements than expected", result.hasMoreElements());
 	}
 
 	void test_must_equal(String query, String var, Object expected) throws ParseException, TypeModeError {
@@ -105,6 +132,15 @@ public abstract class TyrubaTest extends TestCase {
 		}
 	}
 	
+	void show_test_results(String query)
+	throws ParseException, TypeModeError {
+		ElementSource result = frontend.frameQuery(query);
+		while (result.hasMoreElements()) {
+			System.out.println(result.nextElement());
+		}
+	}
+	
+	
 	protected void test_resultcount(String query, int numresults) throws ParseException, TypeModeError {
 		int counter = get_resultcount(query);
 		assertEquals("Expected number of results:",numresults,counter);
@@ -130,6 +166,11 @@ public abstract class TyrubaTest extends TestCase {
 	    }  
 	    dir.delete();
 	}
+
+//	protected String getJDBCURL() {
+//		return null;
+//	//		return "jdbc:postgresql:tyruba";
+//	}
 	
 	
 }

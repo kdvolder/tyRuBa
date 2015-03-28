@@ -6,22 +6,21 @@
 package tyRuBa.modes;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Vector;
+import annotations.Feature;
 
-public class TupleType extends Type {
+public final class TupleType extends Type {
 
-	private ArrayList parts;
+	private ArrayList<Type> parts;
 
 	/** default Constructor */
 	public TupleType() {
-		parts = new ArrayList();
+		parts = new ArrayList<Type>();
 	}
 	
 	/** Constructor */
 	public TupleType(Type[] types) {
-		parts = new ArrayList(types.length);
+		parts = new ArrayList<Type>(types.length);
 		for (int i = 0; i < types.length; i++) {
 			parts.add(types[i]);
 		}
@@ -182,7 +181,7 @@ public class TupleType extends Type {
 		} else {
 			TupleType other = (TupleType) tother;
 			int size = size();
-			if (size == 0 || size != other.size()) {
+			if (size != other.size()) {
 				return false;
 			} else {
 				for (int i = 0; i < size(); i++) {
@@ -238,26 +237,20 @@ public class TupleType extends Type {
 //			throw new TypeModeError(e, this);
 //		}
 //	}
-
+	
 	public Type getParamType(int pos, TypeConstructor typeConst) {
-		if (! typeConst.hasRepresentation()) {
+//		if (! typeConst.hasRepresentation()) {
 			return get(pos);
-		} else {
-			return getParamType(typeConst.getParameterName(pos),
-					typeConst.getRepresentation());
-		}
+//		} else {
+//			return getParamType(typeConst.getParameterName(pos),
+//					typeConst.getRepresentation());
+//		}
 	}
 
 	public Type getParamType(String currName, Type repAs) {
 		if (repAs instanceof TVar) {
 			if (currName.equals(((TVar) repAs).getName())) {
 				return this; 
-			} else {
-				return null;
-			}
-		} else if (repAs instanceof ListType) {
-			if (size() == 1) {
-				return get(0).getParamType(currName, repAs);
 			} else {
 				return null;
 			}
@@ -285,6 +278,37 @@ public class TupleType extends Type {
 				return result;
 			}
 		}
+	}
+
+	/**
+	 * Project a tuple type by only retaining the elements
+	 * that occur in "Bound" places. Used to obtain the type
+	 * of an index's key.
+	 * 
+	 * @param list
+	 * @return TupleType projected type
+	 */
+	@Feature(names="./partialKey")
+	public TupleType project(BindingList list) {
+		ArrayList<Type> keepTypes = new ArrayList<Type>();
+		for (int i = 0; i < list.size(); i++) {
+			BindingMode b = list.get(i);
+			if (b.isBound())
+				keepTypes.add(get(i));
+			else if (b.usePartialKeyExtraction()) {
+				keepTypes.add(b.partialKeyType(get(i)));
+			}
+		}
+		return new TupleType(keepTypes.toArray(new Type[keepTypes.size()]));
+	}
+
+	@Override
+	public Type makeStrict() {
+		Type[] newParts = new Type[parts.size()];
+		for (int i = 0; i < newParts.length; i++) {
+			newParts[i] = parts.get(i).makeStrict();
+		}
+		return new TupleType(newParts);
 	}
     
 }

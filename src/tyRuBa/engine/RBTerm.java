@@ -1,8 +1,12 @@
 package tyRuBa.engine;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import tyRuBa.engine.visitor.CollectVarsVisitor;
 import tyRuBa.engine.visitor.InstantiateVisitor;
@@ -11,6 +15,7 @@ import tyRuBa.engine.visitor.SubstituteVisitor;
 import tyRuBa.engine.visitor.TermVisitor;
 import tyRuBa.modes.BindingMode;
 import tyRuBa.modes.ConstructorType;
+import tyRuBa.modes.Factory;
 import tyRuBa.modes.ModeCheckContext;
 import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeConstructor;
@@ -86,7 +91,7 @@ public abstract class RBTerm implements Cloneable, Serializable, TwoLevelKey {
 	}
 	
 	/** Return the type of the term */
-	protected abstract Type getType(TypeEnv env) throws TypeModeError;
+	public abstract Type getType(TypeEnv env) throws TypeModeError;
 
 	public String functorTypeConstructor() throws TypeModeError {
 		throw new TypeModeError(this.toString() + " cannot be used as a functor");
@@ -129,10 +134,32 @@ public abstract class RBTerm implements Cloneable, Serializable, TwoLevelKey {
 		return (RBTerm) accept(visitor);
 	}
 	
-	public abstract String toString();
+	public final String toString() {
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		PrintWriter out = new PrintWriter(bytes);
+		unparse(out);
+		out.close();
+		return bytes.toString();
+	}
 
     public boolean isOfType(TypeConstructor t) {
         return false;
     }
+
+	public void unparse(PrintWriter out) {
+		out.print(this.toString());
+	}
+
+//	public boolean isOfType(Type expected) {
+//		assert isGround(); 
+//		Type myType;
+//		try {
+//			myType = getType(Factory.makeTypeEnv());
+//			Map varRenamings = new HashMap();			
+//			return myType.isSubTypeOf(expected, varRenamings);
+//		} catch (TypeModeError e) {
+//			throw new Error("This shouldn't happen",e);
+//		}
+//	}
 	
 }

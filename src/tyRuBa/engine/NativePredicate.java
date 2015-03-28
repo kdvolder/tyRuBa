@@ -6,11 +6,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.Assert;
-
-import org.apache.regexp.RE;
-
 import tyRuBa.engine.compilation.CompilationContext;
 import tyRuBa.engine.compilation.Compiled;
 import tyRuBa.modes.BindingList;
@@ -20,10 +18,11 @@ import tyRuBa.modes.ModeCheckContext;
 import tyRuBa.modes.PredInfo;
 import tyRuBa.modes.PredInfoProvider;
 import tyRuBa.modes.PredicateMode;
+import tyRuBa.modes.TupleType;
 import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeConstructor;
-import tyRuBa.modes.TupleType;
 import tyRuBa.modes.TypeModeError;
+import tyRuBa.util.RegularExpression;
 
 /** 
  * A NativePredicate is a predicate that uses java methods in its evaluation.
@@ -35,7 +34,7 @@ import tyRuBa.modes.TypeModeError;
 public class NativePredicate extends RBComponent {
 
 	private PredInfo predinfo;
-	private ArrayList implementations = new ArrayList();
+	private List<AbstractImplementation> implementations = new ArrayList<AbstractImplementation>();
 	private PredicateIdentifier predId;
 	
 	public Mode getMode() {
@@ -48,31 +47,19 @@ public class NativePredicate extends RBComponent {
 		predinfo = Factory.makePredInfo(null, name, argtypes);
 	}
 	
-	public NativePredicate(String name, Type t) {
+	public NativePredicate(String name, Type... t) {
 		this(name, Factory.makeTupleType(t));
-	}
-
-	public NativePredicate(String name, Type t1, Type t2) {
-		this(name, Factory.makeTupleType(t1, t2));
-	}
-
-	public NativePredicate(String name, Type t1, Type t2, Type t3) {
-		this(name, Factory.makeTupleType(t1, t2, t3));
-	}
-	
-	public NativePredicate(String name, Type t1, Type t2, Type t3, Type t4) {
-		this(name, Factory.makeTupleType(t1, t2, t3, t4));
 	}
 
 	/** add a predicate mode to this native predicate along with the
 	 *  implementation for this mode */
-	public void addMode(Implementation imp) {
+	public void addMode(AbstractImplementation imp) {
 		predinfo.addPredicateMode(imp.getPredicateMode());
 		implementations.add(imp);
 	}
 
 	/** add this predicate to rb */
-	private void addToRuleBase(ModedRuleBaseIndex rb) throws TypeModeError {
+	public void addToRuleBase(ModedRuleBaseIndex rb) throws TypeModeError {
 		rb.insert(predinfo);
 		rb.insert(this);
 	}
@@ -90,8 +77,8 @@ public class NativePredicate extends RBComponent {
 		return implementations.size();
 	}
 	
-	public Implementation getImplementationAt(int pos) {
-		return (Implementation)implementations.get(pos);
+	public AbstractImplementation getImplementationAt(int pos) {
+		return implementations.get(pos);
 	}
 
 	public TupleType getPredType() {
@@ -109,9 +96,9 @@ public class NativePredicate extends RBComponent {
 	public RBComponent convertToMode(PredicateMode mode, ModeCheckContext context) 
 	throws TypeModeError {
 		BindingList targetBindingList = mode.getParamModes();
-		Implementation result = null;
+		AbstractImplementation result = null;
 		for (int i = 0; i < getNumImplementation(); i++) {
-			Implementation candidate = getImplementationAt(i);
+			AbstractImplementation candidate = getImplementationAt(i);
 			if (targetBindingList.satisfyBinding(candidate.getBindingList())) {
 				if (result == null 
 				 || candidate.getMode().isBetterThan(result.getMode())) {
@@ -130,7 +117,7 @@ public class NativePredicate extends RBComponent {
 	public String toString() {
 		StringBuffer result = new StringBuffer(predinfo.getPredId().toString());
 		for (Iterator iter = implementations.iterator(); iter.hasNext();) {
-			Implementation element = (Implementation) iter.next();
+			EagerImplementation element = (EagerImplementation) iter.next();
 			result.append("\n" + element);
 		}
 		return result.toString();
@@ -140,7 +127,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate string_append =	new NativePredicate("string_append", 
 			Type.string, Type.string, Type.string);
 
-		string_append.addMode(new Implementation("BBF", "DET") {
+		string_append.addMode(new EagerImplementation("BBF", "DET") {
 			public void doit(RBTerm[] args) {
 				String s1 = (String) args[0].up();
 				String s2 = (String) args[1].up();
@@ -148,7 +135,7 @@ public class NativePredicate extends RBComponent {
 			}
 		}); 
 
-		string_append.addMode(new Implementation("FFB", "MULTI") {
+		string_append.addMode(new EagerImplementation("FFB", "MULTI") {
 			public void doit(RBTerm[] args) {
 				String s = (String) args[0].up();
 				int len = s.length();
@@ -158,7 +145,7 @@ public class NativePredicate extends RBComponent {
 			}
 		}); 
 
-		string_append.addMode(new Implementation("BFB", "SEMIDET") {
+		string_append.addMode(new EagerImplementation("BFB", "SEMIDET") {
 			public void doit(RBTerm[] args) {
 				String s1 = (String) args[0].up();
 				String s3 = (String) args[1].up();
@@ -167,7 +154,7 @@ public class NativePredicate extends RBComponent {
 			}
 		}); 
 
-		string_append.addMode(new Implementation("FBB", "SEMIDET") {
+		string_append.addMode(new EagerImplementation("FBB", "SEMIDET") {
 			public void doit(RBTerm[] args) {
 				String s2 = (String) args[0].up();
 				String s3 = (String) args[1].up();
@@ -183,7 +170,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate string_length =	new NativePredicate("string_length",
 			Type.string, Type.integer);
 
-		string_length.addMode(new Implementation("BF", "DET") {
+		string_length.addMode(new EagerImplementation("BF", "DET") {
 			public void doit(RBTerm[] args) {
 				String s = (String) args[0].up();
 				addSolution(new Integer(s.length()));
@@ -197,7 +184,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate string_index_split = new NativePredicate("string_index_split",
 			Type.integer, Type.string, Type.string, Type.string);
 
-		string_index_split.addMode(new Implementation("BBFF", "SEMIDET") {
+		string_index_split.addMode(new EagerImplementation("BBFF", "SEMIDET") {
 			public void doit(RBTerm[] args) {
 				int where = ((Integer) args[0].up()).intValue();
 				String to_split = (String) args[1].up();
@@ -215,7 +202,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate string_split_at_last = new NativePredicate("string_split_at_last", 
 			Type.string, Type.string, Type.string, Type.string);
 
-		string_split_at_last.addMode(new Implementation("BBFF", "DET") {
+		string_split_at_last.addMode(new EagerImplementation("BBFF", "DET") {
 			public void doit(RBTerm[] args) {
 				String separator = (String) args[0].up();
 				String to_split = (String) args[1].up();
@@ -229,7 +216,7 @@ public class NativePredicate extends RBComponent {
 			}
 		});
 
-		string_split_at_last.addMode(new Implementation("BFBB", "DET") {
+		string_split_at_last.addMode(new EagerImplementation("BFBB", "DET") {
 			public void doit(RBTerm[] args) {
 				String separator = (String) args[0].up();
 				String start = (String) args[1].up();
@@ -263,7 +250,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate string_replace = new NativePredicate("string_replace",
 			Type.string, Type.string, Type.string, Type.string);
 
-		string_replace.addMode(new Implementation("BBBF", "DET") {
+		string_replace.addMode(new EagerImplementation("BBBF", "DET") {
 			public void doit(RBTerm[] args) {
 				String r1 = (String) args[0].up();
 				String r2 = (String) args[1].up();
@@ -272,7 +259,7 @@ public class NativePredicate extends RBComponent {
 			}
 		}); 
 
-		string_replace.addMode(new Implementation("BBFB", "DET") {
+		string_replace.addMode(new EagerImplementation("BBFB", "DET") {
 			public void doit(RBTerm[] args) {
 				String r1 = (String) args[0].up();
 				String r2 = (String) args[1].up();
@@ -288,7 +275,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate to_lower_case = new NativePredicate("to_lower_case",
 			Type.string, Type.string);
 
-		to_lower_case.addMode(new Implementation("BF", "DET") {
+		to_lower_case.addMode(new EagerImplementation("BF", "DET") {
 			public void doit(RBTerm[] args) {
 				String s = (String) args[0].up();
 				addSolution(s.toLowerCase());
@@ -302,7 +289,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate to_upper_case =	new NativePredicate("to_upper_case",
 			Type.string, Type.string);
 
-		to_upper_case.addMode(new Implementation("BF", "DET") {
+		to_upper_case.addMode(new EagerImplementation("BF", "DET") {
 			public void doit(RBTerm[] args) {
 				String s = (String) args[0].up();
 				addSolution(s.toUpperCase());
@@ -316,7 +303,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate capitalize = new NativePredicate("capitalize", 
 			Type.string, Type.string);
 
-		capitalize.addMode(new Implementation("BF", "DET") {
+		capitalize.addMode(new EagerImplementation("BF", "DET") {
 			public void doit(RBTerm[] args) {
 				String s = (String) args[0].up();
 				if (s.length() > 0)
@@ -331,7 +318,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate decapitalize = new NativePredicate("decapitalize",
 			Type.string, Type.string);
 
-		decapitalize.addMode(new Implementation("BF", "DET") {
+		decapitalize.addMode(new EagerImplementation("BF", "DET") {
 			public void doit(RBTerm[] args) {
 				String s = (String) args[0].up();
 				if (s.length() > 0)
@@ -346,7 +333,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate string_repeat = new NativePredicate("string_repeat",
 			Type.integer, Type.string, Type.string);
 
-		string_repeat.addMode(new Implementation("BBF", "DET") {
+		string_repeat.addMode(new EagerImplementation("BBF", "DET") {
 			public void doit(RBTerm[] args) {
 				int num = ((Integer) args[0].up()).intValue();
 				String rep = (String) args[1].up();
@@ -368,7 +355,7 @@ public class NativePredicate extends RBComponent {
 		String javaName = t.getName();
 		NativePredicate type_test = new NativePredicate(id.getName(), Factory.makeAtomicType(t));
 		
-		type_test.addMode(new Implementation("B", "SEMIDET") {
+		type_test.addMode(new EagerImplementation("B", "SEMIDET") {
 			public void doit(RBTerm[] args) {
                 
 				if (args[0].isOfType(t)) {
@@ -384,7 +371,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate range = new NativePredicate("range",
 			Type.integer, Type.integer, Type.integer);
 
-		range.addMode(new Implementation("BBF", "NONDET") {
+		range.addMode(new EagerImplementation("BBF", "NONDET") {
 			public void doit(RBTerm[] args) {
 				int lo = ((Integer) args[0].up()).intValue();
 				int high = ((Integer) args[1].up()).intValue();
@@ -401,7 +388,7 @@ public class NativePredicate extends RBComponent {
 	public static void defineGreater(ModedRuleBaseIndex rb) throws TypeModeError {
 		NativePredicate greater = new NativePredicate("greater", Type.integer, Type.integer);
 
-		greater.addMode(new Implementation("BB", "SEMIDET") {
+		greater.addMode(new EagerImplementation("BB", "SEMIDET") {
 			public void doit(RBTerm[] args) {
 				int high = ((Integer) args[0].up()).intValue();
 				int lo = ((Integer) args[1].up()).intValue();
@@ -417,7 +404,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate sum = new NativePredicate("sum",
 			Type.integer, Type.integer, Type.integer);
 
-		sum.addMode(new Implementation("BBF", "DET") {
+		sum.addMode(new EagerImplementation("BBF", "DET") {
 			public void doit(RBTerm[] args) {
 				int v1 = ((Integer) args[0].up()).intValue();
 				int v2 = ((Integer) args[1].up()).intValue();
@@ -425,7 +412,7 @@ public class NativePredicate extends RBComponent {
 			}
 		}); 
 
-		sum.addMode(new Implementation("BFB", "DET") {
+		sum.addMode(new EagerImplementation("BFB", "DET") {
 			public void doit(RBTerm[] args) {
 				int v1 = ((Integer) args[0].up()).intValue();
 				int v2 = ((Integer) args[1].up()).intValue();
@@ -433,7 +420,7 @@ public class NativePredicate extends RBComponent {
 			}
 		}); 
 
-		sum.addMode(new Implementation("FBB", "DET") {
+		sum.addMode(new EagerImplementation("FBB", "DET") {
 			public void doit(RBTerm[] args) {
 				int v1 = ((Integer) args[0].up()).intValue();
 				int v2 = ((Integer) args[1].up()).intValue();
@@ -448,7 +435,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate mul = new NativePredicate("mul", 
 			Type.integer, Type.integer, Type.integer);
 
-		mul.addMode(new Implementation("BBF", "DET") {
+		mul.addMode(new EagerImplementation("BBF", "DET") {
 			public void doit(RBTerm[] args) {
 				int v1 = ((Integer) args[0].up()).intValue();
 				int v2 = ((Integer) args[1].up()).intValue();
@@ -456,7 +443,7 @@ public class NativePredicate extends RBComponent {
 			}
 		}); 
 
-		mul.addMode(new Implementation("FBB", "SEMIDET") {
+		mul.addMode(new EagerImplementation("FBB", "SEMIDET") {
 			public void doit(RBTerm[] args) {
 				int v2 = ((Integer) args[0].up()).intValue();
 				int v3 = ((Integer) args[1].up()).intValue();
@@ -470,7 +457,7 @@ public class NativePredicate extends RBComponent {
 			}
 		}); 
 
-		mul.addMode(new Implementation("BFB", "SEMIDET") {
+		mul.addMode(new EagerImplementation("BFB", "SEMIDET") {
 			public void doit(RBTerm[] args) {
 				int v1 = ((Integer) args[0].up()).intValue();
 				int v3 = ((Integer) args[1].up()).intValue();
@@ -494,7 +481,7 @@ public class NativePredicate extends RBComponent {
 	public static void defineDebugPrint(ModedRuleBaseIndex rb) throws TypeModeError {
 		NativePredicate debug_print = new NativePredicate("debug_print", Type.object);
 
-		debug_print.addMode(new Implementation("B", "DET") {
+		debug_print.addMode(new EagerImplementation("B", "DET") {
 			public void doit(RBTerm[] args) {
 				String msg = args[0].up().toString();
 				debug_print(msg);
@@ -508,7 +495,7 @@ public class NativePredicate extends RBComponent {
 	public static void defineThrowError(ModedRuleBaseIndex rb) throws TypeModeError {
 		NativePredicate throw_error = new NativePredicate("throw_error", Type.string);
 
-		throw_error.addMode(new Implementation("B", "FAIL") {
+		throw_error.addMode(new EagerImplementation("B", "FAIL") {
 			public void doit(RBTerm[] args) {
 				String msg = (String)args[0].up();
 				throw new Error(msg);
@@ -522,7 +509,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate write_file = new NativePredicate("write_file",
 			Type.string, Type.string);
 
-		write_file.addMode(new Implementation("BB", "SEMIDET") {
+		write_file.addMode(new EagerImplementation("BB", "SEMIDET") {
 			public void doit(RBTerm[] args) {
 				String filename = (String)args[0].up();
 				String contents = (String)args[1].up();
@@ -549,7 +536,7 @@ public class NativePredicate extends RBComponent {
 	public static void defineWriteOutput(final QueryEngine qe,ModedRuleBaseIndex rb) throws TypeModeError {
 		NativePredicate write_output = new NativePredicate("write_output", Type.string);
 
-		write_output.addMode(new Implementation("B", "DET") {
+		write_output.addMode(new EagerImplementation("B", "DET") {
 			public void doit(RBTerm[] args) {
 				String contents = (String)args[0].up();
 				qe.output().print(contents);
@@ -563,7 +550,7 @@ public class NativePredicate extends RBComponent {
 	public static void defineFileseparator(ModedRuleBaseIndex rb) throws TypeModeError {
 		NativePredicate fileseparator = new NativePredicate("fileseparator", Type.string);
 
-		fileseparator.addMode(new Implementation("F", "DET") {
+		fileseparator.addMode(new EagerImplementation("F", "DET") {
 			public void doit(RBTerm[] args) {
 				addSolution(System.getProperty("file.separator"));
 			}
@@ -576,7 +563,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate hash_value = new NativePredicate("hash_value",
 			Type.object, Type.integer);
 
-		hash_value.addMode(new Implementation("BF", "DET") {
+		hash_value.addMode(new EagerImplementation("BF", "DET") {
 			public void doit(RBTerm[] args) {
 				addSolution(new Integer(args[0].up().hashCode()));
 			}
@@ -590,7 +577,7 @@ public class NativePredicate extends RBComponent {
 			Factory.makeListType(Factory.makeTVar("element")), 
 			Type.integer);
 
-		length.addMode(new Implementation("BF", "DET") {
+		length.addMode(new EagerImplementation("BF", "DET") {
 			public void doit(RBTerm[] args) {
 				Object arg = args[0].up();
 				if (arg instanceof String && arg.equals("[]")) {
@@ -620,14 +607,14 @@ public class NativePredicate extends RBComponent {
 
 	public static void defineReMatch(ModedRuleBaseIndex rb) throws TypeModeError {
 		NativePredicate re_match = new NativePredicate("re_match", 
-			Factory.makeStrictAtomicType(Factory.makeTypeConstructor(org.apache.regexp.RE.class)),
+			Factory.makeStrictAtomicType(Factory.makeTypeConstructor(tyRuBa.util.RegularExpression.class)),
 			Type.string);
 
-		re_match.addMode(new Implementation("BB", "SEMIDET") {
+		re_match.addMode(new EagerImplementation("BB", "SEMIDET") {
 			public void doit(RBTerm[] args) {
-				RE re = (RE) args[0].up();
+				RegularExpression re = (RegularExpression) args[0].up();
 				String s = (String) args[1].up();
-				if (re.match(s)) 
+				if (re.matches(s)) 
 					addSolution();
 			}
 		}); 
@@ -640,7 +627,7 @@ public class NativePredicate extends RBComponent {
 		NativePredicate convertTo = new NativePredicate("convertTo" + t.getName(),
 			Factory.makeAtomicType(t), Factory.makeStrictAtomicType(t));
 			
-		convertTo.addMode(new Implementation("BF", "SEMIDET") {
+		convertTo.addMode(new EagerImplementation("BF", "SEMIDET") {
 			public void doit(RBTerm[] args) {
                 
                 if (args[0].isOfType(t)) {
@@ -649,7 +636,7 @@ public class NativePredicate extends RBComponent {
 			}
 		});
 		 
-		convertTo.addMode(new Implementation("FB", "DET") {
+		convertTo.addMode(new EagerImplementation("FB", "DET") {
 			public void doit(RBTerm[] args) {
 				addSolution(args[0].up());
 			}

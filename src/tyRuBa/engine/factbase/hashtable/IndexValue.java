@@ -5,6 +5,7 @@ package tyRuBa.engine.factbase.hashtable;
 
 import java.io.Serializable;
 
+import tyRuBa.engine.IValidator;
 import tyRuBa.engine.RBTuple;
 import tyRuBa.engine.Validator;
 import tyRuBa.engine.factbase.ValidatorManager;
@@ -15,7 +16,7 @@ import tyRuBa.engine.factbase.ValidatorManager;
  * @category FactBase
  * @author riecken
  */
-public class IndexValue implements Serializable {
+class IndexValue implements Serializable {
 
     /** handle of the validator for the bucket that this fact resides in. */
     private long validatorHandle;
@@ -24,7 +25,7 @@ public class IndexValue implements Serializable {
     private RBTuple parts;
 
     /** Make an index value with the specified validator and tuple. */
-    public static IndexValue make(Validator v, RBTuple parts) {
+    public static IndexValue make(IValidator v, RBTuple parts) {
         if (v == null) {
             return new IndexValue(0, parts);
         } else {
@@ -61,7 +62,7 @@ public class IndexValue implements Serializable {
         if (validatorHandle == 0) {
             return true;
         } else {
-            Validator v = vm.get(validatorHandle);
+            IValidator v = vm.get(validatorHandle);
             if (v == null || !v.isValid()) {
                 return false;
             }

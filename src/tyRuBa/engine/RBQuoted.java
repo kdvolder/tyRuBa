@@ -1,5 +1,7 @@
 package tyRuBa.engine;
 
+import java.io.PrintWriter;
+
 import tyRuBa.engine.visitor.TermVisitor;
 import tyRuBa.modes.Factory;
 import tyRuBa.modes.Type;
@@ -18,8 +20,11 @@ public class RBQuoted extends RBAbstractPair {
 		return quotedToString();
 	}
 	
-	public String toString() {
-		return "{" + getQuotedParts().quotedToString() + "}";
+	@Override
+	public void unparse(PrintWriter out) {
+		out.print("{");
+		out.print(getQuotedParts().quotedToString());
+		out.print("}");
 	}
 
 	public String quotedToString() {
@@ -30,7 +35,7 @@ public class RBQuoted extends RBAbstractPair {
 		return getCdr();
 	}
 	
-	protected Type getType(TypeEnv env) throws TypeModeError {
+	public Type getType(TypeEnv env) throws TypeModeError {
 		return Factory.makeSubAtomicType(Factory.makeTypeConstructor(String.class));
 	}
 
@@ -51,4 +56,5 @@ public class RBQuoted extends RBAbstractPair {
     public Object getSecond() {
         return getCdr().getSecond();
     }
+
 }

@@ -13,6 +13,7 @@ import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.QueryEngine;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RBTuple;
+import tyRuBa.engine.factbase.FileBasedPersistence;
 import tyRuBa.engine.factbase.NamePersistenceManager;
 import tyRuBa.engine.factbase.ValidatorManager;
 import tyRuBa.modes.BindingList;
@@ -30,7 +31,7 @@ import tyRuBa.util.pager.Pager.ResourceId;
  * @category FactBase
  * @author riecken
  */
-public final class Index {
+final class Index {
 
     /**
      * Wraps a HashMap in a Pager resource. This wrapper also knows how to clean
@@ -94,8 +95,8 @@ public final class Index {
     /** Whether we wish to check for duplicates. */
     private boolean checkDet;
 
-    /** Query engine that this index is in. */
-    private QueryEngine engine;
+    /** The persistence strategy this index is a part of */
+    private FileBasedPersistence perst;
 
     /** ValidatorManager to validate facts. */
     private ValidatorManager validatorManager;
@@ -128,7 +129,7 @@ public final class Index {
      */
     Index(PredicateMode mode, Location storageLocation, QueryEngine engine, String predicateName) {
         this.validatorManager = engine.getFrontEndValidatorManager();
-        this.engine = engine;
+        this.perst = (FileBasedPersistence) engine.getPersistenceStrategy();
         this.storageLocation = storageLocation;
         this.predicateName = predicateName;
         this.nameManager = engine.getFrontendNamePersistenceManager();
@@ -148,21 +149,10 @@ public final class Index {
     }
 
     /**
-     * Creates an Index with a specific NamePersistenceManager and
-     * ValidatorManager (used for fact libraries).
-     */
-    Index(PredicateMode mode, Location storageLocation, QueryEngine engine, String predicateName,
-            NamePersistenceManager nameManager, ValidatorManager validatorManager) {
-        this(mode, storageLocation, engine, predicateName);
-        this.nameManager = nameManager;
-        this.validatorManager = validatorManager;
-    }
-
-    /**
      * Retrieves the Pager from the QueryEngine.
      */
     private Pager getPager() {
-        return engine.getFrontEndPager();
+        return perst.getPager();
     }
 
     /**
@@ -245,7 +235,7 @@ public final class Index {
                     if (checkDet) { //SemiDet/Det uniqueness check
                         if (!idxWhatIsThere.getParts().equals(value.getParts())) {
                             throw new Error(
-                            		"OOPS!! More than one fact has been inserted into a Det/SemiDet predicate ("+predicateName+") present = "
+                            		"OOPS!! Insertion of duplicate data into Det/SemiDet predicate ("+predicateName+") present = "
                                             + idxWhatIsThere.getParts() + " ||| new = " + value.getParts() + key);
                         }
                     }
@@ -304,7 +294,7 @@ public final class Index {
 
     }
 
-    /** Returns a match for a SemiDet / Det exectution. */
+    /** Returns a match for a SemiDet / Det execution. */
     public RBTuple getMatchSingle(RBTuple inputPars) {
         return (RBTuple) getMatchElementSource(inputPars).firstElementOrNull();
     }

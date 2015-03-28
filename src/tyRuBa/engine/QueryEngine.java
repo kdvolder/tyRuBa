@@ -7,13 +7,13 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 
-import tyRuBa.engine.factbase.FactLibraryManager;
 import tyRuBa.engine.factbase.NamePersistenceManager;
+import tyRuBa.engine.factbase.PersistenceStrategy;
 import tyRuBa.engine.factbase.ValidatorManager;
-import tyRuBa.modes.ConstructorType;
 import tyRuBa.modes.CompositeType;
+import tyRuBa.modes.ConstructorType;
 import tyRuBa.modes.Factory;
-import tyRuBa.modes.ListType;
+import tyRuBa.modes.JavaTypeConstructor;
 import tyRuBa.modes.PredInfo;
 import tyRuBa.modes.TupleType;
 import tyRuBa.modes.Type;
@@ -21,17 +21,16 @@ import tyRuBa.modes.TypeConstructor;
 import tyRuBa.modes.TypeEnv;
 import tyRuBa.modes.TypeMapping;
 import tyRuBa.modes.TypeModeError;
-import tyRuBa.modes.UserDefinedTypeConstructor;
 import tyRuBa.parser.ParseException;
 import tyRuBa.parser.TyRuBaParser;
 import tyRuBa.tdbc.PreparedInsert;
 import tyRuBa.tdbc.PreparedQuery;
 import tyRuBa.util.Action;
-import tyRuBa.util.DelayedElementSource;
 import tyRuBa.util.ElementSource;
 import tyRuBa.util.NullQueryLogger;
 import tyRuBa.util.QueryLogger;
 import tyRuBa.util.pager.Pager;
+import annotations.Export;
 
 /**
  * @author kdvolder
@@ -64,22 +63,28 @@ public abstract class QueryEngine {
 	}
 
 	/** Every QueryEngine must have a frontend */
-	abstract FrontEnd frontend();
+	public abstract FrontEnd frontend();
 
-	abstract ModedRuleBaseIndex rulebase();
+	public abstract ModedRuleBaseIndex rulebase();
 
 	public PrintStream output() {
 		return frontend().os;
 	}
 
-	/** Gets the storage path for this query engine (will be where
+	/** 
+	 * Gets the storage path for this query engine (will be where
 	 * the factbase is stored
 	 */
 	public abstract String getStoragePath();
+	
+	/**
+	 * @category JDBC
+	 */
+	public abstract PersistenceStrategy getPersistenceStrategy();
 
 	public abstract String getIdentifier();
 
-	public int getFrontEndCacheSize() {
+	public long getFrontEndCacheSize() {
 		return frontend().getCacheSize();
 	}
 
@@ -91,16 +96,8 @@ public abstract class QueryEngine {
 		return frontend().getNamePersistenceManager();
 	}
 
-	public FactLibraryManager getFrontEndFactLibraryManager() {
-		return frontend().getFactLibraryManager();
-	}
-
 	public long getFrontEndLastBackupTime() {
 		return frontend().getLastBackupTime();
-	}
-
-	public Pager getFrontEndPager() {
-		return frontend().getPager();
 	}
 
 	/** Load a file from the default library directory (stored somewhere
@@ -146,42 +143,11 @@ public abstract class QueryEngine {
 	 bindings for the values in the query */
 	public ElementSource frameQuery(RBExpression e) throws TypeModeError,
 			ParseException {
-		frontend().autoUpdateBuckets();
-		final PreparedQuery runable = e.prepareForRunning(this);
+		final PreparedQuery runable = e.prepareForRunning(this,true);
 		//		System.out.println("--- query result structure dump ----");
 		//		System.out.println(result);
 		//		System.out.println("------------------------------------");
-		logger.logQuery(e);
-		synchronized (frontend()) {
-			// CAUTION! 
-			// In very rare occasions, there is potential problem that
-			// something like outdaing buckets or saving factbase comes
-			// in between the end of runable.start() and synchronizeOn.
-			// Since not all elementsources are 100% lazy the start()
-			// invocation may actually have
-			// started working on the first element. If the engine state
-			// is altered in between there is thus
-			// a potential inconsistency! 
-			// So we must guard against this problem by making sure
-			// the source is fully lazy by using a DelayedElementSource here.
-			frontend().getSynchPolicy().newSource();
-			ElementSource result = new DelayedElementSource() {
-
-				protected ElementSource produce() {
-					//System.err.println("[INFO] - QueryEngine - Starting Query");
-					return runable.start();
-				}
-
-				protected String produceString() {
-					// TODO Auto-generated method stub
-					return null;
-				}
-			};
-			frontend().getSynchPolicy().sourceDone();
-			ElementSource ret = result.synchronizeOn(frontend());
-			//System.err.println("[INFO] - QueryEngine - Done Query");
-			return ret;
-		}
+		return runable.start();
 	}
 
 	/** Solve a query and return an enumeration of frames with 
@@ -240,16 +206,12 @@ public abstract class QueryEngine {
 	 */
 	public String getStringProperty(Object obj, String propertyName) {
 		RBTerm res = getProperty(obj, propertyName);
-		String result = "null";
-		if (res != null) {
+		if (res==null)
+			return "null";
+		else {
 			Object upped = res.up();
-			if (upped instanceof UppedTerm) {
-				result = res.toString();
-			} else {
-				result = upped.toString();
-			}
+			return upped.toString();
 		}
-		return result;
 	}
 
 	/**
@@ -281,31 +243,31 @@ public abstract class QueryEngine {
 	public RBExpression makeExpression(String expression)
 			throws ParseException, TypeModeError {
 		TyRuBaParser parser = new TyRuBaParser(new ByteArrayInputStream(
-				expression.getBytes()), System.err);
+				expression.getBytes()), System.err, null);
 		return parser.Expression(this);
 	}
 
 	private RBPredicateExpression makePredExpression(String expression)
 			throws ParseException, TypeModeError {
 		TyRuBaParser parser = new TyRuBaParser(new ByteArrayInputStream(
-				expression.getBytes()), System.err);
+				expression.getBytes()), System.err, null);
 		return parser.SimplePredicate(this);
 	}
 
-	/** Parse and interpret from a string **/
-	//moved from FrontEnd to make available for buckets)
-	public static RBTerm makeTerm(String term) throws ParseException,
-			TypeModeError {
-		//TODO: This method probably should not be used... if used it can not
-		// parse userDefined type objects because those can only be parsed
-		// in the context of a query engine that know about their definitions.
-		TyRuBaParser parser = new TyRuBaParser(new ByteArrayInputStream(term
-				.getBytes()), System.err);
-		return parser.Term(new FrontEnd(false));
-	}
+//	/** Parse and interpret from a string **/
+//	//moved from FrontEnd to make available for buckets)
+//	public static RBTerm makeTerm(String term) throws ParseException,
+//			TypeModeError {
+//		//TODO: This method probably should not be used... if used it can not
+//		// parse userDefined type objects because those can only be parsed
+//		// in the context of a query engine that know about their definitions.
+//		TyRuBaParser parser = new TyRuBaParser(new ByteArrayInputStream(term
+//				.getBytes()), System.err);
+//		return parser.Term(new FrontEnd(false));
+//	}
 
-	public TypeConstructor findType(String typeName) throws TypeModeError {
-		TypeConstructor result = rulebase().findType(typeName);
+	public TypeConstructor findTypeConst(String typeName) throws TypeModeError {
+		TypeConstructor result = rulebase().findTypeConst(typeName);
 		if (result == null) {
 			throw new TypeModeError("Unknown type: " + typeName);
 		} else {
@@ -324,6 +286,12 @@ public abstract class QueryEngine {
 		}
 	}
 
+	@Export(to="./BDB")
+	public Type findType(String name) throws TypeModeError {
+		TypeConstructor tc = findTypeConst(name);
+		return tc.apply(Factory.makeTupleType(), false);
+	}
+
 	public ConstructorType findConstructorType(FunctorIdentifier id)
 			throws TypeModeError {
 		ConstructorType typeConst = rulebase().findConstructorType(id);
@@ -333,7 +301,7 @@ public abstract class QueryEngine {
 			return typeConst;
 		}
 	}
-
+	
 	public void addTypePredicate(TypeConstructor TypeConstructor,
 			ArrayList subTypes) {
 		rulebase().addTypePredicate(TypeConstructor, subTypes);
@@ -353,16 +321,16 @@ public abstract class QueryEngine {
 		rulebase().addFunctorConst(repAs, type);
 	}
 
-	public PreparedQuery prepareForRunning(RBExpression e) throws TypeModeError {
-		return e.prepareForRunning(this);
+	public PreparedQuery prepareForRunning(RBExpression e, boolean typeCheck) throws TypeModeError, ParseException {
+		return e.prepareForRunning(this, typeCheck);
 	}
 
-	public PreparedQuery prepareForRunning(String queryTemplate)
+	public PreparedQuery prepareForRunning(String queryTemplate, boolean typeCheck)
 			throws ParseException, TypeModeError {
 		RBExpression exp = TyRuBaParser.parseExpression(
 				new ByteArrayInputStream(queryTemplate.getBytes()), System.err,
 				this);
-		return prepareForRunning(exp);
+		return prepareForRunning(exp, typeCheck);
 	}
 
 	public PreparedInsert prepareForInsertion(String factStr)
@@ -381,7 +349,7 @@ public abstract class QueryEngine {
 	public RBTerm makeTermFromString(String term) throws ParseException,
 			TypeModeError {
 		TyRuBaParser parser = new TyRuBaParser(new ByteArrayInputStream(term
-				.getBytes()), System.err);
+				.getBytes()), System.err, null);
 		return parser.Term(this);
 	}
 
@@ -396,36 +364,33 @@ public abstract class QueryEngine {
 
 	public RBTerm makeJavaObject(Object _o) {
 		TypeMapping mapping = findTypeMapping(_o.getClass());
-	    if (mapping == null) {
-	        return RBCompoundTerm.makeJava(_o);
-	    }
-	    else {
-	    		Object obj_rep = mapping.toTyRuBa(_o);
-	    		RBTerm term_rep = null;
-	    		if (obj_rep instanceof Object[]) {
-	    			Object[] obj_arr = (Object[])obj_rep;
-	    			RBTerm[] term_arr = new RBTerm[obj_arr.length];
-	    			for (int i = 0; i < term_arr.length; i++) {
-	    				term_arr[i] = makeJavaObject(obj_arr[i]);
+		if (mapping == null) {
+			return RBCompoundTerm.makeJava(_o);
+		}
+		else {
+			Object obj_rep = mapping.toTyRuBa(_o);
+			RBTerm term_rep = null;
+			if (obj_rep instanceof Object[]) {
+				Object[] obj_arr = (Object[])obj_rep;
+				RBTerm[] term_arr = new RBTerm[obj_arr.length];
+				for (int i = 0; i < term_arr.length; i++) {
+					term_arr[i] = makeJavaObject(obj_arr[i]);
 				}
 
-	    			ConstructorType consType = mapping.getFunctor();
-	    			Type repType = consType.getTypeConst().getRepresentation();
-	    			if (repType instanceof ListType) {
-	    				term_rep = FrontEnd.makeList(term_arr);
+				ConstructorType consType = mapping.getFunctor();
+				Type repType = consType.getTypeConst().getRepresentation();
+				if (repType instanceof TupleType) {
+					term_rep = FrontEnd.makeTuple(term_arr);
 				}
-	    			else if (repType instanceof TupleType) {
-	    				term_rep = FrontEnd.makeTuple(term_arr);
-	    			}
-	    			else
-	    				throw new Error("Cannot convert java object "+term_rep+" to "+ repType);
-	    		}
-	    		else {
-	    			term_rep = makeJavaObject(obj_rep);
-	    		}
-	    		
-	        return mapping.getFunctor().apply(term_rep);
-	    }
+				else
+					throw new Error("Cannot convert java object "+term_rep+" to "+ repType);
+			}
+			else {
+				term_rep = makeJavaObject(obj_rep);
+			}
+
+			return mapping.getFunctor().apply(term_rep);
+		}
 	}	
 	
 	public RBTerm makeTypeCast(TypeConstructor toType, Object value) {
@@ -433,9 +398,9 @@ public abstract class QueryEngine {
 				.apply(RBCompoundTerm.makeJava(value));
 	}
 
-	/**	
-	 * @codegroup metadata
-	 */
-	public abstract void enableMetaData();
+//	/**	
+//	 * @codegroup metadata
+//	 */
+//	public abstract void enableMetaData();
 
 }

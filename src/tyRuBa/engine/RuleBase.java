@@ -14,9 +14,6 @@ import tyRuBa.modes.TypeModeError;
 
 /**
  * A RuleBase stores a collection of Logic inference rules and facts.
- * It has a dependency tracking mechanism that holds on to its
- * dependents weakly. Dependents are notified of a change to
- * the rulebase by means of an update message.
  */
 public abstract class RuleBase {
 
@@ -89,15 +86,9 @@ public abstract class RuleBase {
 
 	private PredicateMode predMode;
 	
-	/**
-	 * @category preparedSQLQueries
-	 */
-	private boolean isPersistent;
-
-	protected RuleBase(QueryEngine engine,PredicateMode predMode,boolean isSQLAble) {
+	protected RuleBase(QueryEngine engine,PredicateMode predMode) {
 		this.engine = engine;
 		this.predMode = predMode;
-		this.isPersistent = isSQLAble;
 	}
 
 	/** return the predicate mode of this moded rulebase */
@@ -178,12 +169,5 @@ public abstract class RuleBase {
 	}
 
 	protected abstract Compiled compile(CompilationContext context);
-
-	/**
-	* @category preparedSQLQueries
-	*/
-    public boolean isPersistent() {
-        return isPersistent;
-    }
 
 }

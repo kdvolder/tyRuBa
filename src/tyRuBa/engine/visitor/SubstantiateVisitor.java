@@ -3,6 +3,7 @@ package tyRuBa.engine.visitor;
 import tyRuBa.engine.Frame;
 import tyRuBa.engine.RBCompoundTerm;
 import tyRuBa.engine.RBIgnoredVariable;
+import tyRuBa.engine.RBJavaObjectCompoundTerm;
 import tyRuBa.engine.RBPair;
 import tyRuBa.engine.RBQuoted;
 import tyRuBa.engine.RBTemplateVar;
@@ -30,6 +31,10 @@ public class SubstantiateVisitor implements TermVisitor {
 //			(RBTerm)compoundTerm.getArgsForVisitor().accept(this));
 	}
 
+	public Object visit(RBJavaObjectCompoundTerm compoundTerm) {
+		return compoundTerm;
+	}
+	
 	public Object visit(RBTuple tuple) {
 		RBTerm[] subterms = new RBTerm[tuple.getNumSubterms()];
 		for (int i = 0; i < subterms.length; i++) {

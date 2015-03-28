@@ -6,7 +6,14 @@
  */
 package tyRuBa.tests;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 import tyRuBa.engine.FrontEnd;
+import tyRuBa.engine.TyRuBaConf;
+import tyRuBa.modes.Type;
+import tyRuBa.modes.TypeModeError;
+import tyRuBa.parser.ParseException;
 import tyRuBa.tdbc.Connection;
 import tyRuBa.tdbc.Insert;
 import tyRuBa.tdbc.PreparedInsert;
@@ -22,11 +29,12 @@ import junit.framework.TestCase;
 public class TDBCTest extends TestCase {
 
 	Connection conn;
+	private FrontEnd fe;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		FrontEnd fe = new FrontEnd(true);
+		fe = new FrontEnd(new TyRuBaConf());
 
 		fe.parse("TYPE Method  AS String");
 		fe.parse("TYPE Field   AS String");
@@ -39,15 +47,64 @@ public class TDBCTest extends TestCase {
 				 "MODES (F,F) IS NONDET END");
 		fe.parse("fooMem(f_booh::Field,f_booh).");
 		fe.parse("fooMem(m_booh::Method,m_booh).");
+		
+		
+		fe.parse("method :: Method " +
+				"MODES (F) IS NONDET END");
+		fe.parse("field :: Field " +
+				"MODES (F) IS NONDET END");
+		fe.parse("call :: Method, Method " +
+				"MODES (F,F) IS NONDET END");
+		
+		fe.parse("method(Dana::Method).");
+		fe.parse("method(Kris::Method).");
+		fe.parse("field(CS::Field).");
+		fe.parse("call(Dana::Method, Kris::Method).");
 
 		conn = new Connection(fe);
 	}
 
 
-//	protected void tearDown() throws Exception {
-//		super.tearDown();
-//	}
+	protected void tearDown() throws Exception {
+		fe.shutdown();
+		super.tearDown();
+	}
+	
+	public void testNoTypeCheckList() throws Exception {
+		fe.parse("listOfStuff :: String, [String] " +
+		"MODES (F,F) IS NONDET END");
+		fe.parse("listOfStuff(Cool,[Check,this,out]).");
 
+		PreparedQuery stat = conn.prepareNoTypeCheckQuery("listOfStuff(?x,!l)");
+		String[] l = new String[] {"Check","this","out"};
+		stat.put("!l",l);
+		ResultSet results = stat.executeQuery();
+		int count = 0;
+		while (results.next()) {
+			count++;
+			String n = results.getString("?x");
+			assertEquals("Cool",n);
+		}
+		assertEquals(1,count);
+	}
+
+    public void testNoTypeCheck() {
+    	try {
+			PreparedQuery q = conn.prepareNoTypeCheckQuery("fooZorba(?x)");
+	    	fail("Should have undefined predicate error");
+		} catch (TyrubaException e) {
+			assertTrue(e.getMessage().contains("fooZorba"));
+		}
+    }
+    
+    public void testAnnoyingDNFConversion() throws Exception {
+		PreparedQuery q = conn.prepareNoTypeCheckQuery("(method(?x);field(?x)),call(?x,?)");
+		ResultSet r = q.executeQuery();
+		assertTrue(r.next());
+		assertEquals(conn.parseTerm("Dana::Method"), r.getObject("?x"));
+		assertFalse(r.next());		
+    }
+	
 	public void testQuery() throws Exception {
 		Query stat = conn.createQuery();
 		ResultSet results = stat.executeQuery("string_append(?x,?y,abcde)");
@@ -100,7 +157,30 @@ public class TDBCTest extends TestCase {
 			// ok 
 		}
 	}
+	
+	public void testGetOutputVariables() throws TyrubaException {
+		PreparedQuery stat = conn.prepareQuery("string_append(!x,!y,?xy)");
+		String[] vars = stat.getOutputVariables();
+		assertEquals(1, vars.length);
+		assertEquals("?xy", vars[0]);
+	}
 
+	public void testGetOutputVariables2() throws TyrubaException {
+		PreparedQuery stat = conn.prepareQuery("string_append(?x,?z,!xy) ; string_append(?a,?x,!xy)");
+		String[] vars = stat.getOutputVariables();
+		assertEquals(1, vars.length);
+		assertEquals("?x", vars[0]);
+	}
+	
+	public void testGetOutputVariables3() throws TyrubaException {
+		PreparedQuery stat = conn.prepareQuery("string_append(?x,?y,!z)");
+		String[] vars = stat.getOutputVariables();
+		assertEquals(2, vars.length);
+		Arrays.sort(vars);
+		assertEquals("?x", vars[0]);
+		assertEquals("?y", vars[1]);
+	}
+	
 	public void testPreparedQueryBadType() throws TyrubaException {
 		PreparedQuery stat = conn.prepareQuery("string_append(!x,!y,?xy)");
 		try {
@@ -132,7 +212,7 @@ public class TDBCTest extends TestCase {
 	}
 	
 	public void testPreparedQueryUDTypeOut() throws TyrubaException {
-		PreparedQuery stat = conn.prepareQuery("foo(?m,!n)");
+		PreparedQuery stat = conn.prepareQuery("foo(?m::Method,!n)");
 		String n = "booh";
 		stat.put("!n",n);
 		ResultSet results = stat.executeQuery();
@@ -146,7 +226,7 @@ public class TDBCTest extends TestCase {
 	}
 
 	public void testPreparedQueryUDTypeOut2() throws TyrubaException {
-		PreparedQuery stat = conn.prepareQuery("fooMem(?m,!n)");
+		PreparedQuery stat = conn.prepareQuery("fooMem(?m::Method,!n)");
 		String n = "m_booh";
 		stat.put("!n",n);
 		ResultSet results = stat.executeQuery();
@@ -157,6 +237,48 @@ public class TDBCTest extends TestCase {
 			assertEquals(m,n);
 		}
 		assertEquals(count,1);
+	}
+	
+	public void testPreparedQueryListTypeIn() throws TyrubaException, ParseException, TypeModeError {
+		fe.parse("listOfStuff :: String, [String] " +
+				"MODES (F,F) IS NONDET END");
+		fe.parse("listOfStuff(Cool,[Check,this,out]).");
+		
+		PreparedQuery stat = conn.prepareQuery("listOfStuff(?x,!l)");
+		String[] l = new String[] {"Check","this","out"};
+		stat.put("!l",l);
+		ResultSet results = stat.executeQuery();
+		int count = 0;
+		while (results.next()) {
+			count++;
+			String n = results.getString("?x");
+			assertEquals("Cool",n);
+		}
+		assertEquals(1,count);
+	}
+	
+	public void testPreparedQueryObjectUDTypeIn() throws TyrubaException, ParseException, TypeModeError {
+		fe.parse("stuff :: Object, String " +
+				"MODES (F,F) IS NONDET END");
+		fe.parse("stuff(foo::Method,Hola).");
+
+		PreparedQuery stat = conn.prepareQuery("equals(?x,foo::Method)"); 
+		  // A hack to get an foo::Method object
+		ResultSet results = stat.executeQuery();
+		results.next();
+		Object fooMethod = results.getObject("?x");
+
+		//Now see if we can use this fooMethod object in another query as a parameter.
+		stat = conn.prepareQuery("stuff(!x,?v)");
+		stat.put("!x",fooMethod);
+		results = stat.executeQuery();
+		int count = 0;
+		while (results.next()) {
+			count++;
+			String n = results.getString("?v");
+			assertEquals("Hola",n);
+		}
+		assertEquals(1,count);
 	}
 	
 	public void testPreparedQueryUDTypeIn() throws TyrubaException {
@@ -171,6 +293,67 @@ public class TDBCTest extends TestCase {
 			assertEquals(m,n);
 		}
 		assertEquals(count,1);
+	}
+	
+	public void testPreparedQueryUDTypeIn2() throws TyrubaException {
+		PreparedQuery stat = conn.prepareQuery("call(!m,?n)");
+		Object m = conn.parseTerm("Dana::Method");
+		Object nExpect = conn.parseTerm("Kris::Method");
+		stat.put("!m",m);
+		ResultSet results = stat.executeQuery();
+		int count = 0;
+		while (results.next()) {
+			count++;
+			Object n = results.getObject("?n");
+			assertEquals(nExpect,n);
+		}
+		assertEquals(count,1);
+	}
+	
+	public void testPreparedQueryUDTypeIn3() throws TyrubaException, TypeModeError {
+		Type memberType = conn.findType("Member");
+		PreparedQuery stat = conn.prepareQuery("call(!m,?n)");
+		Object m = conn.parseTerm("Dana::Field");
+		stat.put("!m", m, memberType);
+		ResultSet results = stat.executeQuery();
+		assertFalse(results.next());
+	}
+	
+	public void testPreparedQueryUDTypeIn4() throws TyrubaException {
+		Type methodType = conn.findType("Method");
+		PreparedQuery stat = conn.prepareQuery("call(!m,?n)");
+		Object m = conn.parseTerm("Dana::Field");
+		try {
+			stat.put("!m", m, methodType);
+			fail("Should have gotten a type Error");
+			ResultSet results = stat.executeQuery();
+			assertFalse(results.next());
+		} catch (TyrubaException e) {
+			assertTrue(e.getMessage().contains("Type"));
+		}
+	}
+	
+	public void testPreparedQueryUDTypeIn5() throws TyrubaException {
+		Type assumedType = conn.findType("String");
+		PreparedQuery stat = conn.prepareQuery("call(!m,?n)");
+		Object m = conn.parseTerm("Dana");
+		try {
+			stat.put("!m", m, assumedType);
+			fail("Should have gotten a type Error");
+			ResultSet results = stat.executeQuery();
+			assertFalse(results.next());
+		} catch (TyrubaException e) {
+			assertTrue(e.getMessage().contains("Type"));
+		}
+	}
+	
+	public void testPreparedQueryUDTypeIn6() throws TyrubaException, TypeModeError {
+		Type assumedType = conn.findType("Object");
+		PreparedQuery stat = conn.prepareQuery("call(!m,?n)");
+		Object m = conn.parseTerm("Dana");
+		stat.put("!m", m, assumedType);
+		ResultSet results = stat.executeQuery();
+		assertFalse(results.next());
 	}
 	
 	public void testInsert() throws Exception {
@@ -190,7 +373,7 @@ public class TDBCTest extends TestCase {
 	}
 
 	public void testPreparedInsert() throws Exception {
-		PreparedInsert ins = conn.prepareInsert("foo(clock::Method,!duh).");
+		PreparedInsert ins = conn.prepareInsert("foo(clock::Method,!duh)");
 
 		ins.put("!duh","bim");
 		ins.executeInsert();
@@ -230,7 +413,7 @@ public class TDBCTest extends TestCase {
 
 		try {
 			ins.put("!duh",1);
-			fail("Should have made an error: he variable !duh should be a string.");
+			fail("Should have made an error: The variable !duh should be a string.");
 		} catch (TyrubaException e) {
 			System.err.println(e.getMessage());
 		}
@@ -256,7 +439,7 @@ public class TDBCTest extends TestCase {
 		ins.executeInsert();
 
 		Query q = conn.createQuery();
-		ResultSet results = q.executeQuery("foo(?out,abc)");
+		ResultSet results = q.executeQuery("foo(?out::Method,abc)");
 
 		int count = 0;
 		while (results.next()) {
@@ -266,5 +449,36 @@ public class TDBCTest extends TestCase {
 		}
 		assertEquals(count,1);
 	}
+	
+	public void testUpTermsEquals() throws ParseException, TypeModeError, TyrubaException {
+		fe.parse("foo(zzzz::Method,a).");
+		fe.parse("foo(zzzz::Method,b).");
+		Query q = conn.createQuery();
+		ResultSet results = q.executeQuery("foo(?x,a);foo(?x,b)");
+		results.next(); // 1st result
+		Object obj1 = results.getObject("?x");
+		results.next(); // 2nd result
+		Object obj2 = results.getObject("?x");
+		assertTrue(obj1.equals(obj2));
+		assertFalse(results.next());
+	}
+	
+	public void testEqualsBug() throws Exception {
+		PreparedQuery q = conn.prepareQuery("equals(!this,?e)");
+		Object obj = conn.parseTerm("foo::Method");
+		q.put("!this", obj);
+		ResultSet results = q.executeQuery();
+		assertTrue(results.next());
+		assertEquals(obj, results.getObject("?e"));
+	}
 
+	public void testEqualsBug2() throws Exception {
+		PreparedQuery q = conn.prepareQuery("equals(!this,?e::Method)");
+		Object obj = conn.parseTerm("foo::Method");
+		q.put("!this", obj);
+		ResultSet results = q.executeQuery();
+		assertTrue(results.next());
+		assertEquals("foo", results.getObject("?e"));
+	}
+	
 }

@@ -44,16 +44,16 @@ public class ObjectTuple implements Serializable {
         isSingleton = in.readBoolean();
         if (isSingleton) {
             singletonObj = in.readObject();
-            if (singletonObj instanceof String) {
-                singletonObj = ((String)singletonObj).intern();
-            }
+//            if (singletonObj instanceof String) {
+//                singletonObj = ((String)singletonObj).intern();
+//            }
         } else {
             objects = new Object[in.readInt()];
             for (int i = 0; i < objects.length; i++) {
                 objects[i] = in.readObject();
-                if (objects[i] instanceof String) {
-                    objects[i] = ((String) objects[i]).intern();
-                }
+//                if (objects[i] instanceof String) {
+//                    objects[i] = ((String) objects[i]).intern();
+//                }
             }
         }
     }

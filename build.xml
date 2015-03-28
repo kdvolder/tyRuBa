@@ -19,7 +19,10 @@
   <target name="compile" depends="init,parser"
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" classpath="/Users/kdvolder/Library/Jars/activation.jar:/Users/kdvolder/Library/Jars/mail.jar"/>
+    <javac srcdir="${src}" 
+    	excludes="tyRuBa/performancetest/**/*"
+    	destdir="${build}" 
+    	classpath="/Users/kdvolder/Library/Jars/activation.jar:/Users/kdvolder/Library/Jars/mail.jar"/>
     <copy todir="${build}">
        <fileset dir="${src}" includes="lib/**/*"/>
     </copy>
@@ -43,7 +46,7 @@
      <javacc 
          target="${src}/tyRuBa/parser/TyRuBaParser.jj" 
 	 outputdirectory="${src}/tyRuBa/parser"
-         javacchome="/Users/kdvolder/javacc-3.2"
+         javacchome="/home/kdvolder/Applications/javacc-4.0"
      />
   </target>
 

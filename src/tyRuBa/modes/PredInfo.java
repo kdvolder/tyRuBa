@@ -10,7 +10,6 @@ import tyRuBa.engine.PredicateIdentifier;
 import tyRuBa.engine.QueryEngine;
 import tyRuBa.engine.factbase.FactBase;
 import tyRuBa.engine.factbase.SimpleArrayListFactBase;
-import tyRuBa.engine.factbase.hashtable.HashTableFactBase;
 
 /**
  * PredInfo stores information for a predicate.  It stores its name, its list of types, 
@@ -81,13 +80,17 @@ public class PredInfo {
 		return result.toString();
 	}
 	
-	public FactBase getFactBase() {
+	/**
+	 * @throws TypeModeError 
+	 * @category JDBC
+	 */
+	public FactBase getFactBase() throws TypeModeError {
 	    if (factbase == null && (predId.getArity() == 0 || engine == null)) {
 	        //use the memory factbase if there are no arguments to the predicate
 	        factbase = new SimpleArrayListFactBase(this);
 	    } else if (factbase == null) {
 	        if (isPersistent) {
-	            factbase = new HashTableFactBase(this);
+	        	factbase = engine.getPersistenceStrategy().createFactBase(this);
 	        } else {
 	            factbase = new SimpleArrayListFactBase(this);
 	    	}
@@ -106,4 +109,5 @@ public class PredInfo {
     public int getArity() {
         return getPredId().getArity();
     }
+
 }

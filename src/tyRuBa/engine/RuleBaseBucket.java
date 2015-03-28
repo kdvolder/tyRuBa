@@ -1,8 +1,15 @@
 package tyRuBa.engine;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.sql.Connection;
 
 import junit.framework.Assert;
+import tyRuBa.engine.factbase.PersistenceStrategy;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 import tyRuBa.util.Files;
@@ -25,20 +32,26 @@ import tyRuBa.util.Files;
 
 public abstract class RuleBaseBucket extends QueryEngine {
 
+	public PersistenceStrategy getPersistenceStrategy() {
+		return frontend.getPersistenceStrategy();
+	}
+
 	private static int tmpBuckets = 0;
 
 	//became part of Validator:
 	//boolean outdated;
-	Validator validator;
+	IValidator validator;
 	String identifier;
 	boolean temporary;
 
 	FrontEnd frontend;
 	BucketModedRuleBaseIndex rulebase;
 
+	private PrintWriter dumpFile = null;
+
 	public void setOutdated() {
 		synchronized (frontend) {
-		    frontend.getFrontEndValidatorManager().update(validator.handle(), new Boolean(true), null);
+			frontend.getValidatorManager().setOutdated(validator, true);
 			frontend.someOutdated = true;
 		}
 	}
@@ -71,20 +84,18 @@ public abstract class RuleBaseBucket extends QueryEngine {
 	/** Add a fact into this bucket */
 	public void insert(RBComponent t) throws TypeModeError {
 		super.insert(new ValidatorComponent(t, validator));
+		if (dumpFile!=null) {
+			try {
+				t.unparse(dumpFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
-
-//	/** Add a fact into this bucket */
-//	public void insert(RBRule r) {
-//		throw new Error("Not supported in this version");
-////		if (nonFacts == null) {
-////			nonFacts = new RBComponentVector();
-////			frontend.ruleBase().insert(nonFacts);
-////		}
-////		nonFacts.insert(r);
-//	}
 	
-	/** Gets the storage path for this query engine (will be where
-	 * the factbase is stored
+	/** 
+	 * Gets the storage path for this Bucket (will be where
+	 * the factbase is stored.
 	 */
 	public String getStoragePath() {
 	    return frontend.getStoragePath() + "/" + identifier;
@@ -93,14 +104,10 @@ public abstract class RuleBaseBucket extends QueryEngine {
 	public String getIdentifier() {
 	    return identifier;
 	}
-
 	
 	protected void clear() {
-		// Invalidate the things stored in the frontend directly
-		validator.invalidate();
-		frontend.getFrontEndValidatorManager().remove(validator.handle());
+		frontend.getFrontEndValidatorManager().invalidate(validator);
 		validator = frontend.obtainGroupValidator(identifier, temporary);
-		// And also clear out the stuff in our componentVector
 		rulebase.clear();
 		frontend.flush();
 	}
@@ -127,11 +134,59 @@ public abstract class RuleBaseBucket extends QueryEngine {
 	protected abstract void update() throws TypeModeError, ParseException;
 
 	void doUpdate() throws TypeModeError, ParseException {
+		openDumpFile();
 		update();
-		frontend.getFrontEndValidatorManager().update(validator.handle(), new Boolean(false), null);
+		closeDumpFile();
+		frontend.getFrontEndValidatorManager().setOutdated(validator, false);
+	}
+
+	private void openDumpFile() {
+		File dumpFileName = getDumpFile();
+		if (dumpFileName!=null) {
+			try {
+				if (dumpFile!=null) dumpFile.close();
+				File parent = new File(dumpFileName.getParent());
+				if (parent!=null) parent.mkdirs();
+				if (dumpFileName.exists())
+					dumpFileName.delete();
+				dumpFile = new PrintWriter(new BufferedWriter(new FileWriter(dumpFileName),1024*50));
+			} 
+			catch (IOException e) {
+				System.err.println("Problem creating dumpFile "+dumpFileName);
+				e.printStackTrace();
+				dumpFile = null;
+			}
+		}
+	}
+
+	/**
+	 * This method computes a File location where facts inserted into this
+	 * bucket will be dumped. Not necessary for the operation of the query engine,
+	 * by may be useful for
+	 *   - debugging
+	 *   - creating performance benchmarks
+	 *   - etc.
+	 * 
+	 * @return File or null
+	 */
+	protected File getDumpFile() {
+		if (frontend.getConf().getDumpFacts()) {
+			String storagePath = getStoragePath();
+			if (storagePath!=null) {
+				return new File(storagePath+".dmp");
+			}
+		}
+		return null;
+	}
+
+	private void closeDumpFile() {
+		if (dumpFile!=null) {
+			dumpFile.close();
+			dumpFile=null;
+		}
 	}
 	
-	ModedRuleBaseIndex rulebase() {
+	public ModedRuleBaseIndex rulebase() {
 		return rulebase;
 	}
 
@@ -161,10 +216,10 @@ public abstract class RuleBaseBucket extends QueryEngine {
 	    rulebase.backup();
 	}
 
-	/**
-	 * @codegroup metadata
-	 */
-	public void enableMetaData() {
-		rulebase.enableMetaData();
-	}
+//	/**
+//	 * @codegroup metadata
+//	 */
+//	public void enableMetaData() {
+//		rulebase.enableMetaData();
+//	}
 }

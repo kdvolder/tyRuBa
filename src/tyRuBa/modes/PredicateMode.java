@@ -20,7 +20,7 @@ public class PredicateMode {
 	/** Constructor */
 	public PredicateMode(BindingList paramModes, Mode mode,	boolean toBeCheck) {
 		this.paramModes = paramModes;
-		this.mode = mode;
+		this.mode = mode.withFreeBound(getParamModes().getNumFree(), getParamModes().getNumBound());
 		this.toBeCheck = toBeCheck;
 	}
 	
@@ -52,10 +52,15 @@ public class PredicateMode {
 	}
 
 	public Mode getMode() {
-		return (Mode) mode.clone();
+		return mode;
 	}
 	
 	public boolean toBeCheck() {
 		return toBeCheck;
+	}
+
+	public int[] getBoundIndexes() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

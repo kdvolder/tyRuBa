@@ -5,6 +5,8 @@ package tyRuBa.engine;
 
 import java.io.Serializable;
 
+import annotations.Export;
+
 
 /**
  * Subclasses of Identifier stores a name and an arity. These objects are used to identify 
@@ -33,6 +35,7 @@ public abstract class Identifier implements Serializable {
     	return getClass().hashCode() * arity + name.hashCode();
     }
 
+	@Export(to="./BDB")
     public String toString() {
     	return name + "/" + arity;
     }

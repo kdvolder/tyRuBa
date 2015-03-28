@@ -2,6 +2,7 @@ package tyRuBa.engine.visitor;
 
 import tyRuBa.engine.RBCompoundTerm;
 import tyRuBa.engine.RBIgnoredVariable;
+import tyRuBa.engine.RBJavaObjectCompoundTerm;
 import tyRuBa.engine.RBPair;
 import tyRuBa.engine.RBQuoted;
 import tyRuBa.engine.RBTemplateVar;
@@ -12,6 +13,8 @@ public interface TermVisitor {
 
 	Object visit(RBCompoundTerm compoundTerm);
 
+	Object visit(RBJavaObjectCompoundTerm compoundTerm);
+	
 	Object visit(RBIgnoredVariable ignoredVar);
 
 	Object visit(RBPair pair);

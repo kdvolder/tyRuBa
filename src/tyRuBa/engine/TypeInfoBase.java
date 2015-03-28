@@ -19,14 +19,14 @@ import tyRuBa.modes.UserDefinedTypeConstructor;
  */
 public class TypeInfoBase implements PredInfoProvider {
 
-	/** 
-	 * A database in which we will store facts that describe the type
-	 * declarations so that user can write tyruba programs about their
-	 * own types.
-	 * 
-	 * @codegroup metadata
-	 */	
-	MetaBase metaBase;
+//	/** 
+//	 * A database in which we will store facts that describe the type
+//	 * declarations so that user can write tyruba programs about their
+//	 * own types.
+//	 * 
+//	 * @codegroup metadata
+//	 */	
+//	MetaBase metaBase;
 	
 	HashMap predicateMap = new HashMap();
 	HashMap typeConstructorMap = new HashMap();
@@ -36,23 +36,23 @@ public class TypeInfoBase implements PredInfoProvider {
 	public TypeInfoBase(String identifier) {
 		super();
 		addTypeConst(TypeConstructor.theAny);
-		metaBase = null;
+//		metaBase = null;
 	}
 
-	/**
-	 * After this methos is called, from this point forward in time, 
-	 * metaData will be added to the metaBase
-	 * 
-	 * @codegroup metadata
-	 */
-	public void enableMetaData(QueryEngine qe) {
-		metaBase = new MetaBase(qe);
-		
-		// Retroactively add facts about the types already declared.
-		for (Iterator iter = typeConstructorMap.values().iterator(); iter.hasNext();) {
-			metaBase.assertTypeConstructor((TypeConstructor) iter.next());
-		}
-	}
+//	/**
+//	 * After this methos is called, from this point forward in time, 
+//	 * metaData will be added to the metaBase
+//	 * 
+//	 * @codegroup metadata
+//	 */
+//	public void enableMetaData(QueryEngine qe) {
+//		metaBase = new MetaBase(qe);
+//		
+//		// Retroactively add facts about the types already declared.
+//		for (Iterator iter = typeConstructorMap.values().iterator(); iter.hasNext();) {
+//			metaBase.assertTypeConstructor((TypeConstructor) iter.next());
+//		}
+//	}
 	
 	public void insert(PredInfo pInfo) throws TypeModeError {
 		PredInfo result = (PredInfo) predicateMap.get(pInfo.getPredId());
@@ -80,7 +80,7 @@ public class TypeInfoBase implements PredInfoProvider {
 	 */
 	public void addTypeConst(TypeConstructor t) {
 		typeConstructorMap.put(t.getName() + "/" + t.getTypeArity(), t);
-		if (metaBase!=null) metaBase.assertTypeConstructor(t);
+//		if (metaBase!=null) metaBase.assertTypeConstructor(t);
 	}
 
 	public void addFunctorConst(Type repAs, CompositeType type) {
@@ -125,7 +125,7 @@ public class TypeInfoBase implements PredInfoProvider {
 		return result.toString();
 	}
 	
-	public TypeConstructor findType(String typeName) {
+	public TypeConstructor findTypeConst(String typeName) {
 		if (typeName.equals("String")
  		  ||typeName.equals("Integer")
 		  ||typeName.equals("Number")
@@ -133,15 +133,17 @@ public class TypeInfoBase implements PredInfoProvider {
 //		  ||typeName.equals("Object")) // see TypeConstructor.theAny
 		    typeName = "java.lang."+typeName;
 		if (typeName.equals("RegExp"))
-			typeName = "org.apache.regexp.RE";
+			typeName = "tyRuBa.util.RegularExpression";
+//			typeName = "org.apache.regexp.RE";
 		TypeConstructor result =  (TypeConstructor)typeConstructorMap.get(typeName + /*arity*/ "/0"); 
 		if (result==null) {
 			if (typeName.indexOf('.')>=0) {
 	            try {
-	                Class cl = Class.forName(typeName);
+	                Class cl = Class.forName(typeName, false, Thread.currentThread().getContextClassLoader());
 	                result = Factory.makeTypeConstructor(cl);
 	                addTypeConst(result);
 	            } catch (ClassNotFoundException e1) {
+	            	e1.printStackTrace();
 	            	   // Yes, empty cathc block is intentional and OK here.
 	            	   // Class.forName is called to attempt to find a Java
 	            	   // class. This expected to fail sometimes.

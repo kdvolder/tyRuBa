@@ -25,7 +25,7 @@ public class CompiledConjunction_Nondet_Semidet extends Compiled {
 	}
 	
 	public String toString() {
-		return "(" + right + " ==> " + left + ")";
+		return "(" + left + " ==> " + right + ")";
 	}
 
 }

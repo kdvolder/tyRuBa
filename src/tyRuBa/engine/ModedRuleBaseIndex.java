@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import tyRuBa.modes.BindingList;
 import tyRuBa.modes.CompositeType;
 import tyRuBa.modes.ConstructorType;
+import tyRuBa.modes.Factory;
 import tyRuBa.modes.PredInfo;
 import tyRuBa.modes.PredInfoProvider;
 import tyRuBa.modes.Type;
@@ -25,27 +26,26 @@ public abstract class ModedRuleBaseIndex implements PredInfoProvider {
 	/** Create indexed rulebase for rb */
 	ModedRuleBaseIndex() {}
 
-	/**	
-	 * @codegroup metadata
-	 */
-	public abstract void enableMetaData();
+//	/**	
+//	 * @codegroup metadata
+//	 */
+//	public abstract void enableMetaData();
 
 	/** return an array of ModedRuleBase corresponding to the predicate name */
 	protected abstract ModedRuleBaseCollection getModedRuleBases(PredicateIdentifier predID) throws TypeModeError;
 	
 	/** return the rulebase corresponding to predID which allow for bindings and
-	 *  has the "best" mode of execution */		
-	public RuleBase getBest(PredicateIdentifier predID, BindingList bindings) {
-		try {
-			return getModedRuleBases(predID).getBest(bindings);
-		} catch (TypeModeError e) {
-			throw new Error("this should never happen");
-		}
+	 *  has the "best" mode of execution 
+	 * @throws TypeModeError */		
+	public RuleBase getBest(PredicateIdentifier predID, BindingList bindings) throws TypeModeError {
+		return getModedRuleBases(predID).getBest(bindings);
 	}
 	
-	/** insert predicate information to the set of known predicates 
+	/** 
+	 * insert predicate information to the set of known predicates 
 	 *  for each predicate modes in the predicate info, a new ModedRuleBase is 
-	 *  created and inserted into the hash map */
+	 *  created and inserted into the hash map 
+	 */
 	public abstract void insert(PredInfo p) throws TypeModeError;
 
 	/** typecheck r, then insert it in all of the rulebases corresponding to
@@ -65,7 +65,13 @@ public abstract class ModedRuleBaseIndex implements PredInfoProvider {
 			findTypeConst(newTypeConst.getName(), newTypeConst.getTypeArity());
 		if (oldTypeConst != null) {
 			if (oldTypeConst.isInitialized()) {
-				throw new TypeModeError("Duplicate declaration for type " + type);
+				//TODO: Check below only allows non-parametric types. Generalize this!
+				if (oldTypeConst.getTypeArity()!=0) 
+					throw new TypeModeError("Adding additional subtypes is only supported for non parametric types");
+				 if (type.getArgs().size()!=0)
+					throw new TypeModeError("Arity of additional declaration "+type+" inconsistent with previous declaration");
+				 else
+					return (CompositeType) oldTypeConst.apply(type.getArgs(), false);
 			} else {
 				oldTypeConst.setParameter(type.getArgs());
 				return (CompositeType) oldTypeConst.apply(type.getArgs(), false);
@@ -80,7 +86,7 @@ public abstract class ModedRuleBaseIndex implements PredInfoProvider {
 	abstract public void addFunctorConst(Type repAs, CompositeType type);
 	abstract public ConstructorType findConstructorType(FunctorIdentifier id);
 	
-	abstract public TypeConstructor findType(String typeName);
+	abstract public TypeConstructor findTypeConst(String typeName);
 	abstract public TypeConstructor findTypeConst(String typeName, int arity);
 	protected abstract void basicAddTypeConst(TypeConstructor typeConst);
 	
@@ -90,7 +96,7 @@ public abstract class ModedRuleBaseIndex implements PredInfoProvider {
 		PredInfo result = maybeGetPredInfo(predId);
 		if (result == null) {
 			if (predId.getArity() == 1) {
-				TypeConstructor t = findType(predId.getName());
+				TypeConstructor t = findTypeConst(predId.getName());
 				if (t != null) {
 					NativePredicate.defineTypeTest(this, predId, t);
 					return maybeGetPredInfo(predId);
@@ -98,7 +104,7 @@ public abstract class ModedRuleBaseIndex implements PredInfoProvider {
 			} else if (predId.getArity() == 2) {
 				String name = predId.getName();
 				if (name.startsWith("convertTo")) {
-					TypeConstructor t = findType(name.substring("convertTo".length()));
+					TypeConstructor t = findTypeConst(name.substring("convertTo".length()));
 					if (t != null) {
 						NativePredicate.defineConvertTo(this, t);
 						return maybeGetPredInfo(predId);
@@ -125,4 +131,8 @@ public abstract class ModedRuleBaseIndex implements PredInfoProvider {
    
     /** Back up the factbases */
     public abstract void backup();
+
+	public final void defineTypeAlias(String aName, Class< ? > aClass) {
+		basicAddTypeConst(Factory.makeTypeConstructor(aName, aClass));
+	}
 }

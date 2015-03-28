@@ -1,11 +1,13 @@
 package tyRuBa.engine.compilation;
 
-import tyRuBa.engine.*;
+import tyRuBa.engine.CachedRuleBase;
 import tyRuBa.engine.Frame;
+import tyRuBa.engine.RBContext;
+import tyRuBa.engine.SemiDetCachedRuleBase;
 import tyRuBa.modes.Mode;
-import tyRuBa.modes.Multiplicity;
 import tyRuBa.util.Action;
 import tyRuBa.util.ElementSource;
+import annotations.Export;
 
 /**
  * This is what you get when an Expression is Compiled.
@@ -92,6 +94,7 @@ public abstract class Compiled {
 	 * All compiled Expressions must override at least one
 	 * of run(ElementSource) or run(Object).
 	 */
+	@Export(to="./BDB")
 	public abstract ElementSource runNonDet(Object input, RBContext context);
 
 	/** 
@@ -142,13 +145,11 @@ public abstract class Compiled {
 	}
 
 	public static Compiled makeCachedRuleBase(Compiled compiledRules) {
-		if (compiledRules.getMode().hi.compareTo(Multiplicity.one)<=0) {
-//			PoormansProfiler.countSemiDetCachedRB++;
+		//if (compiledRules.getMode().hi.compareTo(Multiplicity.one)<=0) {
+		if (compiledRules instanceof SemiDetCompiled)
 			return new SemiDetCachedRuleBase((SemiDetCompiled)compiledRules);
-		} else {
-//			PoormansProfiler.countCachedRB++;
+		else
 			return new CachedRuleBase(compiledRules);
-		}
 	}
 
 //	/** So that a Compiled can be used as an Action for mapping on ElementSources */

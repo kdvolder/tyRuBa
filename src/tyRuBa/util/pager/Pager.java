@@ -230,7 +230,7 @@ public class Pager {
 	private long lastTaskTime = System.currentTimeMillis();
 
 	/** The maximum number of files the pager keeps in memory. */
-	private int cacheSize;
+	private long cacheSize;
 	
 	/** The map that tracks resources that are in memory. */
 	private Map inMemory = new HashMap();
@@ -293,7 +293,7 @@ public class Pager {
 	}
 	
 	/** Creates a new Pager. */
-	public Pager(int cacheSize, int queueSize, long lastBackupTime, boolean backgrounCleaning) {
+	public Pager(int cacheSize, int queueSize, boolean backgrounCleaning) {
 		this.cacheSize = cacheSize;
 		this.needToCallBackup = false;
 		this.lruQueue = new DoubleLinkedList();
@@ -430,13 +430,13 @@ public class Pager {
 	}
 	
 	/** Change the amount of data that is cached in memory. */
-	public void setCacheSize(int cacheSize) {
+	public void setCacheSize(long cacheSize) {
 		this.cacheSize = cacheSize;
 		pageUntilNonNeeded();
 	}
 	
 	/** Get the cache size. */
-	public int getCacheSize() {
+	public long getCacheSize() {
 		return cacheSize;
 	}
 	

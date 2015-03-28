@@ -34,12 +34,12 @@ public class BasicModedRuleBaseIndex extends ModedRuleBaseIndex {
 	 *  of an expression and its predicate mode */
 	HashMap index = new HashMap();
 
-	/**	
-	 * @codegroup metadata
-	 */
-	public void enableMetaData() {
-		typeInfoBase.enableMetaData(engine);
-	}
+//	/**	
+//	 * @codegroup metadata
+//	 */
+//	public void enableMetaData() {
+//		typeInfoBase.enableMetaData(engine);
+//	}
 
 	public BasicModedRuleBaseIndex(QueryEngine qe, String identifier) {     
 		this.engine = qe;
@@ -138,7 +138,7 @@ public class BasicModedRuleBaseIndex extends ModedRuleBaseIndex {
 	public void addFunctorConst(Type repAs, CompositeType type) {
 		typeInfoBase.addFunctorConst(repAs, type);
 	}
-
+	
 	public void addTypeMapping(TypeMapping mapping, FunctorIdentifier id) throws TypeModeError {
 		typeInfoBase.addTypeMapping(id, mapping);
 	}
@@ -156,8 +156,8 @@ public class BasicModedRuleBaseIndex extends ModedRuleBaseIndex {
 		return result != null;
 	}
 	
-	public TypeConstructor findType(String typeName) {
-		return typeInfoBase.findType(typeName);
+	public TypeConstructor findTypeConst(String typeName) {
+		return typeInfoBase.findTypeConst(typeName);
 	}
 	
 	public TypeConstructor findTypeConst(String typeName, int arity) {

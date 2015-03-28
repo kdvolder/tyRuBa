@@ -1,6 +1,9 @@
 package tyRuBa.engine;
 
+import java.io.PrintWriter;
+
 import tyRuBa.engine.visitor.TermVisitor;
+import tyRuBa.modes.CompositeType;
 import tyRuBa.modes.Factory;
 import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeEnv;
@@ -48,17 +51,31 @@ public class RBPair extends RBAbstractPair {
 			return super.up();
 		}
 	}
-
-	public String toString() {
-		return "[" + cdrToString(true, this) + "]";
+	
+	@Override
+	public void unparse(PrintWriter out) {
+		out.print('[');
+		getCar().unparse(out);
+		RBTerm rest = this.getCdr(); 
+		while (rest instanceof RBAbstractPair) {
+			RBAbstractPair pair = (RBAbstractPair) rest;
+			out.print(", ");
+			pair.getCar().unparse(out);
+			rest = pair.getCdr();
+		}
+		if (!rest.equals(FrontEnd.theEmptyList)) {
+			out.print(" | ");
+			rest.unparse(out);
+		}
+		out.print(']');
 	}
 
 	public String quotedToString() {
 		return getCar().quotedToString() + getCdr().quotedToString();
 	}
 
-	protected Type getType(TypeEnv env) throws TypeModeError {
-		Type car,cdr,result;
+	public Type getType(TypeEnv env) throws TypeModeError {
+		Type car,cdr;
 		try {		
 			car = getCar().getType(env);
 		} catch (TypeModeError e) {
@@ -69,12 +86,15 @@ public class RBPair extends RBAbstractPair {
 		} catch (TypeModeError e) {
 			throw new TypeModeError(e, getCdr());
 		}
+		
 		try {
-			result = Factory.makeListType(car).union(cdr);
+			Type eltTp = Factory.makeTVar("el");
+			Type list = Factory.makeListType(car).union(cdr);
+			Factory.makeListType(eltTp).checkEqualTypes(list);
+			return Factory.makeNonEmptyListType(eltTp);
 		} catch (TypeModeError e) {
 			throw new TypeModeError(e, this);
-		}				
-		return result;
+		}
 	}
 
 	public Object accept(TermVisitor v) {

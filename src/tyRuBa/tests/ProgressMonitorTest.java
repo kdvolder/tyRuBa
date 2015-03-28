@@ -1,8 +1,8 @@
 package tyRuBa.tests;
 
+import tyRuBa.jobs.ProgressMonitor;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
-import tyRuBa.engine.ProgressMonitor;
 import tyRuBa.engine.RuleBase;
 import tyRuBa.engine.SimpleRuleBaseBucket;
 
@@ -47,6 +47,10 @@ public class ProgressMonitorTest extends TyrubaTest {
 			if (!isDone)
 				fail("Hey... the work is not done!");
 			return updates;
+		}
+
+		public boolean isCanceled() {
+			return false;
 		}
 
 	};

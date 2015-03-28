@@ -7,7 +7,7 @@ import java.util.Vector;
     THese occur for example in unifying something with a long ComponentVector
     */
 public class CompositeElementSource extends ElementSource {
-    Vector children = new Vector();
+    Vector children = new Vector(); //TODO: use ArrayList, which is cheaper.
     
     /** Composite: adding a child */
     public void add(ElementSource child) {

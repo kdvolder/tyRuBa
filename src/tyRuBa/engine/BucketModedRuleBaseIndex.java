@@ -23,13 +23,13 @@ public class BucketModedRuleBaseIndex extends ModedRuleBaseIndex {
 	BasicModedRuleBaseIndex localRuleBase;
 	BasicModedRuleBaseIndex globalRuleBase;
 	
-	/**	
-	 * @codegroup metadata
-	 */
-	public void enableMetaData() {
-		localRuleBase.enableMetaData();
-		globalRuleBase.enableMetaData();
-	}
+//	/**	
+//	 * @codegroup metadata
+//	 */
+//	public void enableMetaData() {
+//		localRuleBase.enableMetaData();
+//		globalRuleBase.enableMetaData();
+//	}
 
 	public BucketModedRuleBaseIndex(QueryEngine qe, String identifier, BasicModedRuleBaseIndex globalRuleBase) {
 		this.localRuleBase = new BasicModedRuleBaseIndex(qe, identifier);
@@ -85,11 +85,11 @@ public class BucketModedRuleBaseIndex extends ModedRuleBaseIndex {
 	    localRuleBase.addTypeMapping(mapping, id);
 	}	
 
-	public TypeConstructor findType(String typeName) {
+	public TypeConstructor findTypeConst(String typeName) {
 		TypeConstructor result;
-		result = localRuleBase.findType(typeName);
+		result = localRuleBase.findTypeConst(typeName);
 		if (result == null) {
-			result = globalRuleBase.findType(typeName);
+			result = globalRuleBase.findTypeConst(typeName);
 		}
 		return result;
 	}

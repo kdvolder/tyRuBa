@@ -7,6 +7,7 @@ import junit.framework.Assert;
 import tyRuBa.engine.compilation.CompilationContext;
 import tyRuBa.engine.compilation.Compiled;
 import tyRuBa.engine.visitor.CollectFreeVarsVisitor;
+import tyRuBa.engine.visitor.CollectTemplateVarsVisitor;
 import tyRuBa.engine.visitor.CollectVarsVisitor;
 import tyRuBa.engine.visitor.ExpressionVisitor;
 import tyRuBa.engine.visitor.SubstituteVisitor;
@@ -15,8 +16,11 @@ import tyRuBa.modes.Factory;
 import tyRuBa.modes.Mode;
 import tyRuBa.modes.ModeCheckContext;
 import tyRuBa.modes.PredInfoProvider;
+import tyRuBa.modes.Type;
+import tyRuBa.modes.TypeConstructor;
 import tyRuBa.modes.TypeEnv;
 import tyRuBa.modes.TypeModeError;
+import tyRuBa.parser.ParseException;
 import tyRuBa.tdbc.PreparedQuery;
 
 public abstract class RBExpression implements Cloneable {
@@ -26,10 +30,15 @@ public abstract class RBExpression implements Cloneable {
     
 	abstract public Compiled compile(CompilationContext c);
 
-	PreparedQuery prepareForRunning(QueryEngine engine)
-		throws TypeModeError {
+	PreparedQuery prepareForRunning(QueryEngine engine, boolean typeCheck)
+		throws TypeModeError, ParseException {
+		engine.frontend().autoUpdateBuckets();
 		RBExpression converted = convertToNormalForm();
-		TypeEnv resultEnv = converted.typecheck(engine.rulebase(), Factory.makeTypeEnv());
+		TypeEnv resultEnv = null;
+		if (typeCheck) 
+			resultEnv = converted.typecheck(engine.rulebase(), Factory.makeTypeEnv());
+		else
+			resultEnv = converted.fakecheck(engine.rulebase(), Factory.makeTypeEnv());
 		RBExpression result =
 			converted.convertToMode(Factory.makeModeCheckContext(engine.rulebase()));
 		if (result.getMode() instanceof ErrorMode) {
@@ -37,11 +46,38 @@ public abstract class RBExpression implements Cloneable {
 				this + " cannot be converted to any declared mode\n" +
 					"   " + result.getMode());
 		} else if (!RuleBase.silent) {
-			System.err.println("inferred types: " + resultEnv);
+			if (typeCheck)
+				System.err.println("inferred types: " + resultEnv);
 			System.err.println("converted to Mode: " + result);
 		}
 		//Compiled compExp = result.getExp().compile(new CompilationContext());
-		return new PreparedQuery(engine,result, resultEnv);
+		return new PreparedQuery(engine, result, resultEnv);
+	}
+
+	/** 
+	 * A quick hack used to execute queries without type checking. 
+	 * This performs similar to the typecheck method but instead of checking
+	 * types it merely retrieves the variables from the query and associates
+	 * the type Object with them.
+	 */
+	private TypeEnv fakecheck(ModedRuleBaseIndex index, TypeEnv env) {
+		Type object = TypeConstructor.theAny.apply(Factory.makeTupleType(), false);
+		Collection vars = getTemplateVariables();
+		for (Object var : vars) {
+			env.put(var, object);
+		}
+		return env;
+	}
+
+	/**
+	 * Returns all the template variables (input for prepared queries)
+	 * found in this expression.
+	 */
+	private Collection getTemplateVariables() {
+		CollectTemplateVarsVisitor visitor = new CollectTemplateVarsVisitor();
+		this.accept(visitor);
+		Collection vars = visitor.getVars();
+		return vars;
 	}
 
 	/**

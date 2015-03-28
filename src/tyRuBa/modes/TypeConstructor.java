@@ -3,6 +3,11 @@
  */
 package tyRuBa.modes;
 
+import java.util.Collection;
+import java.util.List;
+
+import junit.framework.Assert;
+
 import tyRuBa.engine.FunctorIdentifier;
 import tyRuBa.engine.MetaBase;
 
@@ -33,20 +38,22 @@ public abstract class TypeConstructor {
         if (this.equals(other)) {
             return true;
         } else {
-            TypeConstructor superTypeConst = other.getSuperTypeConstructor();
-            return superTypeConst != null
-                && this.isSuperTypeOf(superTypeConst);
+            List<TypeConstructor> list = other.getSuperTypeConstructor();
+            for (TypeConstructor superTypeConst : list) {
+            	if (this.isSuperTypeOf(superTypeConst)) return true;
+			}
+            return false;
         }
     }
 
-    public abstract TypeConstructor getSuperTypeConstructor();
+    public abstract List<TypeConstructor> getSuperTypeConstructor();
 
     public TypeConstructor getSuperestTypeConstructor() {
-        TypeConstructor superConst = getSuperTypeConstructor();
-        if (superConst == null) {
+        List<TypeConstructor> superConst = getSuperTypeConstructor();
+        if (superConst.isEmpty()) {
             return this;
         } else {
-            return superConst.getSuperestTypeConstructor();
+            return superConst.get(0).getSuperestTypeConstructor();
         }
     }
 
@@ -61,9 +68,6 @@ public abstract class TypeConstructor {
             Type representedBy = getRepresentation();
             if (representedBy instanceof TupleType)
                 return ((TupleType)representedBy).size();
-            if (representedBy instanceof ListType)
-                return 1; // constructor to make one of these needs one representation 
-                          // argument of some list type.
             if (representedBy instanceof CompositeType)
                 return 1;
             else 
@@ -77,7 +81,9 @@ public abstract class TypeConstructor {
 
     public abstract String getParameterName(int i);
 
-    public TypeConstructor lowerBound(TypeConstructor otherTypeConst) {
+    public TypeConstructor union(TypeConstructor otherTypeConst) throws TypeModeError {
+    	//Note this is overridden in UserDefinedTypeconstructo
+    	//because the UnionTypeConstructor will not work properly for them.
         if (this.equals(otherTypeConst)) {
             return this;
         } else if (this.isSuperTypeOf(otherTypeConst)) {
@@ -85,7 +91,7 @@ public abstract class TypeConstructor {
         } else if (otherTypeConst.isSuperTypeOf(this)) {
             return otherTypeConst;
         } else {
-            return this.getSuperTypeConstructor().lowerBound(otherTypeConst);
+            return new UnionTypeConstructor(this, otherTypeConst);
         }
     }
 

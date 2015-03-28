@@ -11,6 +11,17 @@ public class SimpleRuleBaseBucket extends RuleBaseBucket {
 		super(frontEnd, null);
 	}
 	
+	public SimpleRuleBaseBucket(FrontEnd frontEnd, String id) {
+		super(frontEnd, id);
+	}
+	
+	public SimpleRuleBaseBucket(FrontEnd frontend, String id, SimpleRuleBaseBucket copyInitialContents) {
+		super(frontend,id);
+		if (copyInitialContents!=null && copyInitialContents.mystuff!=null) {
+			mystuff = new StringBuffer(copyInitialContents.mystuff.toString());
+		}
+	}
+
 	public synchronized void addStuff(String toParse) {
 		if (mystuff == null) 
 			mystuff = new StringBuffer();

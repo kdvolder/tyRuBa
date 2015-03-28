@@ -2,15 +2,31 @@ package tyRuBa.engine;
 
 import java.io.Serializable;
 
+import annotations.Feature;
+import annotations.Export;
 
-public class Validator implements Serializable {
-    
+/**
+ * @category JDBC
+ */
+@Feature(names="Validator")
+public class Validator implements Serializable, IValidator {
+
+	public static Validator theNeverValid = new Validator(false);
+
+	@Export(to="NONE")
+	public static Validator theAlwaysValid = new Validator() {
+	    public void invalidate() {
+	    	throw new Error("Not allowed!");
+	    }
+	};
+
     private boolean isOutdated = true;
 	private boolean isValid = true;
-	
     private long handle = -1;
     	
     public Validator() {}
+
+    private Validator(boolean isValid) {this.isValid=isValid;}
 
     public long handle() {
 		return handle;
@@ -20,10 +36,6 @@ public class Validator implements Serializable {
 		this.handle = handle;
 	}
 
-	/**
-	 * Method isValid.
-	 * @return boolean
-	 */
 	public boolean isValid() {
 		return isValid;
 	}
@@ -46,14 +58,4 @@ public class Validator implements Serializable {
 		isOutdated = flag;
 	}
 	
-	private boolean hasAssociatedFacts = false;
-	
-	public boolean hasAssociatedFacts() {
-	    return hasAssociatedFacts;
-	}
-	
-	public void setHasAssociatedFacts(boolean flag) {
-	    hasAssociatedFacts = flag;
-	}
-
 }

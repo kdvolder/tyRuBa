@@ -1,9 +1,9 @@
 package tyRuBa.util;
 
 /**
- * @author cburns
- *
  * Ultra simple list class designed for minimal overhead.
+ * 
+ * @author cburns
  */
 public final class SList {
 	

@@ -24,7 +24,7 @@ public class Factory {
 	}
 
 	public static BindingMode makePartiallyBound() {
-		return PatiallyBound.the;
+		return PartiallyBound.the;
 	}
 
 	static public Type makeAtomicType(TypeConstructor typeConstructor) {
@@ -67,44 +67,26 @@ public class Factory {
 
 	public static PredicateMode makePredicateMode(String paramModesString, 
 	String modeString) {
-		BindingList paramModes = Factory.makeBindingList();
-		
-		for (int i = 0; i < paramModesString.length(); i++) {
-			char currChar = paramModesString.charAt(i);
-			if (currChar == 'b' || currChar == 'B') {
-				paramModes.add(Factory.makeBound());
-			} else if (currChar == 'f' || currChar == 'F'){
-				paramModes.add(Factory.makeFree());
-			}
-			else {
-				throw new Error("unknown binding mode " + currChar);
-			}
-		}
-		
+		BindingList paramModes = BindingList.convertFromString(paramModesString);		
 		Mode mode = Mode.convertFromString(modeString);
 		
 		return makePredicateMode(paramModes, mode);
 	}
 
+	static public Type makeJavaType(Class clazz) {
+		return Factory.makeAtomicType(Factory.makeTypeConstructor(clazz));
+	}
+	static public Type makeStrictJavaType(Class clazz) {
+		return Factory.makeStrictAtomicType(Factory.makeTypeConstructor(clazz));
+	}
+	
 	static public TupleType makeTupleType() {
 		return new TupleType();
 	}
 
 	/** List with one element only */
-	public static TupleType makeTupleType(Type t) {
-		return new TupleType(new Type[] {t});
-	}
-
-	public static TupleType makeTupleType(Type t1, Type t2) {
-		return new TupleType(new Type[] {t1, t2});
-	}
-
-	public static TupleType makeTupleType(Type t1, Type t2, Type t3) {
-		return new TupleType(new Type[] {t1, t2, t3});
-	}
-	
-	public static TupleType makeTupleType(Type t1, Type t2, Type t3, Type t4) {
-		return new TupleType(new Type[] {t1, t2, t3, t4});
+	public static TupleType makeTupleType(Type... t) {
+		return new TupleType(t);
 	}
 
 	static public BindingList makeBindingList() {
@@ -141,12 +123,17 @@ public class Factory {
 	}
 
 	public static Type makeListType(Type et) {
-		return new ListType(et);
-	}
-	public static ListType makeEmptyListType() {
-		return new ListType();
+		return ListType.make(et);
 	}
 	
+	public static Type makeEmptyListType() {
+		return ListType.makeEmpty();
+	}
+	
+	public static Type makeNonEmptyListType(Type et) {
+		return ListType.makeNonEmpty(et);
+	}
+
 	public static ModeCheckContext makeModeCheckContext(ModedRuleBaseIndex rulebases) {
 		return new ModeCheckContext(new BindingEnv(), rulebases);
 	}
@@ -179,8 +166,17 @@ public class Factory {
 		return new JavaTypeConstructor(javaclass);
 	}
 	
+	public static TypeConstructor makeTypeConstructor(String aliasName, Class javaclass) {
+		return new JavaTypeConstructor(aliasName, javaclass);
+	}
+	
 	public static TypeConstructor makeTypeConstructor(String name, int arity) {
 		return new UserDefinedTypeConstructor(name, arity);
+	}
+
+	public static BindingMode makePartiallyBoundCompound(
+			ConstructorType constructorType, BindingList argModes) {
+		return new BoundComposite(constructorType,argModes);
 	}
 
 

@@ -1,5 +1,6 @@
 package tyRuBa.tests;
 
+import tyRuBa.engine.RBAvoidRecursion;
 import tyRuBa.engine.RuleBase;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
@@ -42,6 +43,19 @@ public class PrologNativePredicateTest extends TyrubaTest {
 	public void testMember() throws ParseException, TypeModeError {
 		test_must_findall("member(?x,[1,2,3,4])", "?x",
 			new String[] { "1", "2", "3", "4" });
+	}
+	
+	public void testMemberLargeList() throws ParseException, TypeModeError {
+		StringBuffer listStr = new StringBuffer("1"); 
+		for (int i = 0; i < RBAvoidRecursion.depthLimit - 2; i++) {
+			listStr.append(",1");
+		}
+
+		test_must_fail("member(?x,[" + listStr + "]),equals(?x,2)");
+		
+		listStr.append(",1");
+		// This currently results in a "To deep recursion in rule application" error.
+		test_must_fail("member(?x,[" + listStr + "]),equals(?x,2)");
 	}
 	
 	public void testPermutation() throws ParseException, TypeModeError {

@@ -20,10 +20,10 @@ import tyRuBa.modes.TypeModeError;
 
 public class ValidatorComponent extends RBComponent {
 
-	private Validator validator;
+	private IValidator validator;
 	private RBComponent comp;
 
-	public ValidatorComponent(RBComponent c, Validator validator) {
+	public ValidatorComponent(RBComponent c, IValidator validator) {
 		this.validator = validator;
 		this.comp = c;
 	}
@@ -39,7 +39,7 @@ public class ValidatorComponent extends RBComponent {
 		}
 	}
 
-	public Validator getValidator() {
+	public IValidator getValidator() {
 		return validator;
 	}
 

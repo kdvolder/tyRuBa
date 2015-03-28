@@ -1,9 +1,15 @@
 package tyRuBa.tests;
 
+import annotations.Feature;
+import tyRuBa.engine.FunctorIdentifier;
 import tyRuBa.engine.RuleBase;
 import tyRuBa.engine.SimpleRuleBaseBucket;
+import tyRuBa.engine.factbase.SimpleArrayListFactBase;
+import tyRuBa.modes.TypeMapping;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
+import tyRuBa.tdbc.PreparedInsert;
+import tyRuBa.tests.TypeTest.SourceLocation;
 
 public class RuleBaseBucketTest extends TyrubaTest {
 	
@@ -11,10 +17,14 @@ public class RuleBaseBucketTest extends TyrubaTest {
 	SimpleRuleBaseBucket otherBucket;
 
 	public void setUp() throws Exception {
+		setUp(false);
+	}
+	
+	public void setUp(boolean reconnect) throws Exception {
 		RuleBase.silent = true;
-		super.setUp();
-		bucket = new SimpleRuleBaseBucket(frontend);
-		otherBucket = new SimpleRuleBaseBucket(frontend);
+		super.setUp(reconnect);
+		bucket = new SimpleRuleBaseBucket(frontend,"buck",bucket);
+		otherBucket = new SimpleRuleBaseBucket(frontend,"other",otherBucket);
 	}
 
 	public void testOutdateSemiDetPersistentFact() throws ParseException, TypeModeError {
@@ -351,6 +361,103 @@ public class RuleBaseBucketTest extends TyrubaTest {
 		test_resultcount("factFrom(?buck)",1);
 		bucket.destroy();
 		test_resultcount("factFrom(?buck)",0);
+	}
+
+	public void testStringIntegerFact() throws ParseException, TypeModeError {
+		frontend.parse(
+				"test :: String, Integer " +
+				"PERSISTENT MODES (B,F) IS SEMIDET END");
+		frontend.parse("test(Kris,99).");
+		test_must_equal("test(Kris,?x)", "?x", "99");
+	}
+	
+	public void tstBadDupDataDifferentBuckets() throws ParseException, TypeModeError {
+		//TODO: This test is disabled until we decide how to handle duplicates
+		frontend.parse("test :: String, Integer " +
+				"PERSISTENT MODES (B,F) IS SEMIDET END");
+		try {
+			bucket.addStuff("test(foo,1).");
+			otherBucket.addStuff("test(foo,2)."); // This bad because there already is a test(foo,...) fact. 
+			test_must_equal("test(foo,?x)", "?x", "1");
+		}
+		catch (Throwable e) {
+			assertTrue(e.getMessage().contains("duplicate"));
+			return;
+		}
+		fail("Expected a 'duplicate data' error");
+	}
+	
+	public void testReconnect() throws Exception {
+		frontend.parse("test :: String, String " +
+		"PERSISTENT MODES (F,F) IS NONDET END");
+		bucket.addStuff("test(bucket,frell).");
+		otherBucket.addStuff("test(otherbucket,frell).");
+		
+		test_must_findall("test(?x,frell)", "?x", new String[] {"bucket","otherbucket"});
+		
+		frontend.shutdown();
+		frontend = null;
+		setUp(true);
+		frontend.parse("test :: String, String " +
+		"PERSISTENT MODES (F,F) IS NONDET END");
+		
+		test_must_findall("test(?x,frell)", "?x", new String[] {"bucket","otherbucket"});
+	}
+	
+	public void testReconnectOutdated() throws Exception {
+		frontend.parse("test :: String, String " +
+		"PERSISTENT MODES (F,F) IS NONDET END");
+		bucket.addStuff("test(bucket,frell).");
+		otherBucket.addStuff("test(otherbucket,frell).");
+		test_must_findall("test(?x,frell)", "?x", new String[] {"bucket","otherbucket"});
+		
+		otherBucket.setOutdated();
+		
+		frontend.shutdown();
+		frontend = null;
+		setUp(true);
+		frontend.parse("test :: String, String " +
+		"PERSISTENT MODES (F,F) IS NONDET END");
+		
+		test_must_findall("test(?x,frell)", "?x", new String[] {"bucket","otherbucket"});
+	}
+	
+	public void testOKDupDataDifferentBuckets() throws ParseException, TypeModeError {
+		frontend.parse(
+				"test :: String, Integer " +
+				"PERSISTENT MODES (B,F) IS SEMIDET END");
+		bucket.addStuff("test(foo,1).");
+		otherBucket.addStuff("test(foo,1)."); // This ok because the existing test(foo,...) fact is identical.
+		test_must_equal("test(foo,?x)", "?x", "1");
+	}
+	
+	public void testDupDataDifferentBuckets() throws ParseException, TypeModeError {
+		frontend.parse(
+				"test :: String, Integer " +
+				"PERSISTENT MODES (B,F) IS SEMIDET END");
+		bucket.addStuff("test(foo,1).");
+		otherBucket.addStuff("test(foo,1).");
+		test_must_equal("test(foo,?x)", "?x", "1");
+		bucket.clearStuff();
+		test_must_equal("test(foo,?x)", "?x", "1");
+		otherBucket.clearStuff();
+		test_must_fail("test(foo,?x)");
+	}
+	
+	@Feature(names="./BDB")
+	public void testPersistCompositeType() throws Exception {
+	    
+	    frontend.parse("TYPE Composite<> AS <String,Integer,Integer,Integer> ");
+	    
+	    frontend.parse("store :: Composite MODES (F) IS NONDET END");
+	    
+	    bucket.addStuff("store(Composite<Fawlty,1,2,3>).");
+	    
+	    test_must_equal("store(Composite<?a,?b,?c,?d>)", "?a", "Fawlty");
+	    test_must_equal("store(Composite<?a,?b,?c,?d>)", "?b", "1");
+	    test_must_equal("store(Composite<?a,?b,?c,?d>)", "?c", "2");
+	    test_must_equal("store(Composite<?a,?b,?c,?d>)", "?d", "3");
+	    
 	}
 	
 	public RuleBaseBucketTest(String arg0) {

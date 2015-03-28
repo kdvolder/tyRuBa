@@ -24,6 +24,8 @@ public class RegexpNativePredicateTest extends TyrubaTest {
 		test_must_succeed("re_match(/c*/,ccc)");
 		test_must_fail("re_match(/a/,ccc)");
 		test_must_succeed("re_match(/b+/,abc)");
+
+		test_must_succeed("re_match(/b/,abc)");
 	}
 	
 	public void testBadUseOfRegexp() throws ParseException, TypeModeError {
@@ -31,7 +33,21 @@ public class RegexpNativePredicateTest extends TyrubaTest {
 				"TYPE Element AS String " +
 				"name :: Element, String " +
 				"MODES (B,F) IS SEMIDET (F,F) IS NONDET (F,B) IS NONDET END");
-		test_must_fail("name(foo::Element,/bar/)"); 
-		 //TODO: in a better implementation this should really be a type error!
+		try {
+			test_must_fail("name(foo::Element,/bar/)");
+			fail("Should have a type error");
+		} catch (TypeModeError e) {
+			//ok
+		} 
 	}
+	
+	public void testRegexpThrowsCorrectException() {
+		try {
+			test_must_fail("re_match(/*/,ccc)");
+		}
+		catch (Exception e) {
+			//OK!
+		}
+	}
+	
 }

@@ -1,6 +1,9 @@
 package tyRuBa.tests;
 
+import java.net.MalformedURLException;
+
 import tyRuBa.engine.FrontEnd;
+import tyRuBa.engine.TyRuBaConf;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 import tyRuBa.util.ElementSource;
@@ -35,8 +38,7 @@ public class StringNativePredicateTest extends TyrubaTest {
 		test_must_equal("string_append(ab,cd,ef,?x)", "?x", "abcdef");
 	}
 
-	public void testStringAppendTypeCheck() throws ParseException, TypeModeError {
-		FrontEnd frontend = new FrontEnd(false);
+	public void testStringAppendTypeCheck() throws ParseException, TypeModeError, MalformedURLException {
 		try {
 			ElementSource results =
 				frontend.varQuery("string_append(1,2,?x)", "?x");

@@ -4,6 +4,7 @@
 package tyRuBa.engine;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import tyRuBa.engine.visitor.TermVisitor;
 import tyRuBa.modes.BindingMode;
@@ -57,8 +58,8 @@ public class RBRepAsJavaObjectCompoundTerm extends RBCompoundTerm {
         return equals(other);
     }
     
-    protected Type getType(TypeEnv env) throws TypeModeError {
-        return typeTag.apply(Factory.makeSubAtomicType(typeTag.getTypeConst()));
+    public Type getType(TypeEnv env) throws TypeModeError {
+        return typeTag.apply(Factory.makeSubAtomicType(Factory.makeTypeConstructor(javaObject.getClass())));
     }
     
     public int formHashCode() {
@@ -117,7 +118,7 @@ public class RBRepAsJavaObjectCompoundTerm extends RBCompoundTerm {
             if (firstindexofhash == -1) {
                 return " ";
             } else {
-                return str.substring(0, firstindexofhash).intern();
+                return str.substring(0, firstindexofhash);//.intern();
             }
         } else if (javaObject instanceof Number) {
             return ((Number)javaObject).toString();
@@ -138,7 +139,7 @@ public class RBRepAsJavaObjectCompoundTerm extends RBCompoundTerm {
             if (firstindexofhash == -1) {
                 return typeTag.getFunctorId().toString() + str;
             } else {
-                return typeTag.getFunctorId().toString() + str.substring(firstindexofhash).intern();
+                return typeTag.getFunctorId().toString() + str.substring(firstindexofhash);//.intern();
             }
         } else if (javaObject instanceof Number) {
             return ((Number)javaObject).toString();
@@ -149,21 +150,11 @@ public class RBRepAsJavaObjectCompoundTerm extends RBCompoundTerm {
         }
     }
     
-    public String toString() {
-    		if (javaObject instanceof String) {
-    			String javaString = (String)javaObject;
-    			return "\""+javaString+"\"" //TODO: properly make escape sequences for special chars.
-				+ "::" + typeTag.getFunctorId().getName();
-    		}
-    		else
-    			return javaObject.toString() + "::" + typeTag.getFunctorId().getName();
-    }
-    
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        if (javaObject instanceof String) {
-            javaObject = ((String)javaObject).intern();
-        }
+//        if (javaObject instanceof String) {
+//            javaObject = ((String)javaObject).intern();
+//        }
     }
     
     public int intValue() {
