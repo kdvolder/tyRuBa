@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,7 +16,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import tyRuBa.engine.factbase.FileBasedPersistence;
 import tyRuBa.engine.factbase.NamePersistenceManager;
 import tyRuBa.engine.factbase.PersistenceStrategy;
 import tyRuBa.engine.factbase.ValidatorManager;
@@ -28,14 +26,12 @@ import tyRuBa.modes.PredInfo;
 import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
-import tyRuBa.tests.TypeAliasTest;
 import tyRuBa.util.Aurelizer;
 import tyRuBa.util.ElementSource;
 import tyRuBa.util.Files;
 import tyRuBa.util.SynchPolicy;
 import tyRuBa.util.SynchResource;
 import tyRuBa.util.pager.Pager;
-import annotations.Export;
 import annotations.Feature;
 
 public class FrontEnd extends QueryEngine 
