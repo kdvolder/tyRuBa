@@ -108,5 +108,10 @@ output	 * @param preparedExp
 			//System.err.println("[INFO] - QueryEngine - Done Query");
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return exp.toString();
+	}
 
 }
