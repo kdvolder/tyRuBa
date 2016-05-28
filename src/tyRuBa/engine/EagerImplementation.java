@@ -109,7 +109,11 @@ public abstract class EagerImplementation extends AbstractImplementation {
 		for (int i = 0; i < getNumArgs(); i++) {
 			args[i] = getArgAt(i).substitute(f);
 		}
-		doit(args);
+		try {
+			doit(args);
+		} catch (ClassCastException e) {
+			//ignore. We silently Convert runtime type errors into 'no result'. 
+		}
 		ArrayList results = new ArrayList();
 		for (int i = 0; i < solutions.size(); i++) {
 			Frame result = (Frame) f.clone();
