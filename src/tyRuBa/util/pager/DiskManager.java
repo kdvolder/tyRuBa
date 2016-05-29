@@ -9,12 +9,12 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
-import serp.util.Semaphore;
 import tyRuBa.util.Aurelizer;
 import tyRuBa.util.DoubleLinkedList;
-import tyRuBa.util.pager.Pager.ResourceId;
 import tyRuBa.util.pager.Pager.Resource;
+import tyRuBa.util.pager.Pager.ResourceId;
 
 /**
  * Manages disk reads and writes. Writes are done in a separate thread as to
@@ -107,8 +107,8 @@ public class DiskManager extends Thread {
      */
     public DiskManager(int maxQueueSize) {
         maxSize = maxQueueSize;
-        resourceLocksMutex = new Semaphore();
-        queueMutex = new Semaphore();
+        resourceLocksMutex = new Semaphore(1);
+        queueMutex = new Semaphore(1);
         queueAvailable = new Semaphore(maxSize);
         queueSize = new Semaphore(0);
         alive = true;
@@ -133,16 +133,16 @@ public class DiskManager extends Thread {
     public void run() {
         while (alive) {
             //wait until there is something in the queue
-            queueSize.down();
+            queueSize.acquireUninterruptibly();
             if (!alive) {
                 break;
             }
-            queueMutex.down();
+            queueMutex.acquireUninterruptibly();
             Task nextTask = (Task) taskQueue.dequeue();
-            queueMutex.up();
+            queueMutex.release();
             //let whoever is waiting on queueAvailable to wake up because
             //there is room in the queue now
-            queueAvailable.up();
+            queueAvailable.release();
 
             nextTask.doIt();
             releaseResourceLock(nextTask.resourceID);
@@ -154,14 +154,14 @@ public class DiskManager extends Thread {
      * @param resID resource to get the lock for.
      */
     void getResourceLock(ResourceId resID) {
-        resourceLocksMutex.down();
+        resourceLocksMutex.acquireUninterruptibly();
         Semaphore lock = (Semaphore) resourceLocks.get(resID);
         if (lock == null) {
             lock = new Semaphore(1);
             resourceLocks.put(resID, lock);
         }
-        resourceLocksMutex.up();
-        lock.down();
+        resourceLocksMutex.release();
+        lock.acquireUninterruptibly();
     }
 
     /**
@@ -169,13 +169,13 @@ public class DiskManager extends Thread {
      * @param resID resource to release the lock for.
      */
     void releaseResourceLock(ResourceId resID) {
-        resourceLocksMutex.down();
+        resourceLocksMutex.acquireUninterruptibly();
         Semaphore lock = (Semaphore) resourceLocks.get(resID);
         if (lock != null) {
             resourceLocks.remove(resID);
-            lock.up();
+            lock.release();
         }
-        resourceLocksMutex.up();
+        resourceLocksMutex.release();
     }
 
     /**
@@ -185,13 +185,13 @@ public class DiskManager extends Thread {
     public synchronized void writeOut(ResourceId resourceID, Resource rsrc) {
         Task task = new Task(resourceID, rsrc);
         getResourceLock(resourceID);
-        queueAvailable.down();
-        queueMutex.down();
+        queueAvailable.acquireUninterruptibly();
+        queueMutex.acquireUninterruptibly();
         taskQueue.enqueue(task);
-        queueMutex.up();
-        queueSize.up();
+        queueMutex.release();
+        queueSize.release();
         int waterLevel;
-        if ((waterLevel = queueSize.getAvailable()) > highWaterMark)
+        if ((waterLevel = queueSize.availablePermits()) > highWaterMark)
             highWaterMark = waterLevel;
         pageOutRequests++;
     }
@@ -230,7 +230,7 @@ public class DiskManager extends Thread {
     /** Kill the write out thread */
     public synchronized void killMe() {
         alive = false;
-        queueSize.up(); //make sure that the thread exits
+        queueSize.release(); //make sure that the thread exits
     }
 
 	/**
@@ -251,7 +251,7 @@ public class DiskManager extends Thread {
      * complete.
      */
     public synchronized void flush() {
-        while (queueSize.getAvailable() > 0) {
+        while (queueSize.availablePermits() > 0) {
             try {
                 sleep(500);
             } catch (InterruptedException e) {

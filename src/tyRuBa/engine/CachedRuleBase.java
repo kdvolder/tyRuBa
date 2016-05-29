@@ -7,7 +7,9 @@ package tyRuBa.engine;
 import java.util.HashMap;
 import java.util.Map;
 
-import serp.util.SoftValueMap;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.MapMaker;
+
 import tyRuBa.engine.compilation.Compiled;
 import tyRuBa.engine.compilation.SemiDetCompiled;
 import tyRuBa.util.Action;
@@ -37,7 +39,9 @@ public class CachedRuleBase extends Compiled {
 //	}
 
 	private void initCache() {
-		cache = RuleBase.softCache ? (Map) new SoftValueMap() : new HashMap();
+		cache = RuleBase.softCache 
+				? CacheBuilder.newBuilder().softValues().build().asMap()
+				: new HashMap();
 	}
 
 	/** Unification, check cache first */

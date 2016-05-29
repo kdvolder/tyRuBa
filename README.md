@@ -5,6 +5,13 @@ TyRuba's former home is here http://tyruba.sourceforge.net/ documentation
 for the language still lives there for now.  There are some more documentation 
 files there, describing the actual logic language.
 
+##NEW IN RELEASE 7.4
+
+  Essentially, this is just the 7.3 release with few changes to 
+  remove the cobwebs from a code base that hasn't been looked at in years.
+  The main goal for this release was to get things setup with a proper
+  CI process resulting in builds properly publishing artefacts to maven central. 
+
 ##NEW IN RELEASE 7.3
 
   Bugfixes, in particular one bugfix having to do with TyRuBa very inconsiderately

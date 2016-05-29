@@ -3,7 +3,8 @@ package tyRuBa.engine;
 import java.util.HashMap;
 import java.util.Map;
 
-import serp.util.SoftValueMap;
+import com.google.common.cache.CacheBuilder;
+
 import tyRuBa.engine.compilation.SemiDetCompiled;
 
 public class SemiDetCachedRuleBase extends SemiDetCompiled {
@@ -20,7 +21,9 @@ public class SemiDetCachedRuleBase extends SemiDetCompiled {
 	}
 
 	private void initCache() {
-		cache = RuleBase.softCache ? (Map) new SoftValueMap() : new HashMap();
+		cache = RuleBase.softCache 
+				? CacheBuilder.newBuilder().softValues().build().asMap() 
+				: new HashMap();
 	}
 
 	/** Unification, check cache first */
