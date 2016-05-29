@@ -1,0 +1,6 @@
+######################
+language: java
+jdk:
+- oraclejdk8
+before_install: releng/decrypt_gpg_key
+after_success: mvn --settings releng/settings.xml deploy

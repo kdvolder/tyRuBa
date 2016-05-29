@@ -1,0 +1,23 @@
+#!/bin/bash -e
+
+###
+### This script is run 'locally' on your development machine
+### It will export your public and private key and then encrypt 
+### the files so they can be stored safely in a public repo.
+###
+
+KEY_ID=0EE8EE81
+read -p "Encryption Key:" ENCRYPTION_KEY
+if [ ${#ENCRYPTION_KEY} -lt 8 ]; then echo "Too short!" ; exit
+fi
+
+# export the keys we need
+gpg --export-secret-keys -a 0EE8EE81 > gpg_private_key.asc
+# encrypt the keys
+openssl enc -aes-256-cbc -pass pass:${ENCRYPTION_KEY} -in gpg_private_key.asc -out gpg_private_key.asc.enc
+# remove unencrypted secret data
+rm -f *key.asc
+
+echo "!!!GPG Key installed!!!"
+gpg --list-keys
+

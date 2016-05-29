@@ -1,0 +1,23 @@
+#!/bin/bash -e
+
+###
+### This script is run 'locally' on your development machine
+### It will export your public and private key and then encrypt 
+### the files so they can be stored safely in a public repo.
+###
+
+#This script is called by travis in the root of the repo... so
+cd releng
+
+#ENCRYPTION_KEY=... This must be set somehow...
+#E.g. using travis web you can add env vars to your project config
+
+#decrypt the key
+openssl enc -aes-256-cbc -d -pass env:ENCRYPTION_KEY -in gpg_private_key.asc.enc -out gpg_private_key.asc
+
+#import the keys into gpg
+gpg --allow-secret-key-import --import gpg_private_key.asc
+
+#delete secret data
+rm -f *key.asc
+
