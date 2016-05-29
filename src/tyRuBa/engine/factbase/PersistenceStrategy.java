@@ -2,7 +2,6 @@ package tyRuBa.engine.factbase;
 
 import annotations.Export;
 import annotations.Feature;
-import tyRuBa.engine.Validator;
 import tyRuBa.modes.PredInfo;
 
 /**

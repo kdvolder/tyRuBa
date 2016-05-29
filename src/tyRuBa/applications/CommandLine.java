@@ -1,6 +1,5 @@
 package tyRuBa.applications;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,9 +8,7 @@ import java.io.PrintStream;
 import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.RuleBase;
 import tyRuBa.engine.TyRuBaConf;
-import tyRuBa.engine.factbase.PersistenceConf;
 import tyRuBa.engine.factbase.hashtable.FileBasedPersistenceConf;
-import tyRuBa.jobs.ProgressMonitor;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 import tyRuBa.tests.PerformanceTest;
