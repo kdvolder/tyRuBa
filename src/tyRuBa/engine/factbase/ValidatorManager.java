@@ -10,7 +10,6 @@ import tyRuBa.engine.IValidator;
  * bucket are valid or not. In a FactBase the validators are referenced by their
  * handles, so mappings are implemented in the ValidatorManager that allow
  * retrieval of a validator by giving its handle.
- * @category FactBase
  */
 public interface ValidatorManager {
 	

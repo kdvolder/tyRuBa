@@ -18,7 +18,6 @@ import tyRuBa.engine.Validator;
 
 /**
  * A ValidatorManager that is persisted to a file on disk.
- * @category FactBase
  * @author riecken
  */
 public class FileBasedValidatorManager implements ValidatorManager {

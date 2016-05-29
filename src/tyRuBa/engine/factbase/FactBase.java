@@ -10,7 +10,6 @@ import tyRuBa.modes.PredicateMode;
 
 /**
  * A Fact Database.
- * @category FactBase
  * @author riecken
  */
 public abstract class FactBase {

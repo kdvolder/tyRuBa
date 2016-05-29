@@ -40,7 +40,6 @@ import tyRuBa.util.pager.FileLocation;
  * indexes can be created on the fly, but it is not recommended as it will be
  * slow. It is best to declare all modes that will be used and have the overhead
  * occur during insertion rather than querying.
- * @category FactBase
  * @author riecken
  */
 public class HashTableFactBase extends FactBase {

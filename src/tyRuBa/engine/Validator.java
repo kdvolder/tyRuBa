@@ -2,9 +2,6 @@ package tyRuBa.engine;
 
 import java.io.Serializable;
 
-/**
- * @category JDBC
- */
 public class Validator implements Serializable, IValidator {
 
 	public static Validator theNeverValid = new Validator(false);

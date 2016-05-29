@@ -19,7 +19,6 @@ import tyRuBa.modes.PredicateMode;
 
 /**
  * Wrapper around another FactBase that records what is inserted to a file.
- * @category FactBase
  * @author riecken
  */
 public class FileWriterFactBase extends FactBase {

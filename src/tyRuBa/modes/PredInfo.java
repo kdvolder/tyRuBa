@@ -14,8 +14,6 @@ import tyRuBa.engine.factbase.SimpleArrayListFactBase;
 /**
  * PredInfo stores information for a predicate.  It stores its name, its list of types, 
  * and its corresponding PredicateModes.
- * 
- * @category FactBase
  */
 public class PredInfo {
 
@@ -82,7 +80,6 @@ public class PredInfo {
 	
 	/**
 	 * @throws TypeModeError 
-	 * @category JDBC
 	 */
 	public FactBase getFactBase() throws TypeModeError {
 	    if (factbase == null && (predId.getArity() == 0 || engine == null)) {

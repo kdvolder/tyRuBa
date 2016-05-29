@@ -17,7 +17,6 @@ import java.util.Map;
 /**
  * A NamePersistenceManager manages the mappings between Strings and filenames
  * for those strings. In this case the filenames are numbers.
- * @category FactBase
  * @author riecken
  */
 public class NamePersistenceManager implements Serializable {

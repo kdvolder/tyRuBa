@@ -22,7 +22,6 @@ import tyRuBa.util.ElementSource;
 
 /**
  * A FactBase that uses an ArrayList to store facts. Inefficient, but simple.
- * @category FactBase
  * @author riecken
  */
 public class SimpleArrayListFactBase extends FactBase {

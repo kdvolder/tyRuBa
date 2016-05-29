@@ -20,7 +20,6 @@ import tyRuBa.util.pager.Pager.Resource;
  * Manages disk reads and writes. Writes are done in a separate thread as to
  * allow other operations to occur concurrently. A resource cannot be written
  * out if it is currently being read and vice versa.
- * @category FactBase
  * @author riecken
  */
 public class DiskManager extends Thread {

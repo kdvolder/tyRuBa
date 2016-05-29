@@ -28,7 +28,6 @@ import tyRuBa.util.pager.Pager.ResourceId;
 /**
  * An index allows facts to be efficiently looked up for a specific predicate
  * mode.
- * @category FactBase
  * @author riecken
  */
 final class Index {

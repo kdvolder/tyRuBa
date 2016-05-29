@@ -13,7 +13,6 @@ import tyRuBa.engine.factbase.ValidatorManager;
 /**
  * A part of a fact that resides in an Index. Has two parts, a RBTuple and a
  * validatorHandle
- * @category FactBase
  * @author riecken
  */
 class IndexValue implements Serializable {

@@ -74,9 +74,6 @@ public abstract class QueryEngine {
 	 */
 	public abstract String getStoragePath();
 	
-	/**
-	 * @category JDBC
-	 */
 	public abstract PersistenceStrategy getPersistenceStrategy();
 
 	public abstract String getIdentifier();

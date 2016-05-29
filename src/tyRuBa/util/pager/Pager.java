@@ -26,7 +26,6 @@ import tyRuBa.util.DoubleLinkedList;
  * The pager is allowed to change the order in which tasks get executed, so it
  * can postpone the execution of tasks for which the files have not been paged
  * yet and give priority to tasks that can be executed immediately.
- * @category FactBase
  * @author riecken
  */
 public class Pager {

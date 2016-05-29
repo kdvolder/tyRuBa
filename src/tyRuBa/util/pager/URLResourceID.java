@@ -13,7 +13,6 @@ import tyRuBa.util.pager.Pager.ResourceId;
 
 /**
  * An Id for a resource that is stored on disk. Accessed using URLs.
- * @category FactBase
  * @author riecken
  */
 public class URLResourceID extends ResourceId {

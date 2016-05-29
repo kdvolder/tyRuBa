@@ -9,7 +9,6 @@ import tyRuBa.util.pager.Pager.ResourceId;
 
 /**
  * Represents a location on disk
- * @category FactBase
  * @author riecken
  */
 public class FileLocation extends Location {

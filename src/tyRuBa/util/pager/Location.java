@@ -8,7 +8,6 @@ import java.net.URL;
 
 /**
  * A "base" location. This is a factory for making resourceIDs (relative to that location).
- * @category FactBase
  * @author riecken
  */
 public abstract class Location {

@@ -7,8 +7,6 @@ import tyRuBa.modes.PredInfo;
  * 
  * By implementing different sublcasses it should be possible to switch between
  * a file system based store or a JDBC based store.
- * 
- * @category JDBC
  */
 public abstract class PersistenceStrategy {
 
