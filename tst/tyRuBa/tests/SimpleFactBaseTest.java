@@ -1,10 +1,5 @@
 package tyRuBa.tests;
 
-import java.io.File;
-
-import annotations.Feature;
-
-import tyRuBa.engine.BackupFailedException;
 import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.TyRuBaConf;
 
@@ -90,7 +85,6 @@ public class SimpleFactBaseTest extends TyrubaTest {
 		test_must_findall("test(?x,a)", "?x", expected);		
 	}	
 
-	@Feature(names="./BDB")
 	public void testDuplicateStrings() throws Exception {
 		
 		frontend.parse("strings :: String, String " +

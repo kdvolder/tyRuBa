@@ -1,7 +1,5 @@
 package tyRuBa.engine.factbase;
 
-import annotations.Export;
-import annotations.Feature;
 import tyRuBa.modes.PredInfo;
 
 /**
@@ -16,26 +14,18 @@ public abstract class PersistenceStrategy {
 
 	private ValidatorManager validatorManager;
 
-	@Export(to="./BDB")
 	public abstract void clean();
 
-	@Export(to="./BDB")
 	public abstract void shutdown();
 
-	@Export(to="./BDB")
 	public abstract void crash();
 
-	@Export(to="./BDB")
 	public abstract FactBase createFactBase(PredInfo info);
 
-	@Export(to="./BDB")
 	public abstract void backup();
 
-	@Export
-	@Feature(names="Validator")
 	public abstract ValidatorManager createValidatorManager();
 	
-	@Export(to="./BDB")
 	public final ValidatorManager getValidatorManager() {
 		if (validatorManager == null) {
 			validatorManager = createValidatorManager();

@@ -1,16 +1,12 @@
 package tyRuBa.engine.factbase.berkeley_db;
 
-import tyRuBa.modes.BindingList;
-
-import annotations.Feature;
-
 import com.sleepycat.bind.EntryBinding;
 import com.sleepycat.je.DatabaseEntry;
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.SecondaryDatabase;
-import com.sleepycat.je.SecondaryKeyCreator;
 
-@Feature(names="./partialKey")
+import tyRuBa.modes.BindingList;
+
 public class RBPartialSecondaryKeyCreator extends RBSecondaryKeyCreator {
 
 	private BindingList bindings;

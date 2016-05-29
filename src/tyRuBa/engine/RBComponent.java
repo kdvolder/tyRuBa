@@ -2,10 +2,7 @@ package tyRuBa.engine;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 
-import annotations.Export;
-import annotations.Feature;
 import tyRuBa.engine.compilation.CompilationContext;
 import tyRuBa.engine.compilation.Compiled;
 import tyRuBa.modes.Mode;
@@ -61,19 +58,16 @@ public abstract class RBComponent {
 		return getPredId().getName();
 	}
 
-	@Export(to="./BDB")
 	public abstract RBTuple getArgs();
 
 	public RBComponent convertToNormalForm() {
 		return this;
 	}
 
-	@Export(to="./BDB")
 	public boolean isGroundFact() {
 		return false; // must be overriden by RBFact!
 	}
 
-	@Export(to="./BDB")
 	public boolean isValid() {
 		// All components are always valid... except for ValidatorComponents.
 		return true;
@@ -81,7 +75,6 @@ public abstract class RBComponent {
 	
 	public abstract Compiled compile(CompilationContext c);
 
-	@Export(to="./BDB")
     public IValidator getValidator() {
         return Validator.theAlwaysValid;
     }

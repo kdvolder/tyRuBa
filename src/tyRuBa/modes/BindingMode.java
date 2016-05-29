@@ -6,7 +6,6 @@
 package tyRuBa.modes;
 
 import tyRuBa.engine.RBTerm;
-import annotations.Feature;
 
 abstract public class BindingMode {
 	
@@ -16,14 +15,11 @@ abstract public class BindingMode {
 	public abstract boolean satisfyBinding(BindingMode mode);
 	public abstract String getBFString();
 	
-	@Feature(names="./partialKey")
 	public boolean usePartialKeyExtraction() {
 		return false;
 	}
-	@Feature(names="./partialKey")
 	public abstract RBTerm extractPartialKey(RBTerm subterm);
 	
-	@Feature(names="./partialKey")
 	public abstract Type partialKeyType(Type type);
 	
 }

@@ -1,13 +1,9 @@
 package tyRuBa.engine.factbase.berkeley_db;
 
-import java.io.File;
-
 import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.factbase.PersistenceConf;
 import tyRuBa.engine.factbase.PersistenceStrategy;
-import annotations.Feature;
 
-@Feature(names={"./BDB","./Configure"})
 public class BerkeleyDBConf extends PersistenceConf {
 
 	private boolean deferredWrite=true;

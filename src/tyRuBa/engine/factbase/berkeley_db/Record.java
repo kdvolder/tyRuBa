@@ -1,9 +1,7 @@
 package tyRuBa.engine.factbase.berkeley_db;
 
 import tyRuBa.engine.RBTuple;
-import annotations.Feature;
 
-@Feature(names="./BDB")
 public class Record {
 	
 	public RBTuple data;

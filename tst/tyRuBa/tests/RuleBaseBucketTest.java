@@ -1,15 +1,9 @@
 package tyRuBa.tests;
 
-import annotations.Feature;
-import tyRuBa.engine.FunctorIdentifier;
 import tyRuBa.engine.RuleBase;
 import tyRuBa.engine.SimpleRuleBaseBucket;
-import tyRuBa.engine.factbase.SimpleArrayListFactBase;
-import tyRuBa.modes.TypeMapping;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
-import tyRuBa.tdbc.PreparedInsert;
-import tyRuBa.tests.TypeTest.SourceLocation;
 
 public class RuleBaseBucketTest extends TyrubaTest {
 	
@@ -444,7 +438,6 @@ public class RuleBaseBucketTest extends TyrubaTest {
 		test_must_fail("test(foo,?x)");
 	}
 	
-	@Feature(names="./BDB")
 	public void testPersistCompositeType() throws Exception {
 	    
 	    frontend.parse("TYPE Composite<> AS <String,Integer,Integer,Integer> ");

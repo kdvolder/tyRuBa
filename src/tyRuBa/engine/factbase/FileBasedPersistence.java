@@ -2,9 +2,6 @@ package tyRuBa.engine.factbase;
 
 import java.io.File;
 
-import annotations.Export;
-import annotations.Feature;
-
 import tyRuBa.engine.factbase.hashtable.FileBasedPersistenceConf;
 import tyRuBa.engine.factbase.hashtable.HashTableFactBase;
 import tyRuBa.modes.PredInfo;
@@ -13,7 +10,6 @@ import tyRuBa.util.pager.Pager;
 
 public class FileBasedPersistence extends PersistenceStrategy {
 
-	@Export(to="Validator")
 	private File path;
 	
     private static Pager pager;
@@ -51,7 +47,6 @@ public class FileBasedPersistence extends PersistenceStrategy {
         pager.backup();
 	}
 
-	@Feature(names="Validator")
 	public ValidatorManager createValidatorManager() {
 		return new FileBasedValidatorManager(path.getPath());
 	}

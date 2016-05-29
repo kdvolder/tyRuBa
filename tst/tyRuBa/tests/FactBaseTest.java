@@ -7,14 +7,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Random;
 
-import annotations.Feature;
-
 import junit.framework.Assert;
-
 import tyRuBa.engine.BackupFailedException;
 import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.RuleBaseBucket;
@@ -48,7 +43,6 @@ public class FactBaseTest extends TyrubaTest {
 		}		
 	}
 	
-	@Feature(names="./BDB")
 	public void testConcurrentOutdating() throws Throwable {
 		final int workLoadSize = 20;
 		

@@ -1,15 +1,12 @@
 package tyRuBa.engine.factbase.berkeley_db;
 
-import tyRuBa.engine.RBTerm;
-import tyRuBa.engine.RBTuple;
-
-import annotations.Feature;
-
 import com.sleepycat.bind.tuple.TupleBinding;
 import com.sleepycat.bind.tuple.TupleInput;
 import com.sleepycat.bind.tuple.TupleOutput;
 
-@Feature(names="./BDB")
+import tyRuBa.engine.RBTerm;
+import tyRuBa.engine.RBTuple;
+
 public class TyRuBaTupleBinding extends TupleBinding {
 
 	private static TupleBinding theEmpty = new TupleBinding() {

@@ -3,20 +3,24 @@
  */
 package tyRuBa.engine.factbase.berkeley_db;
 
-import java.io.File;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import com.sleepycat.bind.EntryBinding;
+import com.sleepycat.bind.tuple.TupleBinding;
+import com.sleepycat.collections.StoredMap;
+import com.sleepycat.je.Database;
+import com.sleepycat.je.DatabaseConfig;
+import com.sleepycat.je.DatabaseException;
+import com.sleepycat.je.SecondaryConfig;
+import com.sleepycat.je.SecondaryKeyCreator;
 
 import tyRuBa.engine.Frame;
 import tyRuBa.engine.IValidator;
 import tyRuBa.engine.RBComponent;
 import tyRuBa.engine.RBContext;
-import tyRuBa.engine.RBFact;
-import tyRuBa.engine.RBRepAsJavaObjectCompoundTerm;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RBTuple;
 import tyRuBa.engine.compilation.CompilationContext;
@@ -25,39 +29,19 @@ import tyRuBa.engine.compilation.SemiDetCompiled;
 import tyRuBa.engine.factbase.FactBase;
 import tyRuBa.engine.factbase.ValidatorManager;
 import tyRuBa.modes.BindingList;
-import tyRuBa.modes.BindingMode;
-import tyRuBa.modes.BoundComposite;
-import tyRuBa.modes.Factory;
-import tyRuBa.modes.Mode;
 import tyRuBa.modes.Multiplicity;
 import tyRuBa.modes.PredInfo;
 import tyRuBa.modes.PredicateMode;
 import tyRuBa.modes.TupleType;
 import tyRuBa.modes.Type;
-import tyRuBa.tests.ModeSwitchExpressionTest;
 import tyRuBa.util.Action;
 import tyRuBa.util.ElementSource;
-import tyRuBa.util.pager.FileLocation;
-import annotations.Feature;
-
-import com.sleepycat.bind.EntryBinding;
-import com.sleepycat.bind.serial.SerialBinding;
-import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.bind.tuple.TupleBinding;
-import com.sleepycat.collections.StoredKeySet;
-import com.sleepycat.collections.StoredMap;
-import com.sleepycat.je.Database;
-import com.sleepycat.je.DatabaseConfig;
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.SecondaryConfig;
-import com.sleepycat.je.SecondaryKeyCreator;
 
 /**
  * A FactBase that uses a BerkeleyDB JE Database 
  * {@link http://www.oracle.com/technology/documentation/berkeley-db/je/}
  * as a persistent backing store.
  */
-@Feature(names="./BDB")
 public class BerkeleyDBFactBase extends FactBase {
 	
 	private BerkeleyDBBasedPersistence env;
@@ -288,7 +272,6 @@ public class BerkeleyDBFactBase extends FactBase {
 		}
 	}
 	
-	@Feature(names="./partialKey")
 	private Compiled compileWithPartialKey(PredicateMode mode,
 			CompilationContext context) {
 		final StoredMap index = getIndex(mode);
@@ -407,7 +390,6 @@ public class BerkeleyDBFactBase extends FactBase {
 
 	}
 	
-	@Feature(names={"./partialKey"})
 	private StoredMap openIndex(PredicateMode predMode) throws DatabaseException {
 		BindingList list = predMode.getParamModes();
     	

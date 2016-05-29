@@ -1,15 +1,10 @@
 package tyRuBa.engine.factbase.hashtable;
 
-import java.io.File;
-
-import annotations.Feature;
-
 import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.factbase.FileBasedPersistence;
 import tyRuBa.engine.factbase.PersistenceConf;
 import tyRuBa.engine.factbase.PersistenceStrategy;
 
-@Feature(names={"./Configure"})
 public class FileBasedPersistenceConf extends PersistenceConf {
 	
 	private boolean backgroundCleaning = true;;

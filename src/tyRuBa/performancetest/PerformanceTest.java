@@ -1,4 +1,4 @@
-package tyRuBa.tests;
+package tyRuBa.performancetest;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

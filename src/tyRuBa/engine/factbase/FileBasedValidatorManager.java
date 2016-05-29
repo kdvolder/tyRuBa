@@ -9,12 +9,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import annotations.Feature;
 
 import tyRuBa.engine.IValidator;
 import tyRuBa.engine.Validator;
@@ -24,7 +21,6 @@ import tyRuBa.engine.Validator;
  * @category FactBase
  * @author riecken
  */
-@Feature(names="Validator")
 public class FileBasedValidatorManager implements ValidatorManager {
 
     /** The directory in which this validator manager is persisted. */

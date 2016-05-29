@@ -2,18 +2,13 @@ package tyRuBa.engine;
 
 import java.io.Serializable;
 
-import annotations.Feature;
-import annotations.Export;
-
 /**
  * @category JDBC
  */
-@Feature(names="Validator")
 public class Validator implements Serializable, IValidator {
 
 	public static Validator theNeverValid = new Validator(false);
 
-	@Export(to="NONE")
 	public static Validator theAlwaysValid = new Validator() {
 	    public void invalidate() {
 	    	throw new Error("Not allowed!");

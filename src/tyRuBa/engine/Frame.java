@@ -3,11 +3,8 @@ package tyRuBa.engine;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import annotations.Export;
-
 public class Frame extends Hashtable {
 	
-	@Export(to="./BDB")
 	public Frame() {}
 
 	/** Frame maintains a stack of rules that where applied to bind variables

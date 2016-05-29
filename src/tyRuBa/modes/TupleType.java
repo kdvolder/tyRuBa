@@ -7,7 +7,6 @@ package tyRuBa.modes;
 
 import java.util.ArrayList;
 import java.util.Map;
-import annotations.Feature;
 
 public final class TupleType extends Type {
 
@@ -288,7 +287,6 @@ public final class TupleType extends Type {
 	 * @param list
 	 * @return TupleType projected type
 	 */
-	@Feature(names="./partialKey")
 	public TupleType project(BindingList list) {
 		ArrayList<Type> keepTypes = new ArrayList<Type>();
 		for (int i = 0; i < list.size(); i++) {

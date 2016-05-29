@@ -1,15 +1,12 @@
 package tyRuBa.engine.factbase.berkeley_db;
 
+import com.sleepycat.bind.tuple.TupleBinding;
+
 import tyRuBa.modes.CompositeType;
 import tyRuBa.modes.TupleType;
 import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeConstructor;
-import tyRuBa.modes.TypeModeError;
-import annotations.Feature;
 
-import com.sleepycat.bind.tuple.TupleBinding;
-
-@Feature(names="./BDB")
 public class FastTyRuBaBindings extends TyRuBaBindings {
 	
 	public FastTyRuBaBindings(BerkeleyDBBasedPersistence env) {

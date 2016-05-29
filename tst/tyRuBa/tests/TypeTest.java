@@ -2,13 +2,8 @@ package tyRuBa.tests;
 
 import java.io.Serializable;
 
-import annotations.Feature;
-
-import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.FunctorIdentifier;
-import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RuleBase;
-import tyRuBa.modes.ConstructorType;
 import tyRuBa.modes.TypeMapping;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
@@ -31,7 +26,6 @@ public class TypeTest extends TyrubaTest {
 		super.setUp();
 	}
 
-	@Feature(names="./partialKey")
 	public void testPartialCompoundTermIndex() throws ParseException, TypeModeError, TyrubaException {
 		frontend.parse("TYPE SourceLocation<> AS <String,Integer,Integer,Integer> " +
 				"sourceLoc :: String, SourceLocation<> " +

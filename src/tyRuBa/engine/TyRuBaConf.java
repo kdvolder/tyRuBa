@@ -4,10 +4,8 @@ import java.io.File;
 
 import tyRuBa.engine.factbase.PersistenceConf;
 import tyRuBa.engine.factbase.PersistenceStrategy;
-import tyRuBa.engine.factbase.berkeley_db.BerkeleyDBConf;
 import tyRuBa.engine.factbase.hashtable.FileBasedPersistenceConf;
 import tyRuBa.jobs.ProgressMonitor;
-import annotations.Feature;
 
 /**
  * An instance of TyRuBaConf provides configuration parameters for creating a TyRuBaFrontend.
@@ -22,8 +20,6 @@ public class TyRuBaConf {
 	private boolean persistent = true;
 	private boolean loadInitFile = true;
 	
-
-	@Feature(names={"./Configure"})
 	private PersistenceConf persistenceConf;
 
 	private boolean locked = false;

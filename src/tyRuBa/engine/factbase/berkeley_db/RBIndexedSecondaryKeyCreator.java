@@ -1,24 +1,18 @@
 package tyRuBa.engine.factbase.berkeley_db;
 
-import tyRuBa.modes.BindingList;
-
-import annotations.Feature;
-
 import com.sleepycat.bind.EntryBinding;
 import com.sleepycat.je.DatabaseEntry;
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.SecondaryDatabase;
-import com.sleepycat.je.SecondaryKeyCreator;
+
+import tyRuBa.modes.BindingList;
 
 public class RBIndexedSecondaryKeyCreator extends RBSecondaryKeyCreator {
 
-	@Feature(names="./BDB")
 	private int[] boundIdxs;
 	
-	@Feature(names="./BDB")
 	private EntryBinding keyBinding;
 	
-	@Feature(names="./BDB")
 	public boolean createSecondaryKey(SecondaryDatabase secondary,
 			DatabaseEntry key, DatabaseEntry data, DatabaseEntry result)
 			throws DatabaseException {
@@ -28,7 +22,6 @@ public class RBIndexedSecondaryKeyCreator extends RBSecondaryKeyCreator {
 		return true;
 	}
 
-	@Feature(names="./BDB")
 	public RBIndexedSecondaryKeyCreator(BerkeleyDBFactBase env,
 			BindingList bindings) {
 		super(env,bindings);

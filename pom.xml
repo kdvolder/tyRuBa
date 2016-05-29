@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>misc-util</artifactId>
+	<version>7.4.0-SNAPSHOT</version>
+	<name>tyRuBa</name>
+	<description>TyRuBa Logic Programming Language</description>
+	<parent>
+		<groupId>com.github.kdvolder</groupId>
+		<artifactId>parent</artifactId>
+		<version>0.0.2-RELEASE</version>
+	</parent>
+
+	<url>https://github.com/kdvolder/basic-util</url>
+
+	<scm>
+		<url>https://github.com/kdvolder/misc-util</url>
+		<connection>scm:git:git://github.com/kdvolder/tyRuBa.git</connection>
+		<developerConnection>scm:git:git@github.com:kdvolder/tyRuBa.git</developerConnection>
+	</scm>
+
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<testSourceDirectory>tst</testSourceDirectory>
+		<resources>
+			<resource>
+				<directory>resources</directory>
+			</resource>
+		</resources>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+		</dependency>
+		<dependency>
+			<groupId>berkeleydb</groupId>
+			<artifactId>je</artifactId>
+			<version>3.2.44</version>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,16 +1,12 @@
 package tyRuBa.engine.factbase.berkeley_db;
 
-import java.io.IOException;
-
-import tyRuBa.engine.FrontEnd;
-import tyRuBa.engine.RBJavaObjectCompoundTerm;
-import annotations.Feature;
-
 import com.sleepycat.bind.tuple.TupleBinding;
 import com.sleepycat.bind.tuple.TupleInput;
 import com.sleepycat.bind.tuple.TupleOutput;
 
-@Feature(names="./BDB")
+import tyRuBa.engine.FrontEnd;
+import tyRuBa.engine.RBJavaObjectCompoundTerm;
+
 public class TyRuBaIntegerBinding extends TupleBinding {
 
 	@Override public Object entryToObject(TupleInput in) {

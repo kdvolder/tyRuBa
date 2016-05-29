@@ -1,17 +1,11 @@
 package tyRuBa.tests;
 
-import java.io.File;
-
-import annotations.Feature;
-
+import junit.framework.TestCase;
 import tyRuBa.engine.factbase.berkeley_db.BerkeleyDBBasedPersistence;
 import tyRuBa.engine.factbase.berkeley_db.BerkeleyDBConf;
 import tyRuBa.engine.factbase.berkeley_db.PersistentCounters;
 import tyRuBa.util.Files;
 
-import junit.framework.TestCase;
-
-@Feature(names="./BDB")
 public class PersistentCountersTest extends TestCase {
 	
 	public void testGetUnique() throws Exception {

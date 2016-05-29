@@ -3,17 +3,14 @@ package tyRuBa.engine;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-import annotations.Export;
-import annotations.Feature;
-
 import tyRuBa.engine.visitor.TermVisitor;
 import tyRuBa.modes.BindingList;
 import tyRuBa.modes.BindingMode;
 import tyRuBa.modes.Factory;
 import tyRuBa.modes.ModeCheckContext;
+import tyRuBa.modes.TupleType;
 import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeEnv;
-import tyRuBa.modes.TupleType;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.util.ObjectTuple;
 import tyRuBa.util.TwoLevelKey;
@@ -146,7 +143,6 @@ public class RBTuple extends RBTerm implements TwoLevelKey {
 		return true;
 	}
 
-	@Export(to="./BDB")
 	public Frame unify(RBTerm other, Frame f) {
 		if (!(other instanceof RBTuple))
 			if (other instanceof RBVariable)
@@ -255,7 +251,6 @@ public class RBTuple extends RBTerm implements TwoLevelKey {
      * @param toExtract parts of tuple to extract.
      * @param from tuple to extract from
      */
-	@Export(to="./BDB")
 	public RBTuple project(int[] toExtract) {
         RBTerm[] extracted = new RBTerm[toExtract.length];
         for (int i = 0; i < extracted.length; i++) {
@@ -264,7 +259,6 @@ public class RBTuple extends RBTerm implements TwoLevelKey {
         return FrontEnd.makeTuple(extracted);
 	}
 
-	@Feature(names="./partialKey")
 	public RBTerm project(BindingList bindings) {
 		RBTerm[] projected = new RBTerm[bindings.getPartialKeySize()];
 		int pos = 0;

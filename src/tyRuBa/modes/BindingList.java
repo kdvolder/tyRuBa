@@ -7,8 +7,6 @@ package tyRuBa.modes;
 
 import java.util.ArrayList;
 
-import annotations.Feature;
-
 /** 
  * A BoundTuple is the BindingMode for a Tuple
  */
@@ -16,7 +14,6 @@ public class BindingList {
 	
 	private ArrayList<BindingMode> parts;
 	
-	@Feature(names="./partialKey")
 	private int partialKeySize = -1; // cache value for getPartialKeySize
 
 	public BindingList() {
@@ -160,7 +157,6 @@ public class BindingList {
 		return true;
 	}
 
-	@Feature(names="./partialKey")
 	public boolean usePartialKeyExtraction() {
 		for (int i = 0; i < size(); i++) {
 			if (get(i).usePartialKeyExtraction())
@@ -169,14 +165,12 @@ public class BindingList {
 		return false;
 	}
 
-	@Feature(names="./partialKey")
 	public int getPartialKeySize() {
 		if (partialKeySize<0)
 			computePartialKeySize();
 		return partialKeySize;
 	}
 
-	@Feature(names="./partialKey")
 	private void computePartialKeySize() {
 		partialKeySize = 0;
 		for (int i = 0; i < size(); i++) {

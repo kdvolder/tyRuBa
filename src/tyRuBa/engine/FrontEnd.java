@@ -32,7 +32,6 @@ import tyRuBa.util.Files;
 import tyRuBa.util.SynchPolicy;
 import tyRuBa.util.SynchResource;
 import tyRuBa.util.pager.Pager;
-import annotations.Feature;
 
 public class FrontEnd extends QueryEngine 
 implements SynchResource {
@@ -74,7 +73,6 @@ implements SynchResource {
 		return new LinkedHashSet();
 	}
 
-	@Feature(names={"./JDBC","./BDB"})
 	public FrontEnd(TyRuBaConf conf) {
 		this.conf = conf;
 		

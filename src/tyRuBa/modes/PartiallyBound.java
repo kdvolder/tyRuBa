@@ -1,6 +1,5 @@
 package tyRuBa.modes;
 
-import annotations.Feature;
 import tyRuBa.engine.RBTerm;
 
 /**
@@ -45,13 +44,11 @@ public class PartiallyBound extends BindingMode {
 	}
 
 	@Override
-	@Feature(names="./partialKey")
 	public RBTerm extractPartialKey(RBTerm term) {
 		throw new Error("This shouldn't happen: partial key extraction not supported");
 	}
 
 	@Override
-	@Feature(names="./partialKey")
 	public Type partialKeyType(Type type) {
 		throw new Error("This shouldn't happen: partial key extraction not supported");
 	}

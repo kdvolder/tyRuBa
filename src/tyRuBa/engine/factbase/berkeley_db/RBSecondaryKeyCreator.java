@@ -1,12 +1,10 @@
 package tyRuBa.engine.factbase.berkeley_db;
 
-import tyRuBa.modes.BindingList;
-import annotations.Feature;
-
 import com.sleepycat.bind.EntryBinding;
 import com.sleepycat.je.SecondaryKeyCreator;
 
-@Feature(names="./BDB")
+import tyRuBa.modes.BindingList;
+
 public abstract class RBSecondaryKeyCreator implements SecondaryKeyCreator {
 
 	protected EntryBinding dataBinding;

@@ -13,7 +13,6 @@ import tyRuBa.engine.factbase.ValidatorManager;
 import tyRuBa.modes.CompositeType;
 import tyRuBa.modes.ConstructorType;
 import tyRuBa.modes.Factory;
-import tyRuBa.modes.JavaTypeConstructor;
 import tyRuBa.modes.PredInfo;
 import tyRuBa.modes.TupleType;
 import tyRuBa.modes.Type;
@@ -29,8 +28,6 @@ import tyRuBa.util.Action;
 import tyRuBa.util.ElementSource;
 import tyRuBa.util.NullQueryLogger;
 import tyRuBa.util.QueryLogger;
-import tyRuBa.util.pager.Pager;
-import annotations.Export;
 
 /**
  * @author kdvolder
@@ -286,7 +283,6 @@ public abstract class QueryEngine {
 		}
 	}
 
-	@Export(to="./BDB")
 	public Type findType(String name) throws TypeModeError {
 		TypeConstructor tc = findTypeConst(name);
 		return tc.apply(Factory.makeTupleType(), false);

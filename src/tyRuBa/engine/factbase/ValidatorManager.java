@@ -3,8 +3,6 @@
  */
 package tyRuBa.engine.factbase;
 
-import annotations.Export;
-import annotations.Feature;
 import tyRuBa.engine.IValidator;
 
 /**
@@ -14,7 +12,6 @@ import tyRuBa.engine.IValidator;
  * retrieval of a validator by giving its handle.
  * @category FactBase
  */
-@Export @Feature(names="Validator")
 public interface ValidatorManager {
 	
 	public IValidator newValidator(String identifier);

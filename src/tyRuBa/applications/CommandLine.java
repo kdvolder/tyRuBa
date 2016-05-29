@@ -11,7 +11,7 @@ import tyRuBa.engine.TyRuBaConf;
 import tyRuBa.engine.factbase.hashtable.FileBasedPersistenceConf;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
-import tyRuBa.tests.PerformanceTest;
+import tyRuBa.performancetest.PerformanceTest;
 
 /**
  * @noToString This tag indicates the developer explicitly checked this class and

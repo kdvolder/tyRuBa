@@ -7,7 +7,6 @@ import tyRuBa.engine.SemiDetCachedRuleBase;
 import tyRuBa.modes.Mode;
 import tyRuBa.util.Action;
 import tyRuBa.util.ElementSource;
-import annotations.Export;
 
 /**
  * This is what you get when an Expression is Compiled.
@@ -94,7 +93,6 @@ public abstract class Compiled {
 	 * All compiled Expressions must override at least one
 	 * of run(ElementSource) or run(Object).
 	 */
-	@Export(to="./BDB")
 	public abstract ElementSource runNonDet(Object input, RBContext context);
 
 	/** 

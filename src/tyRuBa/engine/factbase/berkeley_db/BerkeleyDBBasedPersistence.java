@@ -3,14 +3,8 @@ package tyRuBa.engine.factbase.berkeley_db;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import annotations.Export;
-import annotations.Feature;
-
-import com.sleepycat.bind.EntryBinding;
 import com.sleepycat.bind.serial.ClassCatalog;
-import com.sleepycat.bind.serial.SerialBinding;
 import com.sleepycat.bind.serial.StoredClassCatalog;
 import com.sleepycat.collections.TransactionRunner;
 import com.sleepycat.collections.TransactionWorker;
@@ -20,31 +14,22 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.DatabaseNotFoundException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
-import com.sleepycat.je.EnvironmentStats;
 import com.sleepycat.je.SecondaryConfig;
-import com.sleepycat.je.StatsConfig;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.je.recovery.NoRootException;
 
 import tyRuBa.engine.FrontEnd;
-import tyRuBa.engine.RBTerm;
-import tyRuBa.engine.Validator;
 import tyRuBa.engine.factbase.FactBase;
 import tyRuBa.engine.factbase.FileBasedValidatorManager;
 import tyRuBa.engine.factbase.PersistenceStrategy;
 import tyRuBa.engine.factbase.ValidatorManager;
-import tyRuBa.engine.factbase.hashtable.HashTableFactBase;
 import tyRuBa.modes.PredInfo;
-import tyRuBa.modes.TupleType;
-import tyRuBa.modes.Type;
 import tyRuBa.util.Files;
 
-@Feature(names="./BDB")
 public class BerkeleyDBBasedPersistence extends PersistenceStrategy {
 	
 	private static final int DEFAULT_CACHE_PERCENT = 20;
 
-	@Export(to="Validator")
 	private File path;
 	
 	private Environment env = null;
@@ -72,10 +57,8 @@ public class BerkeleyDBBasedPersistence extends PersistenceStrategy {
 	
 	private TyRuBaBindings tyRuBaBindings;
 	
-	@Feature(names={"./Configure"})
 	private boolean isTransactional = false;
 
-	@Feature(names={"./Configure"})
 	private BerkeleyDBConf bdbConf;
 		
 	private void initialize(boolean retry) {
@@ -163,7 +146,6 @@ public class BerkeleyDBBasedPersistence extends PersistenceStrategy {
 		}
 	}
 
-	@Feature(names="Validator")
 	public ValidatorManager createValidatorManager() {
 		return new FileBasedValidatorManager(path.getPath());
 	}
@@ -252,7 +234,6 @@ public class BerkeleyDBBasedPersistence extends PersistenceStrategy {
 		return dbConf;
 	}
 
-	@Feature(names={"./Configure"})
 	public boolean getLazyOpenIndexes() {
 		return bdbConf.getLazyOpenIndexes();
 	}

@@ -3,21 +3,16 @@ package tyRuBa.engine.factbase.berkeley_db;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sleepycat.bind.EntityBinding;
 import com.sleepycat.bind.EntryBinding;
-import com.sleepycat.bind.serial.SerialBinding;
 import com.sleepycat.bind.tuple.TupleBinding;
 import com.sleepycat.bind.tuple.TupleInput;
 import com.sleepycat.bind.tuple.TupleOutput;
 
-import annotations.Feature;
 import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RBTuple;
-import tyRuBa.modes.TupleType;
 import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeModeError;
-import tyRuBa.tests.TyrubaTest;
 
 /**
  * An instance of this class exists for every BDBBasedPersistence strategy object.
@@ -27,7 +22,6 @@ import tyRuBa.tests.TyrubaTest;
  *  
  * @author kdvolder
  */
-@Feature(names="./BDB")
 public class TyRuBaBindings {
 	
 	Map<Type,TupleBinding> bindings = new HashMap<Type, TupleBinding>(); 
