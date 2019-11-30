@@ -10,7 +10,7 @@ public class ModeCheckTest extends TyrubaTest {
 	}
 
 	protected void setUp() throws Exception {
-		TyrubaTest.initfile = true;
+		TyrubaJUnit4Test.initfile = true;
 		super.setUp();
 	}
 

@@ -1,31 +1,31 @@
 package tyRuBa.tests;
 
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import tyRuBa.engine.RBAvoidRecursion;
 import tyRuBa.engine.RuleBase;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 
-public class PrologNativePredicateTest extends TyrubaTest {
+public class PrologNativePredicateTest extends TyrubaJUnit4Test {
 
-	public PrologNativePredicateTest(String arg0) {
-		super(arg0);
-	}
-	
-	public void setUp() throws Exception {
-		TyrubaTest.initfile = true;
+	@Before public void setUp() throws Exception {
+		TyrubaJUnit4Test.initfile = true;
 		RuleBase.useCache = true;
 		RuleBase.silent = true;
 		super.setUp();
 	}
 
-	public void testListRef() throws ParseException, TypeModeError {
+	@Test public void testListRef() throws ParseException, TypeModeError {
 		test_must_equal("list_ref(?n,[a,b,c],b)", "?n", "1");
 		test_must_equal("list_ref(2,[a,b,c],?x)", "?x", "c");
 		test_must_findall("list_ref(?n,[a,b,a],a)", "?n",
 			new String[] { "0", "2" });
 	}
 	
-	public void testAppend() throws ParseException, TypeModeError {
+	@Test public void testAppend() throws ParseException, TypeModeError {
 		test_must_succeed("append([1,2,3],[4,5],[1,2,3,4,5])");
 		test_must_equal("append(?x,[4,5],[1,2,3,4,5])", "?x", "[1,2,3]");
 		test_must_fail("append(?x,[3,5],[1,2,3,4,5])");
@@ -40,12 +40,13 @@ public class PrologNativePredicateTest extends TyrubaTest {
 			});
 	}
 	
-	public void testMember() throws ParseException, TypeModeError {
+	@Test public void testMember() throws ParseException, TypeModeError {
 		test_must_findall("member(?x,[1,2,3,4])", "?x",
 			new String[] { "1", "2", "3", "4" });
 	}
 	
-	public void IGNORED_testMemberLargeList() throws ParseException, TypeModeError {
+	@Ignore
+	@Test public void testMemberLargeList() throws ParseException, TypeModeError {
 		//Test is ignored: it would be nice if this worked, but it doesn't. There's 
 		// a hard limit on the recursion depth in rules.
 		StringBuffer listStr = new StringBuffer("1"); 
@@ -60,7 +61,7 @@ public class PrologNativePredicateTest extends TyrubaTest {
 		test_must_fail("member(?x,[" + listStr + "]),equals(?x,2)");
 	}
 	
-	public void testPermutation() throws ParseException, TypeModeError {
+	@Test public void testPermutation() throws ParseException, TypeModeError {
 		test_must_succeed("permutation([1,2,3],[1,2,3])");
 		test_must_succeed("permutation([1,2,3],[1,3,2])");
 		test_must_succeed("permutation([1,2,3],[2,1,3])");
@@ -72,7 +73,7 @@ public class PrologNativePredicateTest extends TyrubaTest {
 		test_must_succeed("permutation(?x, [1,2,3])");
 	}
 	
-	public void testReverse() throws ParseException, TypeModeError {
+	@Test public void testReverse() throws ParseException, TypeModeError {
 		test_must_equal("reverse([1,2,3],?x)", "?x", "[3,2,1]");
 		test_must_equal("reverse(?x,[1,2,3])", "?x", "[3,2,1]");
 	}
@@ -84,7 +85,7 @@ public class PrologNativePredicateTest extends TyrubaTest {
 //		test_must_fail("list(abc)");
 //	}
 	
-	public void testEqualOrUnify() throws ParseException, TypeModeError {
+	@Test public void testEqualOrUnify() throws ParseException, TypeModeError {
 		frontend.parse("TYPE foo<?x> AS <String>");
 		test_must_succeed("equals([1,2,3],[1,2,3])");		
 		test_must_fail("equals(a,b)");
@@ -94,7 +95,7 @@ public class PrologNativePredicateTest extends TyrubaTest {
 		test_must_equal("equals(?x,a)", "?x", "a");
 	}
 	
-	public void testZip() throws ParseException, TypeModeError {
+	@Test public void testZip() throws ParseException, TypeModeError {
 		test_must_succeed(
 			"zip([1,2,3],[a,b,c],?x), equals(?x,[<1,a>,<2,b>,<3,c>])");
 		test_must_succeed("zip([1,2,3],[a,b,c],[<1,a>,<2,b>,<3,c>])");
@@ -108,11 +109,11 @@ public class PrologNativePredicateTest extends TyrubaTest {
 //		}
 	}
 	
-	public void testSumList() throws ParseException, TypeModeError {
+	@Test public void testSumList() throws ParseException, TypeModeError {
 		test_must_equal("sumList([1,2,3],?x)", "?x", "6");
 	}
 	
-	public void testTrueFalse() throws ParseException, TypeModeError {
+	@Test public void testTrueFalse() throws ParseException, TypeModeError {
 		test_must_fail("false()");
 		test_must_succeed("true()");
 		test_must_succeed("true();false()");
@@ -120,5 +121,4 @@ public class PrologNativePredicateTest extends TyrubaTest {
 		test_must_fail("true(),false()");
 		test_must_fail("false(),true()");
 	}
-
 }

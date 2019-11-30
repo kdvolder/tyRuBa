@@ -22,7 +22,7 @@ public class TypeAliasTest extends TyrubaTest {
 	}
 
 	protected void setUp() throws Exception {
-		TyrubaTest.initfile = true;
+		TyrubaJUnit4Test.initfile = true;
 		RuleBase.useCache = true;
 		RuleBase.silent = true;
 		super.setUp();

@@ -10,7 +10,7 @@ public class ExistQuantifierAndNotFilterTest extends TyrubaTest {
 	}
 	
 	public void setUp() throws Exception {
-		TyrubaTest.initfile = false;
+		TyrubaJUnit4Test.initfile = false;
 		super.setUp();
 	}
 
@@ -52,7 +52,7 @@ public class ExistQuantifierAndNotFilterTest extends TyrubaTest {
 	}
 	
 	public void testBadExist() throws Exception {
-		TyrubaTest.initfile = true;
+		TyrubaJUnit4Test.initfile = true;
 		super.setUp();
 		
 		frontend.parse("foo :: ?t\n" +			"MODES (F) IS NONDET END");

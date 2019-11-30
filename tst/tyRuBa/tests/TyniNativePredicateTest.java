@@ -10,7 +10,7 @@ public class TyniNativePredicateTest extends TyrubaTest {
 	}
 	
 	public void setUp() throws Exception {
-		TyrubaTest.initfile = true;
+		TyrubaJUnit4Test.initfile = true;
 		super.setUp();
 	}
 

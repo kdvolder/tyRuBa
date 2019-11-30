@@ -11,7 +11,7 @@ public class UniqueQuantifierTest extends TyrubaTest {
 	}
 	
 	public void setUp() throws Exception {
-		TyrubaTest.initfile = true;
+		TyrubaJUnit4Test.initfile = true;
 		RuleBase.silent = false;
 		super.setUp();
 	}

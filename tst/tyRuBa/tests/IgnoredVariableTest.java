@@ -11,7 +11,7 @@ public class IgnoredVariableTest extends TyrubaTest {
 	}
 
 	protected void setUp() throws Exception {
-		TyrubaTest.initfile = false;
+		TyrubaJUnit4Test.initfile = false;
 		RuleBase.useCache = false;
 		super.setUp();
 	}

@@ -8,7 +8,7 @@ public class CacheRuleBaseTest extends TyrubaTest {
 	
 	public void setUp() throws Exception {
 		RuleBase.useCache = true;
-		TyrubaTest.initfile = false;
+		TyrubaJUnit4Test.initfile = false;
 		super.setUp();
 	}
 

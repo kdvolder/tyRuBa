@@ -2,6 +2,10 @@ package tyRuBa.tests;
 
 import java.io.Serializable;
 
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import tyRuBa.engine.FunctorIdentifier;
 import tyRuBa.engine.RuleBase;
 import tyRuBa.modes.TypeMapping;
@@ -13,20 +17,18 @@ import tyRuBa.tdbc.PreparedQuery;
 import tyRuBa.tdbc.ResultSet;
 import tyRuBa.tdbc.TyrubaException;
 
-public class TypeTest extends TyrubaTest {
+import static org.junit.Assert.*;
 
-	public TypeTest(String arg0) {
-		super(arg0);
-	}
+public class TypeTest extends TyrubaJUnit4Test {
 
-	protected void setUp() throws Exception {
-		TyrubaTest.initfile = true;
+	@Before public void setUp() throws Exception {
+		TyrubaJUnit4Test.initfile = true;
 		RuleBase.useCache = true;
 		RuleBase.silent = true;
 		super.setUp();
 	}
 
-	public void testPartialCompoundTermIndex() throws ParseException, TypeModeError, TyrubaException {
+	@Test public void testPartialCompoundTermIndex() throws ParseException, TypeModeError, TyrubaException {
 		frontend.parse("TYPE SourceLocation<> AS <String,Integer,Integer,Integer> " +
 				"sourceLoc :: String, SourceLocation<> " +
 				"PERSISTENT MODES (F,F) IS NONDET END ");
@@ -60,7 +62,7 @@ public class TypeTest extends TyrubaTest {
 		q = conn.prepareQuery("sourceLoc(?it,SourceLocation<?name,?x,?y,?z>)");
 	}
 
-	public void testMyAppend() throws Exception {
+	@Test public void testMyAppend() throws Exception {
 		frontend.parse("myappend :: [?t], [?t], [?t] " +
 				"MODES " +
 				"	(B,B,F) IS DET " +
@@ -72,7 +74,7 @@ public class TypeTest extends TyrubaTest {
 		frontend.parse("myappend([?x|?xs],?ys,[?x|?zs]) :- myappend(?xs,?ys,?zs).");
 	}
 	
-	public void testIllegalCastToAbstractType() throws Exception {
+	@Test public void testIllegalCastToAbstractType() throws Exception {
 		frontend.parse(
 			"TYPE RefType AS String " +
 			"TYPE PrimType AS String " +
@@ -95,7 +97,7 @@ public class TypeTest extends TyrubaTest {
 		
 	}
 	
-	public void testRepAsStringAndString() throws Exception {
+	@Test public void testRepAsStringAndString() throws Exception {
 		frontend.parse("TYPE Foo AS String");
 		frontend.parse(
 				"foo :: Foo " +
@@ -109,7 +111,7 @@ public class TypeTest extends TyrubaTest {
 		}
 	}
 	
-	public void testRepAsStringAndString2() throws ParseException, TypeModeError {
+	@Test public void testRepAsStringAndString2() throws ParseException, TypeModeError {
 		frontend.parse("TYPE Foo AS String");
 		frontend.parse(
 				"foo :: Foo " +
@@ -125,7 +127,7 @@ public class TypeTest extends TyrubaTest {
 		}
 	}
 
-    public void testMixingCompositeAndAtomicTypes() throws Exception {
+	@Test public void testMixingCompositeAndAtomicTypes() throws Exception {
 
 		frontend.parse(
 		"TYPE Element AS String ");
@@ -158,7 +160,7 @@ public class TypeTest extends TyrubaTest {
 		"match(?P::SubtypePat, ?X)   :- match(?P,?X). ");
     }
 	
-    public void testCompositeSubTypes() throws Exception {
+	@Test public void testCompositeSubTypes() throws Exception {
 
 		frontend.parse(
 			"TYPE Element AS String " +
@@ -186,7 +188,7 @@ public class TypeTest extends TyrubaTest {
 		"match(SubtypePat<?P>, ?X)   :- match(?P,?X). ");
     }
         
-	public void testBadAppend1() throws ParseException, TypeModeError {
+	@Test public void testBadAppend1() throws ParseException, TypeModeError {
 		try {
 			frontend.parse("append(?x,abc,?x).");
 			fail("This should have thrown a TypeModeError because \"abc\" does not" +				"have type [?t]");
@@ -194,7 +196,7 @@ public class TypeTest extends TyrubaTest {
 		}
 	}
 
-	public void testBadAppend2() throws ParseException, TypeModeError {
+	@Test public void testBadAppend2() throws ParseException, TypeModeError {
 		try {
 			frontend.parse("append([?x|?xs],?ys,[?x|?zs]) :- append(?x,?ys,?zs).");
 			fail("This should have thrown a TypeModeError because ?x is not a list");
@@ -202,13 +204,13 @@ public class TypeTest extends TyrubaTest {
 		}
 	}
 
-	public void testEmptyList()throws ParseException, TypeModeError {
+	@Test public void testEmptyList()throws ParseException, TypeModeError {
 		frontend.parse("list :: [?x]\n" 
 			+ "MODES (FREE) IS NONDET END");
 		frontend.parse("list([]).");
 	}
 
-	public void testDeclarationArity() throws ParseException, TypeModeError {
+	@Test public void testDeclarationArity() throws ParseException, TypeModeError {
 		try {
 			frontend.parse("planet :: String\n"
 				+ "MODES\n"
@@ -221,7 +223,7 @@ public class TypeTest extends TyrubaTest {
 		}
 	}
 	
-	public void testUndefinedPredError() throws ParseException, TypeModeError {
+	@Test public void testUndefinedPredError() throws ParseException, TypeModeError {
 		try {
 			frontend.parse("plannet(Earth).");
 			fail("This should have thrown a TypeModeError because plannet is not a declared" +				"predicate");
@@ -229,7 +231,7 @@ public class TypeTest extends TyrubaTest {
 		}
 	}
 
-	public void testStrictType() throws ParseException, TypeModeError {
+	@Test public void testStrictType() throws ParseException, TypeModeError {
 		try {
 			frontend.parse("isSum :: Integer, Integer, Integer");
 			frontend.parse("isSum(?x,?y,?z) :-  sum(?x,?y,?z).");
@@ -258,19 +260,19 @@ public class TypeTest extends TyrubaTest {
 		test_must_succeed("equals(?x,foo),sameObject(?x,?x)");
 	}
 	
-	public void testEmptyListRule1() throws ParseException, TypeModeError {
+	@Test public void testEmptyListRule1() throws ParseException, TypeModeError {
 		frontend.parse("foo :: Integer, [Integer] \n" +			"MODES (B,F) IS NONDET END");
 		frontend.parse("foo(?T,?X) :- equals(?X,[]), Integer(?T), " +			"NOT(equals(?T,1)); equals(?X,[1]), Integer(?T).");
 	}
 
-	public void testEmptyListRule2() throws ParseException, TypeModeError {
+	@Test public void testEmptyListRule2() throws ParseException, TypeModeError {
 		frontend.parse("foo :: Integer, [Integer] \n" +
 			"MODES (B,F) IS MULTI END");
 		frontend.parse("foo(?T,[]) :- Integer(?T), NOT(equals(?T,1)).");
 		frontend.parse("foo(?T,[?T]) :- Integer(?T).");
 	}
 	
-	public void testStrictTypesInRules() throws ParseException, TypeModeError {
+	@Test public void testStrictTypesInRules() throws ParseException, TypeModeError {
 		frontend.parse("inEither :: ?a,[?a],[?a]\n" +			"MODES (F,B,B) IS NONDET END");
 		frontend.parse("inEither(?x,?l1,?l2) :- member(?x,?l1); member(?x,?l2).");		
 
@@ -291,7 +293,7 @@ public class TypeTest extends TyrubaTest {
 			new String[] { "1", "2", "3", "4", "5", "6" });
 	}
 	
-	public void testStrictTypesWithShrinkingTypes() throws ParseException, TypeModeError {
+	@Test public void testStrictTypesWithShrinkingTypes() throws ParseException, TypeModeError {
 		//Note: assuming strict types are going to disapear then these tests are should pass
 		// Currently strict types are still supported however, but they are buggy. Making this
 		// test already behave as if they where not supported.
@@ -302,7 +304,7 @@ public class TypeTest extends TyrubaTest {
 		test_resultcount("Integer(?x), sum(?x,?x,?x), member(?x,[0,1,2])", 1);
 	}
 	
-	public void testTypeTests() throws ParseException, TypeModeError {
+	@Test public void testTypeTests() throws ParseException, TypeModeError {
 		test_must_succeed("Integer(1)");
 		test_must_succeed("Number(1.1)");
 		test_must_fail("list_ref(0,[0,a],?x), String(?x)");
@@ -318,7 +320,7 @@ public class TypeTest extends TyrubaTest {
 		frontend.parse("TYPE Bar AS String");
 	}
 	
-	public void testListType() throws ParseException, TypeModeError {
+	@Test public void testListType() throws ParseException, TypeModeError {
 		frontend.parse(
 			"descriptorImg :: [String], String "+
 			"MODES "+
@@ -331,7 +333,7 @@ public class TypeTest extends TyrubaTest {
 	/** Test added because of bug (undesirable type error) found combining tvars 
 	 * with actual types in lists.
 	 */
-	public void testListType2() throws ParseException, TypeModeError {
+	@Test public void testListType2() throws ParseException, TypeModeError {
 		frontend.parse(
 			"abc :: [String] "+
 			"MODES "+
@@ -345,7 +347,7 @@ public class TypeTest extends TyrubaTest {
 			"abc(?x) :- equals(?c,c), equals(?x,[a,b,?c]).");
 	}
 
-	public void testUserListType() throws ParseException, TypeModeError {
+	@Test public void testUserListType() throws ParseException, TypeModeError {
 		
 		frontend.parse("TYPE Package AS String ");
 		frontend.parse("TYPE CU AS String ");
@@ -369,7 +371,7 @@ public class TypeTest extends TyrubaTest {
 			"viewFromHere(?X, []) :- Element(?X), NOT(child(?X,?)).");
 	}
 	
-	public void testCompositeType() throws ParseException, TypeModeError {
+	@Test public void testCompositeType() throws ParseException, TypeModeError {
 		frontend.parse("TYPE Tree<?key,?value> = Node<?key,?value>" +
 			"| Leaf<?value>" +
 			"| EmptyTree<>" +			"| WeirdTree<?value>");
@@ -419,7 +421,7 @@ public class TypeTest extends TyrubaTest {
 		}
 	}
 	
-	public void testMixedTypeListRule() throws ParseException, TypeModeError {
+	@Test public void testMixedTypeListRule() throws ParseException, TypeModeError {
 		frontend.parse(
 		"TYPE Type AS String " +		"TYPE Method AS String " +		"TYPE Element = Type | Method " +		"method :: Type, Method " +		"MODES" +		"(F,F) IS NONDET " +		"(B,F) IS NONDET " +		"(F,B) IS SEMIDET " +		"END");
 
@@ -439,7 +441,8 @@ public class TypeTest extends TyrubaTest {
 
 	}
 	
-	public void IGNORED_testAppendMixedTypeLists() throws ParseException, TypeModeError {
+	@Ignore
+	@Test public void testAppendMixedTypeLists() throws ParseException, TypeModeError {
 		//Ignored: This test fails because the type checker is a bit broken and can't easily be fixed.
 		//To fix it will require rewriting it and possibly changing even how it works conceptually.
 		
@@ -462,8 +465,7 @@ public class TypeTest extends TyrubaTest {
 				"append(?xy,?z,?xyz)");
 	}
 	
-	
-	public void testUserDefinedListType() throws TypeModeError, ParseException {
+	@Test public void testUserDefinedListType() throws TypeModeError, ParseException {
 		frontend.parse("TYPE List<?element> = NonEmptyList<?element> | EmptyList<>");
 		frontend.parse("TYPE NonEmptyList<?element> AS <?element,List<?element>>");
 		frontend.parse("TYPE EmptyList<> AS <>");
@@ -636,7 +638,7 @@ public class TypeTest extends TyrubaTest {
         
     }
     
-	public void testMappedCompositeType() throws ParseException, TypeModeError, TyrubaException {
+	@Test public void testMappedCompositeType() throws ParseException, TypeModeError, TyrubaException {
 	    
 	    frontend.parse("TYPE SourceLocation<> AS <String,Integer,Integer,Integer> " +
 	    		"TYPE SourceRange<>    AS <String,Integer,Integer,Integer,String> " +
@@ -674,13 +676,15 @@ public class TypeTest extends TyrubaTest {
 	    
 	}
 	
-	public void IGNORED_testSeparatedSubTypedeclarations() throws ParseException, TypeModeError, TyrubaException {
+	@Ignore
+	@Test public void testSeparatedSubTypedeclarations() throws ParseException, TypeModeError, TyrubaException {
 		//Test ignored. What it is testing is not yet implemented.
 	    frontend.parse("TYPE Tree<?E> = EmptyTree<> ");
 	    frontend.parse("TYPE Tree<?E> = BinaryTree<?E> ");
 	    frontend.parse("TYPE BinaryTree<?E> AS < Tree<?E>, Tree<?E> >");
 	}
-	public void IGNORED_testBadSeparatedSubTypedeclarations() throws ParseException, TypeModeError, TyrubaException {
+	@Ignore
+	@Test public void testBadSeparatedSubTypedeclarations() throws ParseException, TypeModeError, TyrubaException {
 		//Test ignored. What it is testing is not yet implemented.
 	    frontend.parse("TYPE Tree<?A> = EmptyTree<> ");
 	    try {
@@ -692,7 +696,7 @@ public class TypeTest extends TyrubaTest {
 		}
 	}
 	
-	public void testCompatibleMappedCompositeType() throws ParseException, TypeModeError, TyrubaException {
+	@Test public void testCompatibleMappedCompositeType() throws ParseException, TypeModeError, TyrubaException {
 	    
 	    frontend.parse("TYPE SourceLocation<> AS <String,Integer,Integer,Integer> " +
 	    		"TYPE SourceRange<>    AS <String,Integer,Integer,Integer> " +
@@ -732,7 +736,7 @@ public class TypeTest extends TyrubaTest {
 	    
 	}
 	
-	public void testJavaTypeConstructor() throws Exception {
+	@Test public void testJavaTypeConstructor() throws Exception {
 		frontend.parse(
 				"sourceLoc :: String, tyRuBa.tests.TypeTest$SourceLocation " +
 				"PERSISTENT MODES (F,F) IS NONDET END ");
@@ -746,8 +750,7 @@ public class TypeTest extends TyrubaTest {
 		
 	}
 
-
-    public void testSameStringUserDefinedTypes() throws Exception {
+	@Test  public void testSameStringUserDefinedTypes() throws Exception {
 		String[] vehics = new String[] {
 				"Bike","Car","Automobile","Big#Automobile","#Car","Big#"
 		};
@@ -788,20 +791,17 @@ public class TypeTest extends TyrubaTest {
 	public class Car implements Vehicle {
 	}
 
-    public void testInterfaceType() throws Exception {
-    	frontend.parse(
-    			"vehic :: String, tyRuBa.tests.TypeTest$Vehicle " +
-    			"MODES (F,F) IS NONDET END");
-    	Connection conn = new Connection(frontend);
-    	PreparedInsert insert = conn.prepareInsert("vehic(!n,!v)");
-    	insert.put("!n","car");
-    	Vehicle theCar = new Car();
+	public void testInterfaceType() throws Exception {
+		frontend.parse(
+				"vehic :: String, tyRuBa.tests.TypeTest$Vehicle " +
+				"MODES (F,F) IS NONDET END");
+		Connection conn = new Connection(frontend);
+		PreparedInsert insert = conn.prepareInsert("vehic(!n,!v)");
+		insert.put("!n","car");
+		Vehicle theCar = new Car();
 		insert.put("!v", theCar);
 		insert.executeInsert();
-		
+
 		test_must_equal("vehic(car,?v)", "?v", theCar);
-    }
-    
-    
-        
+	}
 }

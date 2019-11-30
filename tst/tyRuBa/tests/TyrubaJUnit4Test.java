@@ -4,37 +4,30 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.After;
+
 import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.QueryEngine;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RuleBase;
 import tyRuBa.engine.TyRuBaConf;
-import tyRuBa.engine.factbase.berkeley_db.BerkeleyDBConf;
-import tyRuBa.engine.factbase.hashtable.FileBasedPersistenceConf;
 import tyRuBa.jobs.ProgressMonitor;
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 import tyRuBa.util.ElementSource;
 
-/**
- * Deprecated. Should be replaced with TyrubaJUnit4Test
- */
-@Deprecated
-public abstract class TyrubaTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class TyrubaJUnit4Test {
 
 	FrontEnd frontend;
+	static public boolean initfile = true;
 	
-	public TyrubaTest(String arg0) {
-		super(arg0);
-	}
-
 	protected void setUp() throws Exception {
 		setUp(false); // default setup without reconnecting
 	}
-	
+
 	protected void setUp(boolean reconnect) throws Exception {
-		super.setUp();
 //		frontend = new FrontEnd(initfile,true);
 		TyRuBaConf conf = new TyRuBaConf();
 //		conf.setPersistenceConf(new BerkeleyDBConf());
@@ -45,23 +38,21 @@ public abstract class TyrubaTest extends TestCase {
 		//		RuleBase.silent = true;
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		if (frontend!=null) {
 			frontend.shutdown();
 			frontend = null;
 		}
-		super.tearDown();
 	}
 
 	protected void setUpNoFrontend() throws Exception {
-		super.setUp();
 		RuleBase.silent = true;
 	}
 
 	protected void setUp(ProgressMonitor mon) throws Exception {
-		super.setUp();
 		TyRuBaConf conf = new TyRuBaConf();
-		conf.setLoadInitFile(TyrubaJUnit4Test.initfile);
+		conf.setLoadInitFile(initfile);
 		conf.setProgressMonitor(mon);
 		frontend = new FrontEnd(conf);
 	}
@@ -169,11 +160,4 @@ public abstract class TyrubaTest extends TestCase {
 	    }  
 	    dir.delete();
 	}
-
-//	protected String getJDBCURL() {
-//		return null;
-//	//		return "jdbc:postgresql:tyruba";
-//	}
-	
-	
 }
