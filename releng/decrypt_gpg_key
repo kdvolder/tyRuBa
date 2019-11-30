@@ -21,3 +21,11 @@ gpg --allow-secret-key-import --import gpg_private_key.asc
 #delete secret data
 rm -f *key.asc
 
+gpg --list-secret-keys
+
+echo ==== gpg conf ====
+cat ~/.gnupg/gpg.conf
+
+echo === Try signing something ===
+echo "Testing" > test.txt
+gpg -v --debug-level 5 --output test.txt.sig --sign test.txt

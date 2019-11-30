@@ -11,10 +11,10 @@
 		<version>0.0.3-RELEASE</version>
 	</parent>
 
-	<url>https://github.com/kdvolder/basic-util</url>
+	<url>https://github.com/kdvolder/tyRuBa</url>
 
 	<scm>
-		<url>https://github.com/kdvolder/misc-util</url>
+		<url>https://github.com/kdvolder/tyRuBa</url>
 		<connection>scm:git:git://github.com/kdvolder/tyRuBa.git</connection>
 		<developerConnection>scm:git:git@github.com:kdvolder/tyRuBa.git</developerConnection>
 	</scm>

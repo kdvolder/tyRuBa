@@ -1,0 +1,87 @@
+Apache Maven 3.3.9 (bb52d8502b132ec0a5a3f4c09453c07478323dc5; 2015-11-10T08:41:47-08:00)
+Maven home: /home/kdvolder/Applications/apache-maven-3.3.9
+Java version: 1.8.0_201, vendor: Oracle Corporation
+Java home: /usr/lib/jvm/java-8-oracle/jre
+Default locale: en_CA, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-70-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] Inspecting build with total of 1 modules...
+[INFO] Installing Nexus Staging features:
+[INFO]   ... total of 1 executions of maven-deploy-plugin replaced with nexus-staging-maven-plugin
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building tyRuBa 7.4.1-BUILD-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ tyRuBa ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 25 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.1:compile (default-compile) @ tyRuBa ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 233 source files to /home/kdvolder/git/kdvolder/tyRuBa/target/classes
+[WARNING] /home/kdvolder/git/kdvolder/tyRuBa/src/tyRuBa/modes/TypeConstructor.java: Some input files use or override a deprecated API.
+[WARNING] /home/kdvolder/git/kdvolder/tyRuBa/src/tyRuBa/modes/TypeConstructor.java: Recompile with -Xlint:deprecation for details.
+[WARNING] /home/kdvolder/git/kdvolder/tyRuBa/src/tyRuBa/engine/RBTerm.java: Some input files use unchecked or unsafe operations.
+[WARNING] /home/kdvolder/git/kdvolder/tyRuBa/src/tyRuBa/engine/RBTerm.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ tyRuBa ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/kdvolder/git/kdvolder/tyRuBa/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.1:testCompile (default-testCompile) @ tyRuBa ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 35 source files to /home/kdvolder/git/kdvolder/tyRuBa/target/test-classes
+[WARNING] /home/kdvolder/git/kdvolder/tyRuBa/tst/tyRuBa/tests/FactBaseTest.java: Some input files use or override a deprecated API.
+[WARNING] /home/kdvolder/git/kdvolder/tyRuBa/tst/tyRuBa/tests/FactBaseTest.java: Recompile with -Xlint:deprecation for details.
+[WARNING] /home/kdvolder/git/kdvolder/tyRuBa/tst/tyRuBa/tests/TyrubaTest.java: Some input files use unchecked or unsafe operations.
+[WARNING] /home/kdvolder/git/kdvolder/tyRuBa/tst/tyRuBa/tests/TyrubaTest.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.12.4:test (default-test) @ tyRuBa ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ tyRuBa ---
+[INFO] Building jar: /home/kdvolder/git/kdvolder/tyRuBa/target/tyRuBa-7.4.1-BUILD-SNAPSHOT.jar
+[INFO] 
+[INFO] --- maven-source-plugin:2.2.1:jar-no-fork (attach-sources) @ tyRuBa ---
+[INFO] 
+[INFO] --- maven-javadoc-plugin:2.9.1:jar (attach-javadocs) @ tyRuBa ---
+[INFO] Skipping javadoc generation
+[INFO] 
+[INFO] --- maven-assembly-plugin:2.2-beta-5:single (default) @ tyRuBa ---
+[INFO] META-INF/ already added, skipping
+[INFO] META-INF/MANIFEST.MF already added, skipping
+[INFO] META-INF/ already added, skipping
+[INFO] META-INF/MANIFEST.MF already added, skipping
+[INFO] org/ already added, skipping
+[INFO] META-INF/ already added, skipping
+[INFO] META-INF/MANIFEST.MF already added, skipping
+[INFO] com/ already added, skipping
+[INFO] Building jar: /home/kdvolder/git/kdvolder/tyRuBa/target/tyRuBa-7.4.1-BUILD-SNAPSHOT-jar-with-dependencies.jar
+[INFO] META-INF/ already added, skipping
+[INFO] META-INF/MANIFEST.MF already added, skipping
+[INFO] META-INF/ already added, skipping
+[INFO] META-INF/MANIFEST.MF already added, skipping
+[INFO] org/ already added, skipping
+[INFO] META-INF/ already added, skipping
+[INFO] META-INF/MANIFEST.MF already added, skipping
+[INFO] com/ already added, skipping
+[INFO] 
+[INFO] --- maven-gpg-plugin:1.5:sign (sign-artifacts) @ tyRuBa ---
+[INFO] 
+[INFO] --- maven-install-plugin:2.4:install (default-install) @ tyRuBa ---
+[INFO] Installing /home/kdvolder/git/kdvolder/tyRuBa/target/tyRuBa-7.4.1-BUILD-SNAPSHOT.jar to /home/kdvolder/.m2/repository/com/github/kdvolder/tyRuBa/7.4.1-BUILD-SNAPSHOT/tyRuBa-7.4.1-BUILD-SNAPSHOT.jar
+[INFO] Installing /home/kdvolder/git/kdvolder/tyRuBa/pom.xml to /home/kdvolder/.m2/repository/com/github/kdvolder/tyRuBa/7.4.1-BUILD-SNAPSHOT/tyRuBa-7.4.1-BUILD-SNAPSHOT.pom
+[INFO] Installing /home/kdvolder/git/kdvolder/tyRuBa/target/tyRuBa-7.4.1-BUILD-SNAPSHOT-sources.jar to /home/kdvolder/.m2/repository/com/github/kdvolder/tyRuBa/7.4.1-BUILD-SNAPSHOT/tyRuBa-7.4.1-BUILD-SNAPSHOT-sources.jar
+[INFO] Installing /home/kdvolder/git/kdvolder/tyRuBa/target/tyRuBa-7.4.1-BUILD-SNAPSHOT-jar-with-dependencies.jar to /home/kdvolder/.m2/repository/com/github/kdvolder/tyRuBa/7.4.1-BUILD-SNAPSHOT/tyRuBa-7.4.1-BUILD-SNAPSHOT-jar-with-dependencies.jar
+[INFO] Installing /home/kdvolder/git/kdvolder/tyRuBa/target/tyRuBa-7.4.1-BUILD-SNAPSHOT.jar.asc to /home/kdvolder/.m2/repository/com/github/kdvolder/tyRuBa/7.4.1-BUILD-SNAPSHOT/tyRuBa-7.4.1-BUILD-SNAPSHOT.jar.asc
+[INFO] Installing /home/kdvolder/git/kdvolder/tyRuBa/target/tyRuBa-7.4.1-BUILD-SNAPSHOT.pom.asc to /home/kdvolder/.m2/repository/com/github/kdvolder/tyRuBa/7.4.1-BUILD-SNAPSHOT/tyRuBa-7.4.1-BUILD-SNAPSHOT.pom.asc
+[INFO] Installing /home/kdvolder/git/kdvolder/tyRuBa/target/tyRuBa-7.4.1-BUILD-SNAPSHOT-sources.jar.asc to /home/kdvolder/.m2/repository/com/github/kdvolder/tyRuBa/7.4.1-BUILD-SNAPSHOT/tyRuBa-7.4.1-BUILD-SNAPSHOT-sources.jar.asc
+[INFO] Installing /home/kdvolder/git/kdvolder/tyRuBa/target/tyRuBa-7.4.1-BUILD-SNAPSHOT-jar-with-dependencies.jar.asc to /home/kdvolder/.m2/repository/com/github/kdvolder/tyRuBa/7.4.1-BUILD-SNAPSHOT/tyRuBa-7.4.1-BUILD-SNAPSHOT-jar-with-dependencies.jar.asc
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 4.558 s
+[INFO] Finished at: 2019-11-30T09:59:12-08:00
+[INFO] Final Memory: 36M/468M
+[INFO] ------------------------------------------------------------------------
