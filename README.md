@@ -5,6 +5,11 @@ TyRuba's former home is here http://tyruba.sourceforge.net/ documentation
 for the language still lives there for now.  There are some more documentation 
 files there, describing the actual logic language.
 
+##NEW IN RELEASE 7.4.1
+
+  TyRuBa now provides a jar that contains all of its dependencies for a somewhat 
+  easier 'download and run' experience. 
+
 ##NEW IN RELEASE 7.4
 
   Essentially, this is just the 7.3 release with few changes to 
