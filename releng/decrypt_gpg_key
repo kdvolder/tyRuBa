@@ -1,11 +1,5 @@
 #!/bin/bash -e
 
-###
-### This script is run 'locally' on your development machine
-### It will export your public and private key and then encrypt 
-### the files so they can be stored safely in a public repo.
-###
-
 #This script is called by travis in the root of the repo... so
 cd releng
 
@@ -23,9 +17,6 @@ rm -f *key.asc
 
 gpg --list-secret-keys
 
-echo ==== gpg conf ====
-cat ~/.gnupg/gpg.conf
-
-echo === Try signing something ===
-echo "Testing" > test.txt
-gpg -v --debug-level 5 --output test.txt.sig --sign test.txt
+# echo === Try signing something ===
+# echo "Testing" > test.txt
+# gpg -v --debug-level 5 --output test.txt.sig --sign test.txt
