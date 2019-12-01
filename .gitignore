@@ -4,3 +4,4 @@ build
 /fdb
 /test_space
 /target/
+/javacc
