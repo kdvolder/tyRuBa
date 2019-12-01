@@ -1,1 +1,2 @@
-java -Xms32m -Xmx128m -classpath $HOME/lib/jars/junit.jar:$HOME/tyruba/tyruba.jar tyRuBa.applications.CommandLine $*
+#!/bin/bash
+java -jar /home/kdvolder/git/kdvolder/tyRuBa/target/tyRuBa-*-jar-with-dependencies.jar $@
