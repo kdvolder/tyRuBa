@@ -56,6 +56,11 @@ public class CommandLine {
 						if (frontend != null)
 							throw new Error("The -noinit option must occur before any file names");
 						conf.setLoadInitFile(false);
+					} else if (args[i].equals("-reconnect")) {
+						System.err.println("Option -reconnect seen...");
+						if (frontend != null)
+							throw new Error("The -reconnect option must occur before any file names");
+						conf.setCleanStart(false);
 					} else if (args[i].equals("-bgpager")) {
 						if (frontend != null)
 							throw new Error("The -bgpager option must occur before any file names");

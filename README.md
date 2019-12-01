@@ -93,8 +93,7 @@ To run the command-line application:
 The most convenient way to accomplish this and run tyruba from the 
 commandline is probably to have a look at the bin/tyruba shell script. 
 Move this to somewhere on your path. You may need to edit it so that it 
-points to wherever you stored your tyruba.jar file. You also need to 
-make it point to a version of junit.jar file installed on your system. 
+points to wherever you stored your tyruba.jar file.
 
 If you did all that, you should be able to run tyruba from the commandline
 by invoking the tyruba command. See below for a description of commandline
@@ -145,6 +144,10 @@ complete at this time)
      ordinary file. Note if you want to use this option, you may find
      it helpfull to browse the initfiles in lib/ (for inspiration on 
      writing your own)
+
+-reconnect
+
+     This tells TyRuBa to retain the contents of persisted fact bases.
  
  -o <filename>
 
