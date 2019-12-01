@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>com.github.kdvolder</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.0.3-RELEASE</version>
+		<version>0.0.4-RELEASE</version>
 	</parent>
 
 	<url>https://github.com/kdvolder/tyRuBa</url>
