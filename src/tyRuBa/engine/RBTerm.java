@@ -83,11 +83,15 @@ public abstract class RBTerm implements Cloneable, Serializable, TwoLevelKey {
 	 * Returns a Set of variables bound by this query expression.
 	 */
 	public final Collection getVariables() {
-		CollectVarsVisitor visitor = new CollectVarsVisitor();
-		this.accept(visitor);
-		Collection vars = visitor.getVars();
-		vars.remove(RBIgnoredVariable.the);
-		return vars;
+	    try {
+    		CollectVarsVisitor visitor = new CollectVarsVisitor();
+    		this.accept(visitor);
+    		Collection vars = visitor.getVars();
+    		vars.remove(RBIgnoredVariable.the);
+    		return vars;
+	    } catch (TypeModeError e) {
+	        throw new IllegalStateException(e);
+	    }
 	}
 	
 	/** Return the type of the term */
@@ -98,10 +102,14 @@ public abstract class RBTerm implements Cloneable, Serializable, TwoLevelKey {
 	}
 		
 	public final RBVariable[] varMap() {
-		ArrayList varlist = new ArrayList();
-		CollectVarsVisitor visitor = new CollectVarsVisitor(varlist);
-		this.accept(visitor);
-		return (RBVariable[])varlist.toArray(new RBVariable[varlist.size()]);
+	    try {
+    		ArrayList varlist = new ArrayList();
+    		CollectVarsVisitor visitor = new CollectVarsVisitor(varlist);
+    		this.accept(visitor);
+    		return (RBVariable[])varlist.toArray(new RBVariable[varlist.size()]);
+	    } catch (TypeModeError e) {
+	        throw new IllegalStateException(e);
+	    }
 	}
 	
 	/**
@@ -117,19 +125,19 @@ public abstract class RBTerm implements Cloneable, Serializable, TwoLevelKey {
 		return constructorType.apply(this);
 	}
 	
-	public abstract Object accept(TermVisitor v);
+	public abstract Object accept(TermVisitor v) throws TypeModeError;
 	
-	public RBTerm substitute(Frame frame) {
+	public RBTerm substitute(Frame frame) throws TypeModeError {
 		SubstituteVisitor visitor = new SubstituteVisitor(frame);
 		return (RBTerm) accept(visitor);
 	}
 	
-	public RBTerm instantiate(Frame frame) {
+	public RBTerm instantiate(Frame frame) throws TypeModeError {
 		InstantiateVisitor visitor = new InstantiateVisitor(frame);
 		return (RBTerm) accept(visitor);
 	}
 	
-	public RBTerm substantiate(Frame subst, Frame inst) {
+	public RBTerm substantiate(Frame subst, Frame inst) throws TypeModeError {
 		SubstantiateVisitor visitor = new SubstantiateVisitor(subst, inst);
 		return (RBTerm) accept(visitor);
 	}

@@ -4,6 +4,7 @@ import tyRuBa.engine.Frame;
 import tyRuBa.engine.RBContext;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RBVariable;
+import tyRuBa.modes.TypeModeError;
 import tyRuBa.util.ElementSource;
 
 public class CompiledUnique extends SemiDetCompiled {
@@ -18,28 +19,32 @@ public class CompiledUnique extends SemiDetCompiled {
 	}
 
 	public Frame runSemiDet(Object input, RBContext context) {
-		Frame f = (Frame) input;
-		Frame newf = (Frame)f.clone();
-		RBTerm[] vals = new RBTerm[vars.length];
-		newf.removeVars(vars);
-		for (int i = 0; i < vars.length; i++) {
-			vals[i] = vars[i].substitute(f);
-		}
-		ElementSource result = exp.runNonDet(newf, context);
-		if (!result.hasMoreElements())
-			return null;
-		else {
-			while (result.hasMoreElements()) {
-				Frame currentFrame = (Frame)result.nextElement();
-				for (int i = 0; i < vals.length; i++) {
-					newf = vals[i].unify(vars[i].substitute(currentFrame), newf);
-					if (newf == null) {
-						return null;
-					}
-				}
-			}
-			return newf;
-		}
+	    try {
+    		Frame f = (Frame) input;
+    		Frame newf = (Frame)f.clone();
+    		RBTerm[] vals = new RBTerm[vars.length];
+    		newf.removeVars(vars);
+    		for (int i = 0; i < vars.length; i++) {
+    			vals[i] = vars[i].substitute(f);
+    		}
+    		ElementSource result = exp.runNonDet(newf, context);
+    		if (!result.hasMoreElements())
+    			return null;
+    		else {
+    			while (result.hasMoreElements()) {
+    				Frame currentFrame = (Frame)result.nextElement();
+    				for (int i = 0; i < vals.length; i++) {
+    					newf = vals[i].unify(vars[i].substitute(currentFrame), newf);
+    					if (newf == null) {
+    						return null;
+    					}
+    				}
+    			}
+    			return newf;
+    		}
+	    } catch (TypeModeError e) {
+	        return null;
+	    }
 	}
 	
 	public String toString() {

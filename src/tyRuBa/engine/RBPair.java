@@ -97,7 +97,7 @@ public class RBPair extends RBAbstractPair {
 		}
 	}
 
-	public Object accept(TermVisitor v) {
+	public Object accept(TermVisitor v) throws TypeModeError {
 		return v.visit(this);
 	}
 

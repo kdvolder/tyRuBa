@@ -9,6 +9,7 @@ import tyRuBa.engine.RBTemplateVar;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RBUniqueQuantifier;
 import tyRuBa.engine.RBVariable;
+import tyRuBa.modes.TypeModeError;
 
 public class SubstituteVisitor extends SubstituteOrInstantiateVisitor {
 
@@ -16,7 +17,7 @@ public class SubstituteVisitor extends SubstituteOrInstantiateVisitor {
 		super(frame);
 	}
 
-	public Object visit(RBUniqueQuantifier unique) {
+	public Object visit(RBUniqueQuantifier unique) throws TypeModeError {
 		Frame f = getFrame();
 		for (int i = 0; i < unique.getNumVars(); i++) {
 			f.remove(unique.getVarAt(i));
@@ -25,7 +26,7 @@ public class SubstituteVisitor extends SubstituteOrInstantiateVisitor {
 		return new RBUniqueQuantifier(unique.getQuantifiedVars(), exp);
 	}
 
-	public Object visit(RBVariable var) {
+	public Object visit(RBVariable var) throws TypeModeError {
 		RBTerm val = (RBTerm) getFrame().get(var);
 		if (val == null) {
 			return var;
@@ -34,7 +35,7 @@ public class SubstituteVisitor extends SubstituteOrInstantiateVisitor {
 		}
 	}
 
-	public Object visit(RBTemplateVar var) {
+	public Object visit(RBTemplateVar var) throws TypeModeError {
 		// Same implementation as for regular variables
 		RBTerm val = (RBTerm) getFrame().get(var);
 		if (val == null) {

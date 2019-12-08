@@ -14,7 +14,7 @@ public class ModeSwitchExpressionTest extends TyrubaTest {
 	}
 
 	public void testWithoutDefault() throws ParseException, TypeModeError {
-		frontend.parse("foo :: =Integer, =Integer\n" +			"MODES\n" +			"(F,B) IS DET\n" +			"(B,F) IS DET\n" +			" END");
+		frontend.parse("foo :: Integer, Integer\n" +			"MODES\n" +			"(F,B) IS DET\n" +			"(B,F) IS DET\n" +			" END");
 		frontend.parse("foo(?x,?y) :- BOUND ?x : sum(?x,1,?y)" +			"| BOUND ?y: sum(?y,1,?x).");
 		
 		test_must_equal("foo(1,?y)", "?y", "2");
@@ -22,7 +22,7 @@ public class ModeSwitchExpressionTest extends TyrubaTest {
 	}
 	
 	public void testWithDefault() throws ParseException, TypeModeError {
-		frontend.parse("foo :: =Integer, =Integer\n" +			"MODES\n" +			"(F,B) IS DET\n" +			"(B,F) IS DET\n" +			"END");
+		frontend.parse("foo :: Integer, Integer\n" +			"MODES\n" +			"(F,B) IS DET\n" +			"(B,F) IS DET\n" +			"END");
 		frontend.parse("foo(?x,?y) :- BOUND ?x : sum(?x,1,?y)" +			"| DEFAULT: sum(?y,1,?x).");
 		
 		test_must_equal("foo(1,?y)", "?y", "2");

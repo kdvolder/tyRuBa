@@ -74,21 +74,29 @@ public abstract class RBExpression implements Cloneable {
 	 * found in this expression.
 	 */
 	private Collection getTemplateVariables() {
-		CollectTemplateVarsVisitor visitor = new CollectTemplateVarsVisitor();
-		this.accept(visitor);
-		Collection vars = visitor.getVars();
-		return vars;
+		try {
+            CollectTemplateVarsVisitor visitor = new CollectTemplateVarsVisitor();
+            this.accept(visitor);
+            Collection vars = visitor.getVars();
+            return vars;
+        } catch (TypeModeError e) {
+            throw new IllegalStateException(e);
+        }
 	}
 
 	/**
 	 * Returns a Collection of variables bound by this query expression.
 	 */
 	public final Collection getVariables() {
-		CollectVarsVisitor visitor = new CollectVarsVisitor();
-		this.accept(visitor);
-		Collection vars = visitor.getVars();
-		vars.remove(RBIgnoredVariable.the);
-		return vars;
+		try {
+            CollectVarsVisitor visitor = new CollectVarsVisitor();
+            this.accept(visitor);
+            Collection vars = visitor.getVars();
+            vars.remove(RBIgnoredVariable.the);
+            return vars;
+        } catch (TypeModeError e) {
+            throw new IllegalStateException(e);
+        }
 	}
 	
 	/**
@@ -96,9 +104,13 @@ public abstract class RBExpression implements Cloneable {
 	 * not become bound in the context.
 	 */
 	public final Collection getFreeVariables(ModeCheckContext context) {
-		CollectFreeVarsVisitor visitor = new CollectFreeVarsVisitor(context);
-		this.accept(visitor);
-		return visitor.getVars();
+        try {
+    		CollectFreeVarsVisitor visitor = new CollectFreeVarsVisitor(context);
+    		this.accept(visitor);
+    		return visitor.getVars();
+        } catch (TypeModeError e) {
+            throw new IllegalStateException(e);
+        }
 	}
 	
 	public abstract TypeEnv typecheck(PredInfoProvider predinfo, TypeEnv startEnv)
@@ -133,9 +145,9 @@ public abstract class RBExpression implements Cloneable {
 		return FrontEnd.makeAnd(this, other);
 	}
 
-	public abstract Object accept(ExpressionVisitor v);
+	public abstract Object accept(ExpressionVisitor v) throws TypeModeError;
 	
-	public RBExpression substitute(Frame frame) {
+	public RBExpression substitute(Frame frame) throws TypeModeError {
 		SubstituteVisitor visitor = new SubstituteVisitor(frame);
 		return (RBExpression) accept(visitor);
 	}

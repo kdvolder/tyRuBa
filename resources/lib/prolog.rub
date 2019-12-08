@@ -1,6 +1,6 @@
 /* A few useful logic predicates (not all from prolog) */
 
-list_ref :: =Integer, [?x], ?x
+list_ref :: Integer, [?x], ?x
 MODES
 (B,B,F) REALLY IS SEMIDET
 (F,B,B) IS NONDET
@@ -83,7 +83,7 @@ zip([?a|?as],[?x|?xs],[<?a,?x>|?axs]) :- zip(?as,?xs,?axs).
 
 /* ------------------------------------------------------------ */
 
-sumList :: [=Integer], =Integer
+sumList :: [Integer], Integer
 MODES
   (B,F) IS DET
 END

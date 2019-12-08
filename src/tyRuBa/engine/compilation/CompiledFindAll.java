@@ -5,6 +5,7 @@ import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.RBContext;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.modes.Mode;
+import tyRuBa.modes.TypeModeError;
 import tyRuBa.util.Action;
 import tyRuBa.util.ElementSource;
 
@@ -28,7 +29,11 @@ public class CompiledFindAll extends SemiDetCompiled {
 		ElementSource res = query.runNonDet(((Frame)input).clone(), context);
 		res = res.map(new Action() {
 			public Object compute(Object arg) {
-				return extract.substitute((Frame) arg);
+			    try {
+			        return extract.substitute((Frame) arg);
+			    } catch (TypeModeError e) {
+			        return null;
+			    }
 			}
 		});
 		RBTerm resultList = FrontEnd.makeList(res);

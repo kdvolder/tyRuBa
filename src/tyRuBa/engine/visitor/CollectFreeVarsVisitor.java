@@ -14,6 +14,7 @@ import tyRuBa.engine.RBTestFilter;
 import tyRuBa.engine.RBUniqueQuantifier;
 import tyRuBa.engine.RBVariable;
 import tyRuBa.modes.ModeCheckContext;
+import tyRuBa.modes.TypeModeError;
 
 /**
  * This visitor visits RBExpression and collects *all* Free variables.
@@ -29,14 +30,14 @@ public class CollectFreeVarsVisitor extends AbstractCollectVarsVisitor {
 		super(new HashSet(), context);
 	}
 	
-	public Object visit(RBDisjunction disjunction) {
+	public Object visit(RBDisjunction disjunction) throws TypeModeError {
 		for (int i = 0; i < disjunction.getNumSubexps(); i++) {
 			disjunction.getSubexp(i).accept(this);
 		}
 		return null;
 	}
 
-	public Object visit(RBExistsQuantifier exists) {
+	public Object visit(RBExistsQuantifier exists) throws TypeModeError {
 		exists.getExp().accept(this);
 		for (int i = 0; i < exists.getNumVars(); i++) {
 			vars.remove(exists.getVarAt(i));
@@ -44,7 +45,7 @@ public class CollectFreeVarsVisitor extends AbstractCollectVarsVisitor {
 		return null;
 	}
 
-	public Object visit(RBFindAll findAll) {
+	public Object visit(RBFindAll findAll) throws TypeModeError {
 		findAll.getQuery().accept(this);
 		Collection boundVars = findAll.getExtract().getVariables();
 		vars.removeAll(boundVars);
@@ -52,7 +53,7 @@ public class CollectFreeVarsVisitor extends AbstractCollectVarsVisitor {
 		return null;
 	}
 
-	public Object visit(RBCountAll count) {
+	public Object visit(RBCountAll count) throws TypeModeError {
 		count.getQuery().accept(this);
 		Collection boundVars = count.getExtract().getVariables();
 		vars.removeAll(boundVars);
@@ -60,15 +61,15 @@ public class CollectFreeVarsVisitor extends AbstractCollectVarsVisitor {
 		return null;
 	}
 
-	public Object visit(RBNotFilter notFilter) {
+	public Object visit(RBNotFilter notFilter) throws TypeModeError {
 		return notFilter.getNegatedQuery().accept(this);
 	}
 
-	public Object visit(RBTestFilter testFilter) {
+	public Object visit(RBTestFilter testFilter) throws TypeModeError {
 		return testFilter.getQuery().accept(this);
 	}
 
-	public Object visit(RBUniqueQuantifier unique) {
+	public Object visit(RBUniqueQuantifier unique) throws TypeModeError {
 		unique.getExp().accept(this);
 		for (int i = 0; i < unique.getNumVars(); i++) {
 			vars.remove(unique.getVarAt(i));

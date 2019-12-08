@@ -3,6 +3,8 @@ package tyRuBa.engine;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import tyRuBa.modes.TypeModeError;
+
 public class Frame extends Hashtable {
 	
 	public Frame() {}
@@ -49,15 +51,19 @@ public class Frame extends Hashtable {
 	/** This is a call Frame. bodyresult comes from further evaluations in the
 	  body. copy new stuff from body into "this" */
 	public Frame callResult(Frame body) {
-		Frame result = new Frame();
-		Enumeration keys = this.keys();
-		Frame instAux = new Frame();
-		while (keys.hasMoreElements()) {
-			RBSubstitutable key = (RBSubstitutable) keys.nextElement();
-			RBTerm value = get(key);
-			result.put(key, value.substantiate(body, instAux));
-		}
-		return result;
+		try {
+            Frame result = new Frame();
+            Enumeration keys = this.keys();
+            Frame instAux = new Frame();
+            while (keys.hasMoreElements()) {
+            	RBSubstitutable key = (RBSubstitutable) keys.nextElement();
+            	RBTerm value = get(key);
+            	result.put(key, value.substantiate(body, instAux));
+            }
+            return result;
+        } catch (TypeModeError e) {
+            return null;
+        }
 	}
 
 	/** Append this and other and return the result (functional) */

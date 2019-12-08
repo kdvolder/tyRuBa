@@ -90,17 +90,22 @@ public class RBExistsQuantifier extends RBExpression {
 	}
 
 	public RBExpression convertToNormalForm(boolean negate) {
-		Frame varRenaming = new Frame();
-		RBVariable[] newVars = new RBVariable[vars.length];
-		for (int i = 0; i < vars.length; i++) {
-			newVars[i]=(RBVariable)vars[i].instantiate(varRenaming);
-		}
-		RBExpression convertedExp = exp.substitute(varRenaming).convertToNormalForm(false);
-		return convertedExp.addExistsQuantifier(newVars, negate);
+        try {
+    		Frame varRenaming = new Frame();
+    		RBVariable[] newVars = new RBVariable[vars.length];
+    		for (int i = 0; i < vars.length; i++) {
+               newVars[i]=(RBVariable)vars[i].instantiate(varRenaming);
+    		}
+    		RBExpression convertedExp = exp.substitute(varRenaming).convertToNormalForm(false);
+    		return convertedExp.addExistsQuantifier(newVars, negate);
+        } catch (TypeModeError e) {
+            //should not be possible.
+            throw new IllegalStateException(e);
+        }
 		
 	}
 
-	public Object accept(ExpressionVisitor v) {
+	public Object accept(ExpressionVisitor v) throws TypeModeError {
 		return v.visit(this);
 	}
 	

@@ -8,22 +8,23 @@ import tyRuBa.engine.RBQuoted;
 import tyRuBa.engine.RBTemplateVar;
 import tyRuBa.engine.RBTuple;
 import tyRuBa.engine.RBVariable;
+import tyRuBa.modes.TypeModeError;
 
 public interface TermVisitor {
 
-	Object visit(RBCompoundTerm compoundTerm);
+	Object visit(RBCompoundTerm compoundTerm) throws TypeModeError;
 
 	Object visit(RBJavaObjectCompoundTerm compoundTerm);
 	
 	Object visit(RBIgnoredVariable ignoredVar);
 
-	Object visit(RBPair pair);
+	Object visit(RBPair pair) throws TypeModeError;
 
-	Object visit(RBQuoted quoted);
+	Object visit(RBQuoted quoted) throws TypeModeError;
 	
-	Object visit(RBTuple tuple);
+	Object visit(RBTuple tuple) throws TypeModeError;
 
-	Object visit(RBVariable var);
+	Object visit(RBVariable var) throws TypeModeError;
 
-	Object visit(RBTemplateVar var);    
+	Object visit(RBTemplateVar var) throws TypeModeError;    
 }

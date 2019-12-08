@@ -10,27 +10,28 @@ import tyRuBa.engine.RBNotFilter;
 import tyRuBa.engine.RBPredicateExpression;
 import tyRuBa.engine.RBTestFilter;
 import tyRuBa.engine.RBUniqueQuantifier;
+import tyRuBa.modes.TypeModeError;
 
 public interface ExpressionVisitor {
 
-	public Object visit(RBConjunction conjunction);
+	public Object visit(RBConjunction conjunction) throws TypeModeError;
 
-	public Object visit(RBDisjunction disjunction);
+	public Object visit(RBDisjunction disjunction) throws TypeModeError;
 
-	public Object visit(RBExistsQuantifier exists);
+	public Object visit(RBExistsQuantifier exists) throws TypeModeError;
 
-	public Object visit(RBFindAll findAll);
+	public Object visit(RBFindAll findAll) throws TypeModeError;
 
-	public Object visit(RBCountAll count);
+	public Object visit(RBCountAll count) throws TypeModeError;
 
-	public Object visit(RBModeSwitchExpression modeSwitch);
+	public Object visit(RBModeSwitchExpression modeSwitch) throws TypeModeError;
 
-	public Object visit(RBNotFilter notFilter);
+	public Object visit(RBNotFilter notFilter)throws TypeModeError;
 
-	public Object visit(RBPredicateExpression predExp);
+	public Object visit(RBPredicateExpression predExp)throws TypeModeError;
 
-	public Object visit(RBTestFilter testFilter);
+	public Object visit(RBTestFilter testFilter) throws TypeModeError;
 
-	public Object visit(RBUniqueQuantifier unique);
+	public Object visit(RBUniqueQuantifier unique) throws TypeModeError;
 
 }

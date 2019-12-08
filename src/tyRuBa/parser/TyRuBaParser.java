@@ -301,6 +301,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     case WHEN:
       jj_consume_token(WHEN);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case STRING_LITERAL:
       case NOT:
       case EXISTS:
       case FINDALL:
@@ -445,7 +446,6 @@ public class TyRuBaParser implements TyRuBaParserConstants {
       t = CompositeType(tfact, rules);
     } else {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case STRICT:
       case IDENTIFIER:
         t = AtomicType(rules);
         break;
@@ -471,22 +471,8 @@ public class TyRuBaParser implements TyRuBaParserConstants {
   final public Type AtomicType(QueryEngine rules) throws ParseException, TypeModeError {
         Token t;
         Type type;
-        boolean strict = false;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case STRICT:
-      jj_consume_token(STRICT);
-               strict = true;
-      break;
-    default:
-      jj_la1[11] = jj_gen;
-      ;
-    }
     t = jj_consume_token(IDENTIFIER);
-                if (strict)
-                        type = Factory.makeStrictAtomicType(rules.findTypeConst(t.image));
-                else
-                        type = Factory.makeAtomicType(rules.findTypeConst(t.image));
-                {if (true) return type;}
+                {if (true) return Factory.makeAtomicType(rules.findTypeConst(t.image));}
     throw new Error("Missing return statement in function");
   }
 
@@ -502,7 +488,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
                strict = true;
       break;
     default:
-      jj_la1[12] = jj_gen;
+      jj_la1[11] = jj_gen;
       ;
     }
     t = jj_consume_token(IDENTIFIER);
@@ -538,7 +524,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
       TypeList(types, tfact, rules);
       break;
     default:
-      jj_la1[13] = jj_gen;
+      jj_la1[12] = jj_gen;
       ;
     }
     jj_consume_token(RANGLE);
@@ -569,7 +555,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
           ;
           break;
         default:
-          jj_la1[14] = jj_gen;
+          jj_la1[13] = jj_gen;
           break label_3;
         }
         jj_consume_token(COMMA);
@@ -577,7 +563,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
       }
       break;
     default:
-      jj_la1[15] = jj_gen;
+      jj_la1[14] = jj_gen;
       ;
     }
     jj_consume_token(RPAREN);
@@ -592,7 +578,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
                                   toBeCheck = false;
       break;
     default:
-      jj_la1[16] = jj_gen;
+      jj_la1[15] = jj_gen;
       ;
     }
     jj_consume_token(IS);
@@ -632,7 +618,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
                           {if (true) return Factory.makeBound();}
       break;
     default:
-      jj_la1[17] = jj_gen;
+      jj_la1[16] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -655,7 +641,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
       m = NonDet();
       break;
     default:
-      jj_la1[18] = jj_gen;
+      jj_la1[17] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -712,7 +698,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
           ;
           break;
         default:
-          jj_la1[19] = jj_gen;
+          jj_la1[18] = jj_gen;
           break label_4;
         }
         jj_consume_token(VERTSLASH);
@@ -727,7 +713,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
                         rules.addFunctorConst(representedBy, t1);
       break;
     default:
-      jj_la1[20] = jj_gen;
+      jj_la1[19] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -743,7 +729,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
       tuple = tupleOfTVars(tfact);
       break;
     default:
-      jj_la1[21] = jj_gen;
+      jj_la1[20] = jj_gen;
       ;
     }
           {if (true) return rules.addNewType(
@@ -760,7 +746,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
       tuple = tupleOfTVars(tfact);
       break;
     default:
-      jj_la1[22] = jj_gen;
+      jj_la1[21] = jj_gen;
       ;
     }
           {if (true) return rules.findTypeConst(t.image, tuple.size()).apply(tuple, false);}
@@ -782,7 +768,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
           ;
           break;
         default:
-          jj_la1[23] = jj_gen;
+          jj_la1[22] = jj_gen;
           break label_5;
         }
         jj_consume_token(COMMA);
@@ -791,7 +777,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
       }
       break;
     default:
-      jj_la1[24] = jj_gen;
+      jj_la1[23] = jj_gen;
       ;
     }
     jj_consume_token(RANGLE);
@@ -839,7 +825,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
         ;
         break;
       default:
-        jj_la1[25] = jj_gen;
+        jj_la1[24] = jj_gen;
         break label_6;
       }
     }
@@ -875,7 +861,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
                           msExp.addDefaultCase(defaultExp);
       break;
     default:
-      jj_la1[26] = jj_gen;
+      jj_la1[25] = jj_gen;
       ;
     }
             {if (true) return msExp;}
@@ -897,6 +883,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     case UNIQUE:
       e = Quantifier(rules);
       break;
+    case STRING_LITERAL:
     case NOT:
     case FINDALL:
     case COUNTALL:
@@ -906,7 +893,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
       e = Disjunction(rules);
       break;
     default:
-      jj_la1[27] = jj_gen;
+      jj_la1[26] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -925,7 +912,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
         ;
         break;
       default:
-        jj_la1[28] = jj_gen;
+        jj_la1[27] = jj_gen;
         break label_8;
       }
       jj_consume_token(SEMICOLON);
@@ -950,7 +937,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
         ;
         break;
       default:
-        jj_la1[29] = jj_gen;
+        jj_la1[28] = jj_gen;
         break label_9;
       }
       jj_consume_token(COMMA);
@@ -968,6 +955,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
   final public RBExpression Predicate(QueryEngine rules) throws ParseException, TypeModeError {
         RBExpression e;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case STRING_LITERAL:
     case IDENTIFIER:
       e = PredicateExpression(rules);
       break;
@@ -989,7 +977,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
       jj_consume_token(RPAREN);
       break;
     default:
-      jj_la1[30] = jj_gen;
+      jj_la1[29] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1002,7 +990,21 @@ public class TyRuBaParser implements TyRuBaParserConstants {
         ArrayList terms = new ArrayList();
         TypeConstructor type;
         String typeName;
-    t = jj_consume_token(IDENTIFIER);
+        String predName;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case IDENTIFIER:
+      t = jj_consume_token(IDENTIFIER);
+                              predName = t.image;
+      break;
+    case STRING_LITERAL:
+      t = jj_consume_token(STRING_LITERAL);
+                                  predName = stringLiteral(t.image);
+      break;
+    default:
+      jj_la1[30] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
     jj_consume_token(LPAREN);
     TermList(terms, rules);
     jj_consume_token(RPAREN);
@@ -1461,6 +1463,12 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     finally { jj_save(5, xla); }
   }
 
+  final private boolean jj_3_3() {
+    if (jj_scan_token(VERTSLASH)) return true;
+    if (jj_3R_13()) return true;
+    return false;
+  }
+
   final private boolean jj_3R_11() {
     if (jj_3R_18()) return true;
     if (jj_scan_token(TYPE)) return true;
@@ -1472,22 +1480,13 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     return false;
   }
 
-  final private boolean jj_3R_25() {
-    if (jj_3R_28()) return true;
-    return false;
-  }
-
   final private boolean jj_3R_24() {
     if (jj_scan_token(COMMA)) return true;
     return false;
   }
 
-  final private boolean jj_3R_20() {
-    if (jj_scan_token(LANGLE)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_25()) jj_scanpos = xsp;
-    if (jj_scan_token(RANGLE)) return true;
+  final private boolean jj_3R_25() {
+    if (jj_3R_28()) return true;
     return false;
   }
 
@@ -1501,21 +1500,16 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     return false;
   }
 
-  final private boolean jj_3R_13() {
-    if (jj_scan_token(BOUND)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_34() {
-    if (jj_scan_token(JAVA_CLASS)) return true;
-    return false;
-  }
-
   final private boolean jj_3R_18() {
     if (jj_scan_token(IDENTIFIER)) return true;
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3R_24()) jj_scanpos = xsp;
+    return false;
+  }
+
+  final private boolean jj_3R_34() {
+    if (jj_scan_token(JAVA_CLASS)) return true;
     return false;
   }
 
@@ -1564,8 +1558,22 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     return false;
   }
 
+  final private boolean jj_3R_20() {
+    if (jj_scan_token(LANGLE)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_25()) jj_scanpos = xsp;
+    if (jj_scan_token(RANGLE)) return true;
+    return false;
+  }
+
   final private boolean jj_3R_30() {
     if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_13() {
+    if (jj_scan_token(BOUND)) return true;
     return false;
   }
 
@@ -1601,6 +1609,11 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     return false;
   }
 
+  final private boolean jj_3R_16() {
+    if (jj_scan_token(LBRACKET)) return true;
+    return false;
+  }
+
   final private boolean jj_3R_19() {
     if (jj_scan_token(STRICT)) return true;
     return false;
@@ -1612,11 +1625,6 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     if (jj_3R_19()) jj_scanpos = xsp;
     if (jj_scan_token(IDENTIFIER)) return true;
     if (jj_3R_20()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_16() {
-    if (jj_scan_token(LBRACKET)) return true;
     return false;
   }
 
@@ -1641,15 +1649,7 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     return false;
   }
 
-  final private boolean jj_3R_44() {
-    if (jj_scan_token(STRICT)) return true;
-    return false;
-  }
-
   final private boolean jj_3R_41() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_44()) jj_scanpos = xsp;
     if (jj_scan_token(IDENTIFIER)) return true;
     return false;
   }
@@ -1723,12 +1723,6 @@ public class TyRuBaParser implements TyRuBaParserConstants {
     return false;
   }
 
-  final private boolean jj_3_3() {
-    if (jj_scan_token(VERTSLASH)) return true;
-    if (jj_3R_13()) return true;
-    return false;
-  }
-
   public TyRuBaParserTokenManager token_source;
   JavaCharStream jj_input_stream;
   public Token token, jj_nt;
@@ -1748,10 +1742,10 @@ public class TyRuBaParser implements TyRuBaParserConstants {
       jj_la1_2();
    }
    private static void jj_la1_0() {
-      jj_la1_0 = new int[] {0x4006000,0x4006000,0x7b0000,0x0,0x0,0x0,0x0,0x0,0x800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2000000,0x0,0xe0000000,0x0,0x8000000,0x0,0x0,0x0,0x0,0x0,0x0,0x7b0000,0x0,0x0,0x590000,0x220000,0x0,0x1440,0x0,0x1440,0x0,0x1440,0x0,0x1440,0x0,0x0,0x1440,};
+      jj_la1_0 = new int[] {0x4006000,0x4006000,0x7b1000,0x0,0x0,0x0,0x0,0x0,0x800000,0x0,0x0,0x0,0x0,0x0,0x0,0x2000000,0x0,0xe0000000,0x0,0x8000000,0x0,0x0,0x0,0x0,0x0,0x0,0x7b1000,0x0,0x0,0x591000,0x1000,0x220000,0x0,0x1440,0x0,0x1440,0x0,0x1440,0x0,0x1440,0x0,0x0,0x1440,};
    }
    private static void jj_la1_1() {
-      jj_la1_1 = new int[] {0x10400000,0x10400000,0x10000202,0x400000,0x10000,0x32002a00,0x20,0x200,0x0,0x10000,0x32002800,0x2000000,0x2000000,0x32002800,0x10000,0x10000002,0x0,0x10000002,0x1,0x100000,0x2000000,0x2000,0x2000,0x10000,0x20000000,0x20000000,0x100000,0x10000200,0x8000,0x10000,0x10000200,0x0,0x10000,0xf0002800,0x2800,0xf0000000,0x100,0xd0000000,0x10000,0xf0002800,0x110000,0x110000,0xf0002800,};
+      jj_la1_1 = new int[] {0x10400000,0x10400000,0x10000202,0x400000,0x10000,0x32002a00,0x20,0x200,0x0,0x10000,0x30002800,0x2000000,0x32002800,0x10000,0x10000002,0x0,0x10000002,0x1,0x100000,0x2000000,0x2000,0x2000,0x10000,0x20000000,0x20000000,0x100000,0x10000200,0x8000,0x10000,0x10000200,0x10000000,0x0,0x10000,0xf0002800,0x2800,0xf0000000,0x100,0xd0000000,0x10000,0xf0002800,0x110000,0x110000,0xf0002800,};
    }
    private static void jj_la1_2() {
       jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x201,0x0,0x1,0x0,0x1,0x0,0x201,0x0,0x0,0x201,};

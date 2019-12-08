@@ -26,9 +26,13 @@ public class RBRepAsJavaObjectCompoundTerm extends RBCompoundTerm {
     Object javaObject;
     RepAsJavaConstructorType typeTag;
     
-    public RBRepAsJavaObjectCompoundTerm(RepAsJavaConstructorType type, Object obj) {
+    public RBRepAsJavaObjectCompoundTerm(RepAsJavaConstructorType type, Object obj) throws TypeModeError {
         typeTag = type;
         javaObject = obj;
+        Class<?> javaClass = type.getRepresentationClass();
+        if (!javaClass.isAssignableFrom(obj.getClass())) {
+        	throw new TypeModeError(obj +" cannot be cast to "+javaClass);
+        }
     }
 
     public RBTerm getArg() {

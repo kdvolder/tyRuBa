@@ -31,10 +31,6 @@ public class Factory {
 		return typeConstructor.apply(Factory.makeTupleType(), false);
 	}
 	
-	public static Type makeStrictAtomicType(TypeConstructor typeConstructor) {
-        return typeConstructor.applyStrict(Factory.makeTupleType(), false);
-	}
-	
 	public static Type makeSubAtomicType(TypeConstructor typeConstructor) {
 		return typeConstructor.apply(Factory.makeTupleType(), true);
 	}
@@ -75,9 +71,6 @@ public class Factory {
 
 	static public Type makeJavaType(Class clazz) {
 		return Factory.makeAtomicType(Factory.makeTypeConstructor(clazz));
-	}
-	static public Type makeStrictJavaType(Class clazz) {
-		return Factory.makeStrictAtomicType(Factory.makeTypeConstructor(clazz));
 	}
 	
 	static public TupleType makeTupleType() {

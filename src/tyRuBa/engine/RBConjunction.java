@@ -136,7 +136,7 @@ public class RBConjunction extends RBCompoundExpression {
 		return result;
 	}
 
-	public Object accept(ExpressionVisitor v) {
+	public Object accept(ExpressionVisitor v) throws TypeModeError {
 		return v.visit(this);
 	}
 }

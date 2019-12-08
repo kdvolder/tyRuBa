@@ -39,7 +39,7 @@ public class RBQuoted extends RBAbstractPair {
 		return Factory.makeSubAtomicType(Factory.makeTypeConstructor(String.class));
 	}
 
-	public Object accept(TermVisitor v) {
+	public Object accept(TermVisitor v) throws TypeModeError {
 		return v.visit(this);
 	}
 

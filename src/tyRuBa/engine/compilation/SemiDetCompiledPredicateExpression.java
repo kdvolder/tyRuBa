@@ -5,6 +5,7 @@ import tyRuBa.engine.RBContext;
 import tyRuBa.engine.RBTuple;
 import tyRuBa.engine.RuleBase;
 import tyRuBa.modes.Mode;
+import tyRuBa.modes.TypeModeError;
 
 public class SemiDetCompiledPredicateExpression extends SemiDetCompiled {
 
@@ -18,16 +19,20 @@ public class SemiDetCompiledPredicateExpression extends SemiDetCompiled {
 	}
 
 	final public Frame runSemiDet(final Object input, RBContext context) {
-		RBTuple goal = (RBTuple)args.substitute((Frame)input);
-		Frame result = compiledRules().runSemiDet(goal, context);
-		if (((Frame)input).isEmpty()) {
+		try {
+            RBTuple goal = (RBTuple)args.substitute((Frame)input);
+            Frame result = compiledRules().runSemiDet(goal, context);
+            if (((Frame)input).isEmpty()) {
 //			PoormansProfiler.countEmptyFrameAppend++;
-			return result;
-		} else if (result == null) {
-			return null;
-		} else {
-			return ((Frame)input).append(result);
-		}
+            	return result;
+            } else if (result == null) {
+            	return null;
+            } else {
+            	return ((Frame)input).append(result);
+            }
+        } catch (TypeModeError e) {
+            return null;
+        }
 	}
 
 	private SemiDetCompiled compiledRules() {

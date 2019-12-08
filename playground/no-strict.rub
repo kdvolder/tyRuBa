@@ -1,0 +1,7 @@
+TYPE Foo AS String
+foo2string :: Foo, String
+MODES 
+    (B,F) IS DET 
+    (F,B) IS SEMIDET
+END
+foo2string(abc::Foo,123).

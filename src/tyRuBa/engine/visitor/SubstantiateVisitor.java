@@ -11,6 +11,7 @@ import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RBTuple;
 import tyRuBa.engine.RBVariable;
 import tyRuBa.modes.ConstructorType;
+import tyRuBa.modes.TypeModeError;
 
 public class SubstantiateVisitor implements TermVisitor {
 
@@ -22,7 +23,7 @@ public class SubstantiateVisitor implements TermVisitor {
 		this.inst = inst;
 	}
 
-	public Object visit(RBCompoundTerm compoundTerm) {
+	public Object visit(RBCompoundTerm compoundTerm) throws TypeModeError {
 		ConstructorType typeConst = compoundTerm.getConstructorType();
 		return typeConst.apply(
 			(RBTerm) compoundTerm.getArg().accept(this));
@@ -35,7 +36,7 @@ public class SubstantiateVisitor implements TermVisitor {
 		return compoundTerm;
 	}
 	
-	public Object visit(RBTuple tuple) {
+	public Object visit(RBTuple tuple) throws TypeModeError {
 		RBTerm[] subterms = new RBTerm[tuple.getNumSubterms()];
 		for (int i = 0; i < subterms.length; i++) {
 			subterms[i] = (RBTerm)tuple.getSubterm(i).accept(this);
@@ -43,7 +44,7 @@ public class SubstantiateVisitor implements TermVisitor {
 		return RBTuple.make(subterms);
 	}
 
-	public Object visit(RBPair pair) {
+	public Object visit(RBPair pair) throws TypeModeError {
 		RBPair head = new RBPair((RBTerm)pair.getCar().accept(this));
 		
 		RBPair next;
@@ -64,12 +65,12 @@ public class SubstantiateVisitor implements TermVisitor {
 		return head;
 	}
 
-	public Object visit(RBQuoted quoted) {
+	public Object visit(RBQuoted quoted) throws TypeModeError {
 		return new RBQuoted(
 			(RBTerm)quoted.getQuotedParts().accept(this));
 	}
 
-	public Object visit(RBVariable var) {
+	public Object visit(RBVariable var) throws TypeModeError {
 		RBTerm val = (RBTerm) subst.get(var);
 		if (val == null) {
 			return (RBTerm) var.accept(new InstantiateVisitor(inst));

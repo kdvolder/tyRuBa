@@ -3,6 +3,7 @@ package tyRuBa.engine.factbase.berkeley_db;
 import tyRuBa.engine.RBCompoundTerm;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.modes.ConstructorType;
+import tyRuBa.modes.TypeModeError;
 
 import com.sleepycat.bind.tuple.TupleBinding;
 import com.sleepycat.bind.tuple.TupleInput;
@@ -20,8 +21,12 @@ public class TyRuBaRepAsBinding extends TupleBinding {
 
 	@Override
 	public Object entryToObject(TupleInput in) {
-		Object rep = repBinding.entryToObject(in);
-		return constructor.apply((RBTerm) rep);
+		try {
+            Object rep = repBinding.entryToObject(in);
+            return constructor.apply((RBTerm) rep);
+        } catch (TypeModeError e) {
+            throw new IllegalStateException(e);
+        }
 	}
 
 	@Override

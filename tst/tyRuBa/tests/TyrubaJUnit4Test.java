@@ -30,6 +30,7 @@ public class TyrubaJUnit4Test {
 	protected void setUp(boolean reconnect) throws Exception {
 //		frontend = new FrontEnd(initfile,true);
 		TyRuBaConf conf = new TyRuBaConf();
+		conf.setLoadInitFile(initfile);
 //		conf.setPersistenceConf(new BerkeleyDBConf());
 //		conf.setPersistenceConf(new FileBasedPersistenceConf());
 		conf.setCleanStart(!reconnect);

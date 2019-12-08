@@ -13,6 +13,7 @@ import tyRuBa.engine.RBTemplateVar;
 import tyRuBa.engine.RBTestFilter;
 import tyRuBa.engine.RBUniqueQuantifier;
 import tyRuBa.engine.RBVariable;
+import tyRuBa.modes.TypeModeError;
 
 /**
  * This visitor visits RBExpression and collects all variables that will
@@ -44,15 +45,15 @@ public class CollectVarsVisitor extends AbstractCollectVarsVisitor {
 		return null;
 	}
 
-	public Object visit(RBExistsQuantifier exists) {
+	public Object visit(RBExistsQuantifier exists) throws TypeModeError {
 		return exists.getExp().accept(this);
 	}
 
-	public Object visit(RBFindAll findAll) {
+	public Object visit(RBFindAll findAll) throws TypeModeError {
 		return findAll.getResult().accept(this);
 	}
 
-	public Object visit(RBCountAll count) {
+	public Object visit(RBCountAll count) throws TypeModeError {
 		return count.getResult().accept(this);
 	}
 
@@ -64,7 +65,7 @@ public class CollectVarsVisitor extends AbstractCollectVarsVisitor {
 		return null;
 	}
 
-	public Object visit(RBUniqueQuantifier unique) {
+	public Object visit(RBUniqueQuantifier unique) throws TypeModeError {
 		return unique.getExp().accept(this);
 	}
 

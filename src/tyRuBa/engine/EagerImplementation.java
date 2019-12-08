@@ -106,23 +106,28 @@ public abstract class EagerImplementation extends AbstractImplementation {
 	public ArrayList eval(RBContext rb, final Frame f, final Frame callFrame) {
 		solutions = new ArrayList();
 		RBTerm[] args = new RBTerm[getNumArgs()];
-		for (int i = 0; i < getNumArgs(); i++) {
-			args[i] = getArgAt(i).substitute(f);
-		}
-		try {
+        try {
+    		for (int i = 0; i < getNumArgs(); i++) {
+    			args[i] = getArgAt(i).substitute(f);
+    		}
 			doit(args);
-		} catch (ClassCastException e) {
+		} catch (TypeModeError | ClassCastException e) {
 			//ignore. We silently Convert runtime type errors into 'no result'. 
+		    return new ArrayList<>();
 		}
 		ArrayList results = new ArrayList();
 		for (int i = 0; i < solutions.size(); i++) {
 			Frame result = (Frame) f.clone();
 			RBTerm[] sols = (RBTerm[]) solutions.get(i);
 			for(int j = 0; j < sols.length; j++) {
-				result = getResultAt(j).substitute(result).unify(sols[j], result);
-				if (result == null) {
-					j = sols.length;
-				}
+			    try {
+    				result = getResultAt(j).substitute(result).unify(sols[j], result);
+    				if (result == null) {
+    					j = sols.length;
+    				}
+			    } catch (TypeModeError e) {
+		            //ignore. We silently Convert runtime type errors into 'no result'. 
+                }
 			}
 			if (result != null) {
 				results.add(callFrame.callResult(result));
@@ -136,31 +141,39 @@ public abstract class EagerImplementation extends AbstractImplementation {
 		if (getMode().hi.compareTo(Multiplicity.one) <= 0) {
 			return new SemiDetCompiled() {
 				public Frame runSemiDet(Object input, RBContext context) {
-					Frame callFrame = new Frame();
-					RBTuple goal = 
-						(RBTuple) ((RBTuple)input).instantiate(callFrame);
-					final Frame fc = goal.unify(getArgs(), new Frame());
-					ArrayList results = eval(context, fc, callFrame);
-					if (results.size() == 0) {
-						return null;
-					} else {
-						return (Frame)results.get(0);
-					}
+				    try {
+    					Frame callFrame = new Frame();
+    					RBTuple goal = 
+    						(RBTuple) ((RBTuple)input).instantiate(callFrame);
+    					final Frame fc = goal.unify(getArgs(), new Frame());
+    					ArrayList results = eval(context, fc, callFrame);
+    					if (results.size() == 0) {
+    						return null;
+    					} else {
+    						return (Frame)results.get(0);
+    					}
+				    } catch (TypeModeError e) {
+				        return null;
+				    }
 				}
 			};
 		} else {
 			return new Compiled(getMode()) {
 				public ElementSource runNonDet(Object input, RBContext context) {
-					final Frame callFrame = new Frame();
-					final RBTuple goal = 
-						(RBTuple) ((RBTuple)input).instantiate(callFrame);
-					final Frame fc = goal.unify(getArgs(), new Frame());
-					ArrayList results = eval(context, fc, callFrame);
-					if (results == null) {
-						return ElementSource.theEmpty;
-					} else {
-						return ElementSource.with(results);
-					}
+                    try {
+    					final Frame callFrame = new Frame();
+    					final RBTuple goal = 
+    						(RBTuple) ((RBTuple)input).instantiate(callFrame);
+    					final Frame fc = goal.unify(getArgs(), new Frame());
+    					ArrayList results = eval(context, fc, callFrame);
+    					if (results == null) {
+    						return ElementSource.theEmpty;
+    					} else {
+    						return ElementSource.with(results);
+    					}
+                    } catch (TypeModeError e) {
+                        return ElementSource.theEmpty;
+                    }
 				}
 			};
 		}

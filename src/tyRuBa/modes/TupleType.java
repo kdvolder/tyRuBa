@@ -10,7 +10,9 @@ import java.util.Map;
 
 public final class TupleType extends Type {
 
-	private ArrayList<Type> parts;
+    private static final long serialVersionUID = 1L;
+    
+    private ArrayList<Type> parts;
 
 	/** default Constructor */
 	public TupleType() {

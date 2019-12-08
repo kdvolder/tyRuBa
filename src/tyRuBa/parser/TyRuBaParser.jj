@@ -585,17 +585,11 @@ Type Type(TVarFactory tfact, QueryEngine rules) throws TypeModeError :
 
 Type AtomicType(QueryEngine rules) throws TypeModeError :
 {	Token t;
-	Type type;
-	boolean strict = false; }
+	Type type; }
 {
-	["=" { strict = true; }]
 	t = <IDENTIFIER>
 	{
-		if (strict)
-			type = Factory.makeStrictAtomicType(rules.findTypeConst(t.image));
-		else
-			type = Factory.makeAtomicType(rules.findTypeConst(t.image));
-		return type;
+		return Factory.makeAtomicType(rules.findTypeConst(t.image));
 	}
 }
 
@@ -911,14 +905,19 @@ RBExpression PredicateExpression(QueryEngine rules) throws TypeModeError :
 {	Token t;
 	ArrayList terms = new ArrayList();
 	TypeConstructor type;
-	String typeName;	}
+	String typeName;	
+	String predName; }
 {
-	t = <IDENTIFIER>
+	( 
+	   t = <IDENTIFIER> { predName = t.image; }
+	| 
+	   t = <STRING_LITERAL> { predName = stringLiteral(t.image); }
+	)
 	("("
         TermList(terms, rules)
      ")")
 	{ 
-		return new RBPredicateExpression(t.image, terms); 
+		return new RBPredicateExpression(predName, terms); 
 	}
 }
 

@@ -381,8 +381,8 @@ public class TypeTest extends TyrubaJUnit4Test {
 		frontend.parse("TYPE EmptyTree<> AS <>");
 		frontend.parse("TYPE WeirdTree<?value> AS [?value]");
 		
-		frontend.parse("sumLeaf :: Tree<?x,=Integer>, =Integer \n" +			"MODES (B,F) IS SEMIDET END");
-		frontend.parse("sumLeaf(Leaf<?value>,?value).");
+		frontend.parse("sumLeaf :: Tree<?key,Integer>, Integer \n" +			"MODES (B,F) IS SEMIDET END");
+		frontend.parse("sumLeaf(Leaf<?value>,?value) :- Integer(?value).");
 		frontend.parse("sumLeaf(EmptyTree<>,0).");
 		frontend.parse("sumLeaf(WeirdTree[],0).");
 		frontend.parse("sumLeaf(WeirdTree[?l|?ist],?sum) " +			":- sumList(?ist,?istSum), sum(?l,?istSum,?sum).");

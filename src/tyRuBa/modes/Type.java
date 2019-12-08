@@ -6,11 +6,11 @@ import java.util.Vector;
 
 abstract public class Type implements Cloneable, Serializable {
 
-	public static final Type integer = Factory.makeStrictJavaType(Integer.class);
-	public static final Type longint = Factory.makeStrictJavaType(Long.class);
-	public static final Type string = Factory.makeStrictJavaType(String.class);
-	public static final Type number = Factory.makeStrictJavaType(Number.class);
-	public static final Type object = Factory.makeStrictJavaType(Object.class);	
+	public static final Type integer = Factory.makeJavaType(Integer.class);
+	public static final Type longint = Factory.makeJavaType(Long.class);
+	public static final Type string = Factory.makeJavaType(String.class);
+	public static final Type number = Factory.makeJavaType(Number.class);
+	public static final Type object = Factory.makeJavaType(Object.class);	
 
 	/** check if this type is equal to other, if not, throw TypeError */
 	public void checkEqualTypes(Type other) throws TypeModeError {

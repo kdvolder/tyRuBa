@@ -62,11 +62,4 @@ public class ModeTest extends TestCase {
 		}
 	}
 
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite();
-		suite.addTestSuite(MultiplicityTest.class);
-		suite.addTestSuite(ModeTest.class);
-		return suite;
-	}
-
 }

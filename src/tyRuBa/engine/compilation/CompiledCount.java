@@ -8,6 +8,7 @@ import tyRuBa.engine.FrontEnd;
 import tyRuBa.engine.RBContext;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.modes.Mode;
+import tyRuBa.modes.TypeModeError;
 import tyRuBa.util.ElementSource;
 
 /**
@@ -27,14 +28,18 @@ public class CompiledCount extends SemiDetCompiled {
 	}
 
 	public Frame runSemiDet(Object input, RBContext context) {
-		ElementSource res = query.runNonDet(((Frame)input).clone(), context);
-		Set results = new HashSet();
-		while (res.hasMoreElements()) {
-			Frame frame = (Frame)res.nextElement();
-			results.add(extract.substitute(frame));
-		}
-		RBTerm resultCount = FrontEnd.makeInteger(results.size());
-		return result.unify(resultCount, (Frame)input);
+	    try {
+    		ElementSource res = query.runNonDet(((Frame)input).clone(), context);
+    		Set results = new HashSet();
+    		while (res.hasMoreElements()) {
+    			Frame frame = (Frame)res.nextElement();
+    			results.add(extract.substitute(frame));
+    		}
+    		RBTerm resultCount = FrontEnd.makeInteger(results.size());
+    		return result.unify(resultCount, (Frame)input);
+	    } catch (TypeModeError e) {
+	        return null;
+        }
 	}
 
 	public String toString() {

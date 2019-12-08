@@ -18,7 +18,7 @@ public abstract class ConstructorType {
 
     public abstract int getArity();
 
-    public abstract RBTerm apply(RBTerm tuple);
+    public abstract RBTerm apply(RBTerm tuple) throws TypeModeError;
 
     public abstract RBTerm apply(ArrayList terms);
 

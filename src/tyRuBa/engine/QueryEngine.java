@@ -355,7 +355,7 @@ public abstract class QueryEngine {
 		return rulebase().findTypeMapping(forWhat);
 	}
 
-	public RBTerm makeJavaObject(Object _o) {
+	public RBTerm makeJavaObject(Object _o) throws TypeModeError {
 		TypeMapping mapping = findTypeMapping(_o.getClass());
 		if (mapping == null) {
 			return RBCompoundTerm.makeJava(_o);
@@ -386,7 +386,7 @@ public abstract class QueryEngine {
 		}
 	}	
 	
-	public RBTerm makeTypeCast(TypeConstructor toType, Object value) {
+	public RBTerm makeTypeCast(TypeConstructor toType, Object value) throws TypeModeError {
 		return toType.getConstructorType()
 				.apply(RBCompoundTerm.makeJava(value));
 	}

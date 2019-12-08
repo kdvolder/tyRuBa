@@ -10,6 +10,7 @@ import tyRuBa.engine.RBTemplateVar;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RBTuple;
 import tyRuBa.engine.RBVariable;
+import tyRuBa.modes.TypeModeError;
 
 public class ToPrologTermVisitor implements TermVisitor {
 
@@ -56,7 +57,7 @@ public class ToPrologTermVisitor implements TermVisitor {
 		return null;
 	}
 
-	public Object visit(RBPair pair) {
+	public Object visit(RBPair pair) throws TypeModeError {
 		converted.append("[");
 		pair.getCar().accept(this);
 		RBTerm rest = pair.getCdr();

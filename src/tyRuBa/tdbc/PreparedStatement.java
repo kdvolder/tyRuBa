@@ -70,15 +70,19 @@ public abstract class PreparedStatement {
 	 * value provided is of a type not acceptable for the context where the
 	 * templateVar occurs.
 	 */
-	public void put(String templateVar, Object value ) throws TyrubaException {
-		RBTerm term = engine.makeJavaObject(value);
-		checkTermType(templateVar,term);
-		if (mustPut!=null) {
-			mustPut.remove(templateVar);
-			if (mustPut.isEmpty())
-				mustPut = null;
-		}
-		putMap.put(new RBTemplateVar(templateVar),term);
+    public void put(String templateVar, Object value ) throws TyrubaException {
+        try {
+            RBTerm term = engine.makeJavaObject(value);
+            checkTermType(templateVar,term);
+            if (mustPut!=null) {
+                mustPut.remove(templateVar);
+                if (mustPut.isEmpty())
+                    mustPut = null;
+            }
+            putMap.put(new RBTemplateVar(templateVar),term);
+        } catch (TypeModeError e) {
+            throw new TyrubaException(e);
+        }
 	}
 
 	/**
@@ -93,18 +97,21 @@ public abstract class PreparedStatement {
 	 * @param type
 	 * @throws TyrubaException 
 	 */
-	public void put(String templateVar, Object value, Type assumedType) throws TyrubaException {
-		RBTerm term = engine.makeJavaObject(value);
-		checkTermType(assumedType,term);
-		checkVarType(templateVar,assumedType);
-		if (mustPut!=null) {
-			mustPut.remove(templateVar);
-			if (mustPut.isEmpty())
-				mustPut = null;
-		}
-		putMap.put(new RBTemplateVar(templateVar),term);
-		
-	}
+    public void put(String templateVar, Object value, Type assumedType) throws TyrubaException {
+        try {
+            RBTerm term = engine.makeJavaObject(value);
+            checkTermType(assumedType,term);
+            checkVarType(templateVar,assumedType);
+            if (mustPut!=null) {
+                mustPut.remove(templateVar);
+                if (mustPut.isEmpty())
+                    mustPut = null;
+            }
+            putMap.put(new RBTemplateVar(templateVar),term);
+        } catch (TypeModeError e) {
+            throw new TyrubaException(e);
+        }
+    }
 
 	private void checkTermType(Type assumedType, RBTerm term) throws TyrubaException {
 		if (workTEnv==null) workTEnv = (TypeEnv) orgTEnv.clone();

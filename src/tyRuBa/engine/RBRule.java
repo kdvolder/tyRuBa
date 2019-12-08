@@ -74,7 +74,7 @@ public class RBRule extends RBComponent implements Cloneable {
 		}
 	}
 
-	public RBRule substitute(Frame frame) {
+	public RBRule substitute(Frame frame) throws TypeModeError {
 		RBRule r = (RBRule) clone();
 		r.args = (RBTuple) args.substitute(frame);
 		r.cond = cond.substitute(frame);

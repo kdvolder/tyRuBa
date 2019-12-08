@@ -5,6 +5,7 @@ import tyRuBa.engine.RBContext;
 import tyRuBa.engine.RBTuple;
 import tyRuBa.engine.RuleBase;
 import tyRuBa.modes.Mode;
+import tyRuBa.modes.TypeModeError;
 import tyRuBa.util.Action;
 import tyRuBa.util.ElementSource;
 
@@ -20,21 +21,25 @@ public class CompiledPredicateExpression extends Compiled {
 	}
 
 	final public ElementSource runNonDet(final Object input, RBContext context) {
-		RBTuple goal = (RBTuple)args.substitute((Frame)input);
-		ElementSource result = compiledRules().runNonDet(goal, context);
-		if (((Frame)input).isEmpty()) {
-//			PoormansProfiler.countEmptyFrameAppend++;
-			return result;
-		} else {
-			return result.map(new Action() {
-				public Object compute(Object resultFrame) {
-					return ((Frame)input).append((Frame)resultFrame);
-				}
-				public String toString() {
-					return "++" + input;
-				}
-			});
-		}
+	    try {
+    		RBTuple goal = (RBTuple)args.substitute((Frame)input);
+    		ElementSource result = compiledRules().runNonDet(goal, context);
+    		if (((Frame)input).isEmpty()) {
+    //			PoormansProfiler.countEmptyFrameAppend++;
+    			return result;
+    		} else {
+    			return result.map(new Action() {
+    				public Object compute(Object resultFrame) {
+    					return ((Frame)input).append((Frame)resultFrame);
+    				}
+    				public String toString() {
+    					return "++" + input;
+    				}
+    			});
+    		}
+	    } catch (TypeModeError e) {
+	        return ElementSource.theEmpty;
+	    }
 	}
 
 	private Compiled compiledRules() {

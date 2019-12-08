@@ -100,7 +100,7 @@ public class RBFindAll extends RBExpression {
 		}
 	}
 
-	public Object accept(ExpressionVisitor v) {
+	public Object accept(ExpressionVisitor v) throws TypeModeError {
 		return v.visit(this);
 	}
 

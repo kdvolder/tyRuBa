@@ -12,6 +12,7 @@ import tyRuBa.engine.RBTemplateVar;
 import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RBUniqueQuantifier;
 import tyRuBa.engine.RBVariable;
+import tyRuBa.modes.TypeModeError;
 
 public class InstantiateVisitor extends SubstituteOrInstantiateVisitor {
 
@@ -19,7 +20,7 @@ public class InstantiateVisitor extends SubstituteOrInstantiateVisitor {
 		super(frame);
 	}
 
-	public Object visit(RBUniqueQuantifier unique) {
+	public Object visit(RBUniqueQuantifier unique) throws TypeModeError {
 		RBExpression exp = (RBExpression) unique.getExp().accept(this);
 		Collection vars = new HashSet();
 		for (int i = 0; i < unique.getNumVars(); i++) {

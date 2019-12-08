@@ -12,6 +12,7 @@ import tyRuBa.engine.RBPredicateExpression;
 import tyRuBa.engine.RBQuoted;
 import tyRuBa.engine.RBTuple;
 import tyRuBa.modes.ModeCheckContext;
+import tyRuBa.modes.TypeModeError;
 
 public abstract class AbstractCollectVarsVisitor implements ExpressionVisitor, TermVisitor {
 
@@ -27,14 +28,14 @@ public abstract class AbstractCollectVarsVisitor implements ExpressionVisitor, T
 		return vars;
 	}
 
-	public Object visit(RBConjunction conjunction) {
+	public Object visit(RBConjunction conjunction) throws TypeModeError {
 		for (int i = 0; i < conjunction.getNumSubexps(); i++) {
 			conjunction.getSubexp(i).accept(this);
 		}
 		return null;
 	}
 
-	public Object visit(RBModeSwitchExpression modeSwitch) {
+	public Object visit(RBModeSwitchExpression modeSwitch) throws TypeModeError {
 		for (int i = 0; i < modeSwitch.getNumModeCases(); i++) {
 			modeSwitch.getModeCaseAt(i).getExp().accept(this);
 		}
@@ -44,11 +45,11 @@ public abstract class AbstractCollectVarsVisitor implements ExpressionVisitor, T
 		return null;
 	}
 
-	public Object visit(RBPredicateExpression predExp) {
+	public Object visit(RBPredicateExpression predExp) throws TypeModeError {
 		return predExp.getArgs().accept(this);
 	}
 
-	public Object visit(RBCompoundTerm compoundTerm) {
+	public Object visit(RBCompoundTerm compoundTerm) throws TypeModeError {
 		compoundTerm.getArg().accept(this);
 		return null;
 	}
@@ -57,14 +58,14 @@ public abstract class AbstractCollectVarsVisitor implements ExpressionVisitor, T
 		return null;
 	}
 	
-	public Object visit(RBTuple tuple) {
+	public Object visit(RBTuple tuple) throws TypeModeError {
 		for (int i = 0; i < tuple.getNumSubterms(); i++) {
 			tuple.getSubterm(i).accept(this);
 		}
 		return null;
 	}
 
-	public Object visit(RBPair pair) {
+	public Object visit(RBPair pair) throws TypeModeError {
 		pair.getCar().accept(this);
 		
 		RBTerm cdr = (RBTerm)pair.getCdr();
@@ -80,7 +81,7 @@ public abstract class AbstractCollectVarsVisitor implements ExpressionVisitor, T
 		return null;
 	}
 
-	public Object visit(RBQuoted quoted) {
+	public Object visit(RBQuoted quoted) throws TypeModeError {
 		return quoted.getQuotedParts().accept(this);
 	}
 	

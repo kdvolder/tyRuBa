@@ -85,11 +85,11 @@ public class RBFact extends RBComponent implements Cloneable {
 			int numArgs = args.getNumSubterms();
 			TupleType startArgTypes = Factory.makeTupleType();
 			for (int i = 0; i < numArgs; i++) {
-				Type currStrictPart = predTypes.get(i).copyStrictPart();
+//				Type currStrictPart = Factory.makeTVar(name)predTypes.get(i).copyStrictPart();
 				Type argType = args.getSubterm(i).getType(startEnv);
-				if (!(currStrictPart instanceof TVar)) {
-					argType = argType.intersect(currStrictPart);
-				}
+//				if (!(currStrictPart instanceof TVar)) {
+//					argType = argType.intersect(currStrictPart);
+//				}
 				startArgTypes.add(argType);
 			}
 

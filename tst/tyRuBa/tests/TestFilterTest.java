@@ -1,19 +1,20 @@
 package tyRuBa.tests;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 
-public class TestFilterTest extends TyrubaTest {
+public class TestFilterTest extends TyrubaJUnit4Test {
 
-	public TestFilterTest(String arg0) {
-		super(arg0);
-	}
-	
+	@Before
 	public void setUp() throws Exception {
 		TyrubaJUnit4Test.initfile = true;
 		super.setUp();
 	}
 
+	@Test
 	public void testTestFilter() throws ParseException, TypeModeError {
 		frontend.parse("test_append_ffb :: [?t]\n" +			"MODES (B) IS DET END\n");
 		frontend.parse("test_append_ffb(?z) :- " +			"TEST(EXISTS ?x,?y : append(?x, ?y, ?z)).");
@@ -25,7 +26,7 @@ public class TestFilterTest extends TyrubaTest {
 		
 		test_must_succeed("test_append_bbf([1],[2])");
 
-		frontend.parse("test_list_ref_bbf :: =Integer, [?t]\n");
+		frontend.parse("test_list_ref_bbf :: Integer, [?t]\n");
 		frontend.parse("test_list_ref_bbf(?x,?y) :- " +			"TEST(EXISTS ?z : list_ref(?x,?y,?z)).");
 		
 		test_must_succeed("test_list_ref_bbf(0,[1,2])");

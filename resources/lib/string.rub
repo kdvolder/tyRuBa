@@ -1,4 +1,4 @@
-string_append :: =String, =String, =String, =String
+string_append :: String, String, String, String
 MODES
 (B,B,B,F) IS DET
 (F,F,F,B) IS MULTI

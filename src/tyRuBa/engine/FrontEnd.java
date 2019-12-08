@@ -377,7 +377,7 @@ implements SynchResource {
 	// expressions and rules etc. As a convention each of these method's name
 	// starts with make
 
-	public static RBTerm makeCompound(ConstructorType cons, RBTerm[] args) {
+	public static RBTerm makeCompound(ConstructorType cons, RBTerm[] args) throws TypeModeError {
 		return cons.apply(makeTuple(args));
 	}
 

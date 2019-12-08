@@ -186,7 +186,7 @@ public class RBTuple extends RBTerm implements TwoLevelKey {
 		}
 	}
 
-	public Object accept(TermVisitor v) {
+	public Object accept(TermVisitor v) throws TypeModeError {
 		return v.visit(this);
 	}
 

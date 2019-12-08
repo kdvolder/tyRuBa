@@ -29,7 +29,7 @@ public abstract class RBCompoundTerm extends RBTerm {
         return new RBGenericCompoundTerm(constructorType,term);
     }
     
-    public static RBTerm makeRepAsJava(RepAsJavaConstructorType type, Object obj) {
+    public static RBTerm makeRepAsJava(RepAsJavaConstructorType type, Object obj) throws TypeModeError {
         return new RBRepAsJavaObjectCompoundTerm(type,obj);
     }
     
@@ -178,7 +178,7 @@ public abstract class RBCompoundTerm extends RBTerm {
 		return getConstructorType().getTypeConst();
 	}
 
-	public Object accept(TermVisitor v) {
+	public Object accept(TermVisitor v) throws TypeModeError {
 		return v.visit(this);
 	}
 

@@ -607,7 +607,7 @@ public class NativePredicate extends RBComponent {
 
 	public static void defineReMatch(ModedRuleBaseIndex rb) throws TypeModeError {
 		NativePredicate re_match = new NativePredicate("re_match", 
-			Factory.makeStrictAtomicType(Factory.makeTypeConstructor(tyRuBa.util.RegularExpression.class)),
+			Factory.makeAtomicType(Factory.makeTypeConstructor(tyRuBa.util.RegularExpression.class)),
 			Type.string);
 
 		re_match.addMode(new EagerImplementation("BB", "SEMIDET") {
@@ -625,7 +625,7 @@ public class NativePredicate extends RBComponent {
 	public static void defineConvertTo(ModedRuleBaseIndex rb, final TypeConstructor t)
 	throws TypeModeError {
 		NativePredicate convertTo = new NativePredicate("convertTo" + t.getName(),
-			Factory.makeAtomicType(t), Factory.makeStrictAtomicType(t));
+			Factory.makeAtomicType(t), Factory.makeAtomicType(t));
 			
 		convertTo.addMode(new EagerImplementation("BF", "SEMIDET") {
 			public void doit(RBTerm[] args) {

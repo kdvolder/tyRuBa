@@ -22,6 +22,7 @@ import tyRuBa.engine.RBTerm;
 import tyRuBa.engine.RBTestFilter;
 import tyRuBa.engine.RBTuple;
 import tyRuBa.modes.ConstructorType;
+import tyRuBa.modes.TypeModeError;
 
 public abstract class SubstituteOrInstantiateVisitor implements ExpressionVisitor, TermVisitor {
 
@@ -35,7 +36,7 @@ public abstract class SubstituteOrInstantiateVisitor implements ExpressionVisito
 		return frame;
 	}
 
-	public Object visit(RBConjunction conjunction) {
+	public Object visit(RBConjunction conjunction) throws TypeModeError {
 		RBConjunction result = new RBConjunction();
 		for (int i = 0; i < conjunction.getNumSubexps(); i++) {
 			result.addSubexp(
@@ -44,7 +45,7 @@ public abstract class SubstituteOrInstantiateVisitor implements ExpressionVisito
 		return result;
 	}
 
-	public Object visit(RBDisjunction disjunction) {
+	public Object visit(RBDisjunction disjunction) throws TypeModeError {
 		RBDisjunction result = new RBDisjunction();
 		for (int i = 0; i < disjunction.getNumSubexps(); i++) {
 			result.addSubexp(
@@ -53,7 +54,7 @@ public abstract class SubstituteOrInstantiateVisitor implements ExpressionVisito
 		return result;
 	}
 
-	public Object visit(RBExistsQuantifier exists) {
+	public Object visit(RBExistsQuantifier exists) throws TypeModeError {
 		RBExpression exp = (RBExpression) exists.getExp().accept(this);
 		Collection vars = new HashSet();
 		for (int i = 0; i < exists.getNumVars(); i++) {
@@ -62,14 +63,14 @@ public abstract class SubstituteOrInstantiateVisitor implements ExpressionVisito
 		return new RBExistsQuantifier(vars, exp);
 	}
 
-	public Object visit(RBFindAll findAll) {
+	public Object visit(RBFindAll findAll) throws TypeModeError {
 		RBExpression query = (RBExpression) findAll.getQuery().accept(this);
 		RBTerm extract = (RBTerm) findAll.getExtract().accept(this);
 		RBTerm result = (RBTerm) findAll.getResult().accept(this);
 		return new RBFindAll(query, extract, result);
 	}
 
-	public Object visit(RBCountAll count) {
+	public Object visit(RBCountAll count) throws TypeModeError {
 		RBExpression query = (RBExpression) count.getQuery().accept(this);
 		RBTerm extract = (RBTerm) count.getExtract().accept(this);
 		RBTerm result = (RBTerm) count.getResult().accept(this);
@@ -81,23 +82,23 @@ public abstract class SubstituteOrInstantiateVisitor implements ExpressionVisito
 			" before any substitution or instantiation is performed");
 	}
 
-	public Object visit(RBNotFilter notFilter) {
+	public Object visit(RBNotFilter notFilter) throws TypeModeError {
 		RBExpression negatedQuery = 
 			(RBExpression) notFilter.getNegatedQuery().accept(this);
 		return new RBNotFilter(negatedQuery);
 	}
 
-	public Object visit(RBPredicateExpression predExp) {
+	public Object visit(RBPredicateExpression predExp) throws TypeModeError {
 		return predExp.withNewArgs((RBTuple)predExp.getArgs().accept(this));
 	}
 
-	public Object visit(RBTestFilter testFilter) {
+	public Object visit(RBTestFilter testFilter) throws TypeModeError {
 		RBExpression testQuery = 
 			(RBExpression) testFilter.getQuery().accept(this);
 		return new RBTestFilter(testQuery);
 	}
 
-	public Object visit(RBCompoundTerm compoundTerm) {
+	public Object visit(RBCompoundTerm compoundTerm) throws TypeModeError {
 		ConstructorType typeConst = compoundTerm.getConstructorType();
 		return typeConst.apply(
 			(RBTerm) compoundTerm.getArg().accept(this));
@@ -109,7 +110,7 @@ public abstract class SubstituteOrInstantiateVisitor implements ExpressionVisito
 		return compoundTerm;
 	}
 	
-	public Object visit(RBTuple tuple) {
+	public Object visit(RBTuple tuple) throws TypeModeError {
 		RBTerm[] subterms = new RBTerm[tuple.getNumSubterms()];
 		for (int i = 0; i < subterms.length; i++) {
 			subterms[i] = (RBTerm) tuple.getSubterm(i).accept(this);
@@ -121,7 +122,7 @@ public abstract class SubstituteOrInstantiateVisitor implements ExpressionVisito
 		return ignoredVar;
 	}
 
-	public Object visit(RBPair pair) {
+	public Object visit(RBPair pair) throws TypeModeError {
 		RBPair head = new RBPair((RBTerm)pair.getCar().accept(this));
 		
 		RBPair next;
@@ -142,7 +143,7 @@ public abstract class SubstituteOrInstantiateVisitor implements ExpressionVisito
 		return head;
 	}
 
-	public Object visit(RBQuoted quoted) {
+	public Object visit(RBQuoted quoted) throws TypeModeError {
 		return new RBQuoted(
 			(RBTerm)quoted.getQuotedParts().accept(this));
 	}

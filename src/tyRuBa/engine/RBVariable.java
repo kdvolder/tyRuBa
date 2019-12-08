@@ -8,6 +8,7 @@ import tyRuBa.modes.Factory;
 import tyRuBa.modes.ModeCheckContext;
 import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeEnv;
+import tyRuBa.modes.TypeModeError;
 
 public class RBVariable extends RBSubstitutable {
 
@@ -37,19 +38,23 @@ public class RBVariable extends RBSubstitutable {
 
 	public Frame unify(RBTerm other, Frame f) {
 		//System.err.println("** entering unify " + this + " to: " + other);
-		if (other instanceof RBIgnoredVariable)
-			return f;
-		RBTerm val = f.get(this);
-		if (val == null) {
-			other = other.substitute(f);
-			if (equals(other))
-				return f;
-			else if (other.freefor(this)) {
-				return bind(other, f);
-			} else
-				return null;
-		} else
-			return val.unify(other, f);
+		try {
+            if (other instanceof RBIgnoredVariable)
+            	return f;
+            RBTerm val = f.get(this);
+            if (val == null) {
+            	other = other.substitute(f);
+            	if (equals(other))
+            		return f;
+            	else if (other.freefor(this)) {
+            		return bind(other, f);
+            	} else
+            		return null;
+            } else
+            	return val.unify(other, f);
+        } catch (TypeModeError e) {
+            return null;
+        }
 	}
 
 	boolean freefor(RBVariable v) {
@@ -104,7 +109,7 @@ public class RBVariable extends RBSubstitutable {
 		context.makeBound(this);
 	}
 
-	public Object accept(TermVisitor v) {
+	public Object accept(TermVisitor v) throws TypeModeError {
 		return v.visit(this);
 	}
 	

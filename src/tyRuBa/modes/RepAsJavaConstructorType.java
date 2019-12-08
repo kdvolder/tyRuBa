@@ -22,10 +22,21 @@ public class RepAsJavaConstructorType extends ConstructorType implements Seriali
     CompositeType result;
     Type repAsType;
     
+    public Class<?> getRepresentationClass() {
+        try {
+            return repAsType.javaEquivalent();
+        } catch (TypeModeError e) {
+            //This should never happen. A 
+            // RepAsJava type should allways be represented
+            // by something that has a javaEquivalent.
+            throw new IllegalStateException("Bug!");
+        }
+    }
+    
     public RepAsJavaConstructorType(FunctorIdentifier functorId, Type repAs, CompositeType result) {
         this.functorId = functorId;
         this.result = result;
-        this.repAsType = repAs.makeStrict();       
+        this.repAsType = repAs;       
     }
 
     public FunctorIdentifier getFunctorId() {
@@ -40,7 +51,7 @@ public class RepAsJavaConstructorType extends ConstructorType implements Seriali
         return 1;
     }
 
-    public RBTerm apply(RBTerm term) {
+    public RBTerm apply(RBTerm term) throws TypeModeError {
         if (term instanceof RBJavaObjectCompoundTerm) {
             return RBCompoundTerm.makeRepAsJava(this,((RBJavaObjectCompoundTerm)term).getObject());
         }
