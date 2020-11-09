@@ -5,6 +5,13 @@ TyRuba's former home is here http://tyruba.sourceforge.net/ documentation
 for the language still lives there for now.  There are some more documentation 
 files there, describing the actual logic language.
 
+##NEW IN RELEASE 8.0.0
+
+  Removed 'strict' typing. The concept seemed broken and annoying. Predicates that 'expect'
+  certain types of values will no simply 'fail' in the usual way when passed values of
+  the 'wrong type'. I.e. the predicates are simply considered to be 'false' on these
+  values and they are filtered from the query result.
+
 ##NEW IN RELEASE 7.4.1
 
   TyRuBa now provides a jar that contains all of its dependencies for a somewhat 
