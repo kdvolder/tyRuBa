@@ -49,10 +49,10 @@ JavaSemiList([?f | ?r],{?f; ?sr}) :- JavaSemiList(?r,?sr).
 // into a formal parameter list.
 //
 
-JavaFormals :: [=String], [=String], String
+JavaFormals :: [String], [String], String
 MODES (B,B,F) IS DET END
 
-JavaFormalsHelper :: [=String],[=String],[String]
+JavaFormalsHelper :: [String],[String],[String]
 MODES (B,B,F) IS DET END
 
 JavaFormals(?Ts,?ns,?formals) :-
