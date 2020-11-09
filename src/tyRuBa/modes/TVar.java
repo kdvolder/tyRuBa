@@ -98,7 +98,7 @@ public class TVar extends Type {
 		if (!me.isFree()) {
 			return me.getContents().isSubTypeOf(declared, renamings);
 		} else if (! (declared instanceof TVar)) {
-			return false;
+			return Type.object.equals(declared);
 		} else {
 			TVar vdeclared = ((TVar)declared).derefTVar();
 			
@@ -205,14 +205,6 @@ public class TVar extends Type {
 		}
 	}
 	
-	public Type copyStrictPart() {
-		if (isFree()) {
-			return Factory.makeTVar(getName());
-		} else {
-			return getContents().copyStrictPart();
-		}
-	}
-
 	public boolean hasOverlapWith(Type other) {
 		TVar me = derefTVar();
 		if (!me.isFree()) {

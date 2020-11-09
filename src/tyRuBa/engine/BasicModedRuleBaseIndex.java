@@ -155,7 +155,7 @@ public class BasicModedRuleBaseIndex extends ModedRuleBaseIndex {
 		PredInfo result = typeInfoBase.maybeGetPredInfo(p);
 		return result != null;
 	}
-	
+
 	public TypeConstructor findTypeConst(String typeName) {
 		return typeInfoBase.findTypeConst(typeName);
 	}

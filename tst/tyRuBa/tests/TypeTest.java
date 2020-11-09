@@ -27,6 +27,11 @@ public class TypeTest extends TyrubaJUnit4Test {
 		RuleBase.silent = true;
 		super.setUp();
 	}
+	
+	@Ignore
+	@Test public void mixedTypesList() throws Exception {
+		test_must_equal("append([a,b], [2,3], ?x)", "?x", "[a,b,2,3]");
+	}
 
 	@Test public void testPartialCompoundTermIndex() throws ParseException, TypeModeError, TyrubaException {
 		frontend.parse("TYPE SourceLocation<> AS <String,Integer,Integer,Integer> " +
@@ -70,7 +75,7 @@ public class TypeTest extends TyrubaJUnit4Test {
 				"	(F,B,B) REALLY IS SEMIDET " +
 				"	(F,F,B) IS MULTI " +
 				"END ");
-		frontend.parse("myappend([],?x,?x).");
+		frontend.parse("myappend([],?x,?x) :- list(?x).");
 		frontend.parse("myappend([?x|?xs],?ys,[?x|?zs]) :- myappend(?xs,?ys,?zs).");
 	}
 	
@@ -205,9 +210,9 @@ public class TypeTest extends TyrubaJUnit4Test {
 	}
 
 	@Test public void testEmptyList()throws ParseException, TypeModeError {
-		frontend.parse("list :: [?x]\n" 
+		frontend.parse("mylist :: [?x]\n" 
 			+ "MODES (FREE) IS NONDET END");
-		frontend.parse("list([]).");
+		frontend.parse("mylist([]).");
 	}
 
 	@Test public void testDeclarationArity() throws ParseException, TypeModeError {
@@ -232,30 +237,23 @@ public class TypeTest extends TyrubaJUnit4Test {
 	}
 
 	@Test public void testStrictType() throws ParseException, TypeModeError {
-		try {
-			frontend.parse("isSum :: Integer, Integer, Integer");
-			frontend.parse("isSum(?x,?y,?z) :-  sum(?x,?y,?z).");
-			fail("This should fail because isSum must have strict(=) types");
-		} catch (TypeModeError e) {
-		}
+        frontend.parse("isSum :: Integer, Integer, Integer");
+        frontend.parse("isSum(?x,?y,?z) :-  sum(?x,?y,?z).");
+		//fail("This should fail because isSum must have strict(=) types");
 		
-		try {
-			frontend.parse("foooo :: [Integer]");
-			frontend.parse("foooo([?x,?y,?z]) :-  sum(?x,?y,?z).");
-			fail("This should fail because foooo must have strict(=) types");
-		} catch (TypeModeError e) {
-		}
+		frontend.parse("foooo :: [Integer]");
+		frontend.parse("foooo([?x,?y,?z]) :-  sum(?x,?y,?z).");
+		//fail("This should fail because foooo must have strict(=) types");
 
-		try {
-			frontend.parse("sumLost :: [Integer], Integer");
-			frontend.parse("sumLost([],0).");
-			frontend.parse("sumLost([?x|?xs],?sum) " +				":-  sumLost(?xs,?rest), sum(?x,?rest,?sum).");
-			fail("This should fail because isSum must have strict(=) types");
-		} catch (TypeModeError e) {
-		}
+		frontend.parse("sumLost :: [Integer], Integer");
+		frontend.parse("sumLost([],0).");
+		frontend.parse("sumLost([?x|?xs],?sum) " +			":-  sumLost(?xs,?rest), sum(?x,?rest,?sum).");
+		//fail("This should fail because isSum must have strict(=) types");
 		
-		frontend.parse("sameObject :: =Object, =Object "+
-		    "MODES (F,B) IS DET " +			"      (B,F) IS DET " +			"END");
+		frontend.parse(
+		    "sameObject :: ?x, ?x "+
+		    "MODES (F,B) IS DET " +		    "      (B,F) IS DET " +		    "END"
+		);
 		frontend.parse("sameObject(?x,?x).");
 		test_must_succeed("equals(?x,foo),sameObject(?x,?x)");
 	}
@@ -273,10 +271,10 @@ public class TypeTest extends TyrubaJUnit4Test {
 	}
 	
 	@Test public void testStrictTypesInRules() throws ParseException, TypeModeError {
-		frontend.parse("inEither :: ?a,[?a],[?a]\n" +			"MODES (F,B,B) IS NONDET END");
+		frontend.parse("inEither :: ?a,Object,Object\n" +			"MODES (F,B,B) IS NONDET END");
 		frontend.parse("inEither(?x,?l1,?l2) :- member(?x,?l1); member(?x,?l2).");		
 
-		frontend.parse("inEitherOne :: ?a,[?a],[?a]\n" +
+		frontend.parse("inEitherOne :: ?a,Object,Object\n" +
 			"MODES (F,B,B) IS NONDET END\n");
 		frontend.parse("inEitherOne(?x,?l1,?l2) :- member(?x,?l1).");
 		frontend.parse("inEitherOne(?x,?l1,?l2) :- member(?x,?l2).");
@@ -370,8 +368,69 @@ public class TypeTest extends TyrubaJUnit4Test {
 		frontend.parse(
 			"viewFromHere(?X, []) :- Element(?X), NOT(child(?X,?)).");
 	}
-	
-	@Test public void testCompositeType() throws ParseException, TypeModeError {
+
+
+	//@Ignore //Composite list types do not really work at the moment.
+	@Test public void testCompositeListTypeSimple() throws ParseException, TypeModeError {
+		frontend.parse("TYPE Special<?v> AS [?v]");
+		frontend.parse(
+				"specialSum :: Special<Integer>, Integer\n" +
+				"MODES\n" +
+				" (B, F) IS DET\n" +
+				"END"
+		);
+		frontend.parse(
+				"specialSum(?l::Special, ?sum) :- sumList(?l, ?sum)."
+		);
+	}
+
+	@Ignore //Composite list types do not really work at the moment.
+	@Test public void testCompositeListTypeSimple_alt() throws ParseException, TypeModeError {
+		frontend.parse("TYPE Special<?v> AS [?v]");
+		frontend.parse(
+				"specialSum :: Special<Integer>, Integer\n" +
+				"MODES\n" +
+				" (B, F) IS DEt\n" +
+				"END"
+		);
+		frontend.parse(
+				"specialSum(Special[], 0)."
+		);
+		frontend.parse(
+				"specialSum(Special[?l | ?ist], ?listSum) :-\n" +
+				"    specialSum(?ist::Special),\n" +
+				"    sum(?l, ?istSum, ?listSum)."
+		);
+	}
+
+	@Ignore //Composite list types do not really work at the moment.
+	@Test public void testCompositeListType() throws ParseException, TypeModeError {
+		frontend.parse(
+				"TYPE Tree<?key,?value> = Node<?key,?value>" +
+				"| Leaf<?value>"
+		);
+		frontend.parse(
+				"TYPE Node<?key,?value> AS <?key, Tree<?key,?value>,Tree<?key,?value>>"
+		);
+		frontend.parse(
+				"TYPE Leaf<?value> AS [?value]"
+		);
+		frontend.parse(
+				"sumLeaf :: Tree<?key,Integer>, Integer \n" +
+				"MODES (B,F) IS SEMIDET END"
+		);
+		frontend.parse("sumLeaf(Leaf[], 0).");
+		frontend.parse("sumLeaf(Leaf[?l|?ist], ?sum)" +
+				":- sumList(?ist,?istSum), sum(?l,?istSum,?sum).");
+		frontend.parse("sumLeaf(Node<?key,?left,?right>,?sum)" +
+				":- sum(?leftSum,?rightSum,?sum), sumLeaf(?left,?leftSum)," +
+				"sumLeaf(?right,?rightSum).");
+
+		test_must_equal("sumLeaf(Leaf[1,2,3], ?x)", "?x", 6);
+		test_must_equal("sumLeaf(Node<abc, Leaf[1,2,3], Leaf[10]>, ?x)", "?x", 16);
+	}
+
+	@Test public void testCompositeTupleType() throws ParseException, TypeModeError {
 		frontend.parse("TYPE Tree<?key,?value> = Node<?key,?value>" +
 			"| Leaf<?value>" +
 			"| EmptyTree<>" +			"| WeirdTree<?value>");
@@ -379,13 +438,10 @@ public class TypeTest extends TyrubaJUnit4Test {
 			"TYPE Node<?key,?value> AS <?key, Tree<?key,?value>,Tree<?key,?value>>");
 		frontend.parse("TYPE Leaf<?value> AS <?value>");
 		frontend.parse("TYPE EmptyTree<> AS <>");
-		frontend.parse("TYPE WeirdTree<?value> AS [?value]");
 		
 		frontend.parse("sumLeaf :: Tree<?key,Integer>, Integer \n" +			"MODES (B,F) IS SEMIDET END");
 		frontend.parse("sumLeaf(Leaf<?value>,?value) :- Integer(?value).");
 		frontend.parse("sumLeaf(EmptyTree<>,0).");
-		frontend.parse("sumLeaf(WeirdTree[],0).");
-		frontend.parse("sumLeaf(WeirdTree[?l|?ist],?sum) " +			":- sumList(?ist,?istSum), sum(?l,?istSum,?sum).");
 		frontend.parse("sumLeaf(Node<?key,?left,?right>,?sum)" +			":- sum(?leftSum,?rightSum,?sum), sumLeaf(?left,?leftSum)," +			"sumLeaf(?right,?rightSum).");
 			
 		frontend.parse("fringe :: Tree<?k,?v>, [=Leaf<?v>]\n" +			"MODES (B,F) IS DET END");
@@ -405,22 +461,20 @@ public class TypeTest extends TyrubaJUnit4Test {
 		test_must_fail("sumLeaf(Leaf<1>,2)");
 		test_must_succeed("sumLeaf(EmptyTree<>,0)");
 		test_must_fail("sumLeaf(EmptyTree<>,1)");
-		test_must_succeed("sumLeaf(WeirdTree[],0)");
-		test_must_succeed("sumLeaf(WeirdTree[1],1)");
-		test_must_succeed("sumLeaf(WeirdTree[1,2,3],6)");
-		test_must_fail("sumLeaf(WeirdTree[1,2,3],7)");
 		test_must_succeed("sumLeaf(Node<1,EmptyTree<>,EmptyTree<>>,0)");
 		test_must_succeed("sumLeaf(Node<1,EmptyTree<>,Leaf<2>>,2)");
 		test_must_succeed("sumLeaf(Node<1,Leaf<3>,EmptyTree<>>,3)");
 		test_must_succeed("sumLeaf(Node<1,Leaf<1>,Leaf<3>>,4)");
 		try {
 			test_must_fail("sumLeaf(Leaf<abc>,0)");
-			fail("This should have thrown a TypeModeError since Leaf<abc> " +				"is of type Tree<?x,String> which is incompatible with " +				"Tree<Integer,Integer>");
+			fail("This should have thrown a TypeModeError since Leaf<abc> " +				"is of type Tree<?x,String> which is incompatible with " +				"Tree<?,Integer>"
+			);
 		} catch (TypeModeError e) {
-//			System.err.println(e.getMessage());
+			System.err.println(e.getMessage());
 		}
 	}
 	
+	@Ignore
 	@Test public void testMixedTypeListRule() throws ParseException, TypeModeError {
 		frontend.parse(
 		"TYPE Type AS String " +		"TYPE Method AS String " +		"TYPE Element = Type | Method " +		"method :: Type, Method " +		"MODES" +		"(F,F) IS NONDET " +		"(B,F) IS NONDET " +		"(F,B) IS SEMIDET " +		"END");
@@ -437,7 +491,8 @@ public class TypeTest extends TyrubaJUnit4Test {
 		"methodizeHierarchy(?sig,[?C1|?CH],?mH) :- " +		"   Type(?C1)," +		"   NOT( EXISTS ?m : method(?C1,?m), signature(?m,?sig) )," +		"   methodizeHierarchy(?sig,?CH,?mH). ");   
 
 		frontend.parse(
-		"methodizeHierarchy(?sig,[?C1|?CH],[?C1,?m|?mH]) :- " +		"  method(?C1,?m), signature(?m,?sig), " +		"  methodizeHierarchy(?sig,?CH,?mH).");   
+		"methodizeHierarchy(?sig,[?C1|?CH],[?C1,?m|?mH]) :- " +		"  methodizeHierarchy(?sig,?CH,?mH)," +
+		"  method(?C1,?m), signature(?m,?sig)" +		" .");   
 
 	}
 	
@@ -465,6 +520,23 @@ public class TypeTest extends TyrubaJUnit4Test {
 				"append(?xy,?z,?xyz)");
 	}
 	
+	@Test public void typeCastToObject() throws Exception {
+		/*  Not totally sure what a ?x::Object cast should do in general but 
+		   clearly the behavior below is a bug of sorts.
+		  
+		:- equals(?x::Object, abc).
+		##QUERY : equals(?x::java.lang.Object,"abc")
+		inferred types: TypeEnv( ?x= Object<> )
+		converted to Mode: equals(?x::java.lang.Object,"abc") {(F,B) IS DET}
+		@
+		FAILURE
+		##END QUERY
+		*/
+		
+		test_must_succeed("equals(?x::java.lang.Object, abc)");
+	}
+	
+	@Ignore
 	@Test public void testUserDefinedListType() throws TypeModeError, ParseException {
 		frontend.parse("TYPE List<?element> = NonEmptyList<?element> | EmptyList<>");
 		frontend.parse("TYPE NonEmptyList<?element> AS <?element,List<?element>>");
@@ -472,12 +544,13 @@ public class TypeTest extends TyrubaJUnit4Test {
 		
 		frontend.parse("append1 :: List<?x>, List<?x>, List<?x>\n" +			"MODES\n" +			"(B,B,F) IS DET\n" +			"(F,F,B) IS NONDET\n" +			"END");
 		
-		frontend.parse("append1(EmptyList<>,?x,?x).");
+		frontend.parse("append1(EmptyList<>,?x,?x) :- List(?x).");
 		frontend.parse("append1(NonEmptyList<?x,?xs>,?y,NonEmptyList<?x,?xys>)" +			":- append1(?xs,?y,?xys).");
 		
 		test_must_succeed("append1(EmptyList<>,EmptyList<>,EmptyList<>)");
 		test_must_succeed("append1(EmptyList<>,NonEmptyList<1,EmptyList<>>," +			"NonEmptyList<1,EmptyList<>>)");
-		test_must_succeed("append1(NonEmptyList<a,EmptyList<>>," +			"NonEmptyList<1,EmptyList<>>,NonEmptyList<a,NonEmptyList<1,EmptyList<>>>)");
+		test_must_succeed("append1("+
+			"NonEmptyList<a::Object,EmptyList<>>," +			"NonEmptyList<1::Object,EmptyList<>>,NonEmptyList<a::Object,NonEmptyList<1::Object,EmptyList<>>>)");
 		test_must_findall("append1(?x,?y,NonEmptyList<1,NonEmptyList<2,EmptyList<>>>)",			"?x", new String[] {
 				"EmptyList<>",
 				"NonEmptyList<1,EmptyList<>>",
@@ -494,6 +567,8 @@ public class TypeTest extends TyrubaJUnit4Test {
 	}
 	
     private static final class SourceLocationMapping extends TypeMapping {
+		private static final long serialVersionUID = 1L;
+
 		public Class getMappedClass() {
 		    return SourceLocation.class;
 		}

@@ -1,0 +1,5 @@
+plunk :: ?x, String
+MODES
+   (B, F) IS DET
+END
+plunk(?x, {Hello ?x!}).

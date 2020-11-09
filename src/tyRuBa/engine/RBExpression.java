@@ -1,18 +1,21 @@
 package tyRuBa.engine;
 
 import java.util.Collection;
+import java.util.Stack;
 
 import junit.framework.Assert;
-
 import tyRuBa.engine.compilation.CompilationContext;
 import tyRuBa.engine.compilation.Compiled;
 import tyRuBa.engine.visitor.CollectFreeVarsVisitor;
 import tyRuBa.engine.visitor.CollectTemplateVarsVisitor;
 import tyRuBa.engine.visitor.CollectVarsVisitor;
+import tyRuBa.engine.visitor.CopyVisitor;
 import tyRuBa.engine.visitor.ExpressionVisitor;
 import tyRuBa.engine.visitor.SubstituteVisitor;
+import tyRuBa.modes.ConstructorType;
 import tyRuBa.modes.ErrorMode;
 import tyRuBa.modes.Factory;
+import tyRuBa.modes.JavaConstructorType;
 import tyRuBa.modes.Mode;
 import tyRuBa.modes.ModeCheckContext;
 import tyRuBa.modes.PredInfoProvider;
@@ -125,10 +128,58 @@ public abstract class RBExpression implements Cloneable {
 	boolean rearrange) throws TypeModeError;
 
 	
-	public RBExpression convertToNormalForm() {
-		return convertToNormalForm(false);
+	public RBExpression convertToNormalForm() throws TypeModeError {
+		return this.eliminateVariableCasts().convertToNormalForm(false);
 	}
 	
+	protected RBExpression eliminateVariableCasts() throws TypeModeError {
+		return (RBExpression) this.accept(new CopyVisitor() {
+
+			RBConjunction conjunction = null;
+			RBPredicateExpression predExp;
+
+			@Override
+			public Object visit(RBPredicateExpression predExp) throws TypeModeError {
+				if (this.predExp!=null) {
+					throw new IllegalStateException("Bug!");
+				}
+				try {
+					conjunction = new RBConjunction();
+					conjunction.addSubexp((RBExpression)super.visit(predExp));
+					if (conjunction.getNumSubexps()==1) {
+						return conjunction.getSubexp(0);
+					}
+					return conjunction;
+				} finally {
+					this.conjunction = null;
+					this.predExp = null;
+				}
+			}
+			
+			@Override
+			public Object visit(RBCompoundTerm compoundTerm) throws TypeModeError {
+				if (compoundTerm instanceof RBGenericCompoundTerm) {
+					RBGenericCompoundTerm varCast = (RBGenericCompoundTerm) compoundTerm;
+					if (varCast.getNumArgs()==1) {
+						ConstructorType constructor = varCast.getConstructorType();
+						if (constructor instanceof JavaConstructorType) {
+							JavaConstructorType javaConstructor = (JavaConstructorType) constructor;
+							RBTerm _var = varCast.getArg(0);
+							if (_var instanceof RBVariable) {
+								RBVariable var = (RBVariable) _var;
+								String name = javaConstructor.getJavaClass().getName();
+								conjunction.addSubexp(new RBPredicateExpression(name, new RBTuple(var)));
+								return var;
+							}
+						}
+						
+					}
+				}
+				return super.visit(compoundTerm);
+			}
+		});
+	}
+
 	public RBExpression convertToNormalForm(boolean negate) {
 		RBExpression result;
 		if (negate) {

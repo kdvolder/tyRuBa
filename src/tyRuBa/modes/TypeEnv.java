@@ -54,13 +54,6 @@ public class TypeEnv extends Hashtable {
 			RBSubstitutable var = (RBSubstitutable) iter.next();
 			if (other.containsKey(var))
 				result.put(var, get(var).union(other.get(var)));
-			else
-				result.put(var, get(var).copyStrictPart());
-		}
-		for (Iterator iter = other.keySet().iterator(); iter.hasNext();) {
-			RBSubstitutable var = (RBSubstitutable) iter.next();
-			if (!this.containsKey(var))
-				result.put(var, other.get(var).copyStrictPart());
 		}
 		return result;
 	}
@@ -75,13 +68,6 @@ public class TypeEnv extends Hashtable {
 			} else
 				result.put(var, other.get(var));
 		}
-		return result;
-	}
-
-	public TypeEnv copyStrictPart() {
-		TypeEnv result = new TypeEnv();
-		for (Object var : keySet()) 
-			result.put(var, ((Type) get(var)).copyStrictPart());
 		return result;
 	}
 

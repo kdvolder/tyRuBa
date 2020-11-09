@@ -185,7 +185,9 @@ public class CompositeType extends BoundaryType {
 	}
 
 	public Type intersect(Type other) throws TypeModeError {
-		if (other instanceof TVar || other instanceof GrowableType) {
+		if (Type.object.equals(this)) {
+			return other;
+		} else if (other instanceof TVar || other instanceof GrowableType || Type.object.equals(other)) {
 			return other.intersect(this);
 		} else {
 			check(other instanceof CompositeType, this, other);
@@ -258,30 +260,6 @@ public class CompositeType extends BoundaryType {
 		return strict;
 	}
 
-	public Type copyStrictPart() {
-		if (isStrict()) {
-			return typeConst.applyStrict((TupleType)args.copyStrictPart(), false);
-		} else {
-			TypeConstructor resultTypeConst =
-				typeConst.getSuperestTypeConstructor();
-			Map params = new HashMap();
-			for (int i = 0; i < typeConst.getTypeArity(); i++) {
-				params.put(typeConst.getParameterName(i), args.get(i).copyStrictPart());
-			}
-			TupleType resultArg = Factory.makeTupleType();
-			for (int i = 0; i < resultTypeConst.getTypeArity(); i++) {
-				String currName = resultTypeConst.getParameterName(i);
-				Type paramType = (Type) params.get(currName);
-				if (paramType == null) {
-					resultArg.add(Factory.makeTVar(currName));
-				} else {
-					resultArg.add(paramType);
-				}
-			}
-			return resultTypeConst.apply(resultArg, false);
-		}
-	}
-	
 	public Type makeStrict() {
 		return new CompositeType(typeConst,true,(TupleType) args.makeStrict());
 	}

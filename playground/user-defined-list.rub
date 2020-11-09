@@ -1,9 +1,8 @@
 TYPE List<?value> = EmptyList<> | NonEmptyList<?value>
-TYPE NonEmptyList<?value> AS <?value,List<?value>>
+TYPE NonEmptyList<?value> AS <?value, List<?value>>
 TYPE EmptyList<> AS <>
 
-
-List :: Object
-List(EmptyList<>).
-List(NonEmptyList<?,?>).
-
+:- member(?x, [
+    EmptyList<>,
+    NonEmptyList<abc, EmptyList<>>
+]), EmptyList(?x).

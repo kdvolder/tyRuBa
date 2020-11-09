@@ -6,9 +6,10 @@ package tyRuBa.modes;
 import java.util.Collection;
 
 import tyRuBa.engine.RBExpression;
+import tyRuBa.engine.RBVariable;
 
 public class ModeCase {
-	private Collection boundVars;
+	private Collection<RBVariable> boundVars;
 	private RBExpression exp;
 		
 	public ModeCase(Collection boundVars, RBExpression exp) {
@@ -20,7 +21,7 @@ public class ModeCase {
 		return exp;
 	}
 		
-	public Collection getBoundVars() {
+	public Collection<RBVariable> getBoundVars() {
 		return boundVars;
 	}
 	

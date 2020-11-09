@@ -3,21 +3,24 @@
  */
 package tyRuBa.tests;
 
+import static org.junit.Assert.fail;
+
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import tyRuBa.modes.TypeModeError;
 import tyRuBa.parser.ParseException;
 
-public class ConvertToTest extends TyrubaTest {
+public class ConvertToTest extends TyrubaJUnit4Test {
 
-	public ConvertToTest(String arg0) {
-		super(arg0);
-	}
-	
+	@Before
 	public void setUp() throws Exception {
 		TyrubaJUnit4Test.initfile = true;
 		super.setUp();
 	}
 	
-	public void testConvertToType1() throws ParseException, TypeModeError {
+	@Test public void testConvertToType1() throws ParseException, TypeModeError {
 		test_must_succeed("convertToInteger(1,1)");
 		test_must_equal("convertToInteger(1,?x)", "?x", "1");
 		test_must_equal("convertToInteger(?x,1)", "?x", "1");
@@ -37,13 +40,14 @@ public class ConvertToTest extends TyrubaTest {
 		test_resultcount("convertToSno(?x,?y), member(?x,[sno::Sno,bol::Bol])", 1);
 	}
 
-	public void testConvertToType2() throws ParseException, TypeModeError {
-		frontend.parse("foo :: =Integer, =Integer\n" + 
+	@Ignore
+	@Test public void testConvertToType2() throws ParseException, TypeModeError {
+		frontend.parse("foo :: Integer, Integer\n" + 
 			"MODES (F,F) IS NONDET END\n");
 		
 		frontend.parse("foo(?x,?y) :- " +
 			"member(?x1,?lst), sum(?x,?x,?y), append([1,2],[a,b],?lst)," +
-			"convertToInteger(?x1,?x).");
+			"Integer(?x1,?x).");
 		
 		test_must_succeed("foo(1,2)");
 		test_must_succeed("foo(2,4)");

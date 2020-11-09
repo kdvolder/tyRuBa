@@ -85,9 +85,10 @@ public abstract class ModedRuleBaseIndex implements PredInfoProvider {
 	
 	abstract public void addFunctorConst(Type repAs, CompositeType type);
 	abstract public ConstructorType findConstructorType(FunctorIdentifier id);
-	
+
 	abstract public TypeConstructor findTypeConst(String typeName);
 	abstract public TypeConstructor findTypeConst(String typeName, int arity);
+
 	protected abstract void basicAddTypeConst(TypeConstructor typeConst);
 	
 	abstract public void addTypePredicate(TypeConstructor TypeConstructor, ArrayList subTypes);
@@ -124,7 +125,7 @@ public abstract class ModedRuleBaseIndex implements PredInfoProvider {
 		}
 	}
 
-    public abstract void addTypeMapping(TypeMapping mapping, FunctorIdentifier id)
+	public abstract void addTypeMapping(TypeMapping mapping, FunctorIdentifier id)
        throws TypeModeError;
 
     public abstract TypeMapping findTypeMapping(Class forWhat);

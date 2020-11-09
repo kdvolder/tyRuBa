@@ -2,6 +2,7 @@ package tyRuBa.engine;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import tyRuBa.modes.CompositeType;
 import tyRuBa.modes.ConstructorType;
@@ -19,41 +20,16 @@ import tyRuBa.modes.UserDefinedTypeConstructor;
  */
 public class TypeInfoBase implements PredInfoProvider {
 
-//	/** 
-//	 * A database in which we will store facts that describe the type
-//	 * declarations so that user can write tyruba programs about their
-//	 * own types.
-//	 * 
-//	 * @codegroup metadata
-//	 */	
-//	MetaBase metaBase;
-	
 	HashMap predicateMap = new HashMap();
-	HashMap typeConstructorMap = new HashMap();
+	Map<String, TypeConstructor> typeConstructorMap = new HashMap<>();
 	HashMap functorMap = new HashMap(); // map from constructor to type constructor
 	HashMap toTyRuBaMappingMap = new HashMap();
 
 	public TypeInfoBase(String identifier) {
 		super();
 		addTypeConst(TypeConstructor.theAny);
-//		metaBase = null;
 	}
 
-//	/**
-//	 * After this methos is called, from this point forward in time, 
-//	 * metaData will be added to the metaBase
-//	 * 
-//	 * @codegroup metadata
-//	 */
-//	public void enableMetaData(QueryEngine qe) {
-//		metaBase = new MetaBase(qe);
-//		
-//		// Retroactively add facts about the types already declared.
-//		for (Iterator iter = typeConstructorMap.values().iterator(); iter.hasNext();) {
-//			metaBase.assertTypeConstructor((TypeConstructor) iter.next());
-//		}
-//	}
-	
 	public void insert(PredInfo pInfo) throws TypeModeError {
 		PredInfo result = (PredInfo) predicateMap.get(pInfo.getPredId());
 		if (result != null)
@@ -79,6 +55,7 @@ public class TypeInfoBase implements PredInfoProvider {
 	 * @codegroup metadata
 	 */
 	public void addTypeConst(TypeConstructor t) {
+		typeConstructorMap.put(t.getName(), t);
 		typeConstructorMap.put(t.getName() + "/" + t.getTypeArity(), t);
 //		if (metaBase!=null) metaBase.assertTypeConstructor(t);
 	}
@@ -135,7 +112,7 @@ public class TypeInfoBase implements PredInfoProvider {
 		if (typeName.equals("RegExp"))
 			typeName = "tyRuBa.util.RegularExpression";
 //			typeName = "org.apache.regexp.RE";
-		TypeConstructor result =  (TypeConstructor)typeConstructorMap.get(typeName + /*arity*/ "/0"); 
+		TypeConstructor result =  (TypeConstructor)typeConstructorMap.get(typeName);
 		if (result==null) {
 			if (typeName.indexOf('.')>=0) {
 	            try {
@@ -174,5 +151,4 @@ public class TypeInfoBase implements PredInfoProvider {
 		predicateMap = new HashMap();
 		typeConstructorMap = new HashMap();
 	}
-
 }

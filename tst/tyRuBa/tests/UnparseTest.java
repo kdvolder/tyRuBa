@@ -140,7 +140,7 @@ public class UnparseTest extends TyrubaTest {
 	 */
 	public void testRBQuotedUnparse() throws ParseException, TypeModeError, TyrubaException {
 		frontend.parse("TYPE Method AS String");
-		frontend.parse("plunk :: Method, String " +
+		frontend.parse("plunk :: ?a, String\n" +
 				       "MODES (B,F) IS DET END ");
 		frontend.parse("plunk(?it,{?it}).");
 		
@@ -158,7 +158,7 @@ public class UnparseTest extends TyrubaTest {
 	}
 	
 	public void testRBQuotedAppend() throws Exception {
-		frontend.parse("q_append :: Object, Object, String " +
+		frontend.parse("q_append :: ?x, ?y, String " +
 				       "MODES (B,B,F) IS DET END");
 		frontend.parse("q_append(?x,?y,{?x?y}).");
 		Connection conn = new Connection(frontend);

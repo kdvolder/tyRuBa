@@ -133,10 +133,6 @@ public class GrowableType extends Type {
 		}
 	}
 
-	public Type copyStrictPart() {
-		return lowerBound.copyStrictPart();
-	}
-
 	public boolean hasOverlapWith(Type other) {
 		return lowerBound.hasOverlapWith(other);
 	}

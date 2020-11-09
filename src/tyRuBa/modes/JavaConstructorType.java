@@ -83,4 +83,8 @@ public class JavaConstructorType extends ConstructorType {
 	public String toString() {
 		return "JavaConstructorType("+javaClass+")";
 	}
+
+	public Class<?> getJavaClass() {
+		return javaClass;
+	}
 }

@@ -2,7 +2,6 @@ package tyRuBa.engine;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 
 import tyRuBa.engine.compilation.CompilationContext;
 import tyRuBa.engine.compilation.Compiled;
@@ -15,10 +14,9 @@ import tyRuBa.modes.ModeCheckContext;
 import tyRuBa.modes.PredInfo;
 import tyRuBa.modes.PredInfoProvider;
 import tyRuBa.modes.PredicateMode;
-import tyRuBa.modes.TVar;
+import tyRuBa.modes.TupleType;
 import tyRuBa.modes.Type;
 import tyRuBa.modes.TypeEnv;
-import tyRuBa.modes.TupleType;
 import tyRuBa.modes.TypeModeError;
 
 public class RBRule extends RBComponent implements Cloneable {
@@ -106,24 +104,17 @@ public class RBRule extends RBComponent implements Cloneable {
 			int numArgs = predTypes.size();
 			
 			for (int i = 0; i < numArgs; i++) {
-				Type currStrictPart = predTypes.get(i).copyStrictPart();
 				Type argType = args.getSubterm(i).getType(startEnv);
-				if (!(currStrictPart instanceof TVar)) {
-					argType.checkEqualTypes(currStrictPart, false);
-				}
 			}
 			
-			startEnv = startEnv.copyStrictPart();
-
 			TypeEnv inferredTypeEnv = getCondition().typecheck(predinfo, startEnv);
 
 			TupleType argTypes = Factory.makeTupleType();
-			Map varRenamings = new HashMap();			
 			for (int i = 0; i < args.getNumSubterms(); i++) {
 				argTypes.add(args.getSubterm(i).getType(inferredTypeEnv));
 			}
 
-			if (!argTypes.isSubTypeOf(predTypes, varRenamings))
+			if (!argTypes.isSubTypeOf(predTypes, new HashMap<>()))
 				throw new TypeModeError("Inferred types " +
 					argTypes + " incompatible with declared types " + predTypes);
 			else
@@ -174,7 +165,7 @@ public class RBRule extends RBComponent implements Cloneable {
 //		}
 //	}
 
-	public RBComponent convertToNormalForm() {
+	public RBComponent convertToNormalForm() throws TypeModeError {
 		return new RBRule(pred, args, cond.convertToNormalForm());
 	}
 

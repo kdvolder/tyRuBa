@@ -207,38 +207,6 @@ public final class TupleType extends Type {
 		return true;
 	}
 
-	public Type copyStrictPart() {
-		TupleType result = new TupleType();
-		for (int i = 0; i < size(); i++) {
-			result.add(get(i).copyStrictPart());
-		}
-		return result;
-	}
-
-//	Type lowerBound(Type other) throws TypeModeError {
-//		if (other == null) {
-//			return this;
-//		} else if (other instanceof TVar) {
-//			return other.lowerBound(this);
-//		}
-//		check(other instanceof TupleType, this, other);
-//		TupleType tother = (TupleType) other;
-//		check(size() == tother.size(), this, other);
-//		TupleType result = new TupleType();
-//		try {
-//			for (int i = 0; i < size(); i++) {
-//				if (get(i) == null) {
-//					result.parts.add(tother.get(i));
-//				} else {
-//					result.parts.add(get(i).lowerBound(tother.get(i)));
-//				}
-//			}
-//			return result;
-//		} catch (TypeModeError e) {
-//			throw new TypeModeError(e, this);
-//		}
-//	}
-	
 	public Type getParamType(int pos, TypeConstructor typeConst) {
 //		if (! typeConst.hasRepresentation()) {
 			return get(pos);

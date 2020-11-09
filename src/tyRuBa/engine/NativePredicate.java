@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import tyRuBa.engine.compilation.CompilationContext;
 import tyRuBa.engine.compilation.Compiled;
 import tyRuBa.modes.BindingList;
@@ -352,15 +352,25 @@ public class NativePredicate extends RBComponent {
 	public static void defineTypeTest(ModedRuleBaseIndex rb, PredicateIdentifier id, final TypeConstructor t)
 	throws TypeModeError {
 		Assert.assertEquals(1,id.getArity());
-		String javaName = t.getName();
-		NativePredicate type_test = new NativePredicate(id.getName(), Factory.makeAtomicType(t));
+		
+		Type argType;
+		if (t.getTypeArity()==0) {
+			argType = Factory.makeAtomicType(t);
+		} else {
+			Type[] vars = new Type[t.getTypeArity()];
+			for (int i = 0; i < vars.length; i++) {
+				vars[i] = Factory.makeTVar("e");
+			}
+			argType = t.apply(Factory.makeTupleType(vars), false);
+		}
+		
+		NativePredicate type_test = new NativePredicate(id.getName(), argType);
 		
 		type_test.addMode(new EagerImplementation("B", "SEMIDET") {
 			public void doit(RBTerm[] args) {
-                
 				if (args[0].isOfType(t)) {
-				    addSolution();
-    			}
+					addSolution();
+				}
 			}
 		});
 		

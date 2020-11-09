@@ -1,7 +1,8 @@
 package tyRuBa.engine;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Vector;
+import java.util.List;
 
 import tyRuBa.engine.compilation.CompilationContext;
 import tyRuBa.engine.compilation.Compiled;
@@ -23,9 +24,14 @@ import tyRuBa.modes.TypeModeError;
  */
 public class RBModeSwitchExpression extends RBExpression {
 	
-	Vector modeCases = new Vector();
+	List<ModeCase> modeCases = new ArrayList<>();
 	RBExpression defaultExp = null;
-	
+
+	public RBModeSwitchExpression(List<ModeCase> cases, RBExpression defaultCase) {
+		this.modeCases = cases;
+		this.defaultExp = defaultCase;
+	}
+
 	public RBModeSwitchExpression(ModeCase mc) {
 		modeCases.add(mc);
 	}
@@ -39,7 +45,7 @@ public class RBModeSwitchExpression extends RBExpression {
 	}
 	
 	public ModeCase getModeCaseAt(int pos) {
-		return (ModeCase) modeCases.elementAt(pos);
+		return (ModeCase) modeCases.get(pos);
 	}
 	
 	public int getNumModeCases() {

@@ -44,8 +44,6 @@ abstract public class Type implements Cloneable, Serializable {
 	
 	public abstract boolean isSubTypeOf(Type type, Map renamings);
 
-	public abstract Type copyStrictPart();
-
 	public abstract boolean hasOverlapWith(Type other);
 	
 	public boolean hasOverlapWith(Vector types, boolean hasOverlap) {

@@ -1,5 +1,11 @@
 /* A few useful logic predicates (not all from prolog) */
 
+/* --------------------------------------------------------------------- */
+list :: [?a]
+
+list([]).
+list([?|?]).
+
 list_ref :: Integer, [?x], ?x
 MODES
 (B,B,F) REALLY IS SEMIDET
@@ -19,7 +25,7 @@ MODES
 (F,F,B) IS MULTI
 END
 
-append([],?x,?x).
+append([],?x,?x) :- list(?x).
 append([?x|?xs],?ys,[?x|?zs]) :- append(?xs,?ys,?zs).
 
 /* --------------------------------------------------------------------- */
@@ -47,7 +53,7 @@ MODES
   (F,B) IS MULTI
 END
 
-selection([],?list).
+selection([],?list) :- list(?list).
 selection([?l|?st],[?l|?ist]) :- selection(?st,?ist). 
 selection(?st,[?l|?ist]) :- selection(?st,?ist). 
 

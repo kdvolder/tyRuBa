@@ -60,7 +60,7 @@ public abstract class RBComponent {
 
 	public abstract RBTuple getArgs();
 
-	public RBComponent convertToNormalForm() {
+	public RBComponent convertToNormalForm() throws TypeModeError {
 		return this;
 	}
 

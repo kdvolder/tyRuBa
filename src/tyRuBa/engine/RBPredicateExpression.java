@@ -38,7 +38,7 @@ public class RBPredicateExpression extends RBExpression {
       // execution.
 
 	/** Constructor */
-	public RBPredicateExpression(String predName, ArrayList argTerms) {
+	public RBPredicateExpression(String predName, ArrayList<RBTerm> argTerms) {
 		this(predName, RBTuple.make(argTerms));
 	}
 	
@@ -137,7 +137,7 @@ public class RBPredicateExpression extends RBExpression {
 
 				for (int i = 0; i < getNumArgs(); i++) {
 					Type argType = getArgAt(i).getType(myEnv);
-					argType.checkEqualTypes(predType.get(i));
+					Type intersection = argType.intersect(predType.get(i));
 				}
 				return startEnv.intersect(myEnv);
 			}
@@ -145,7 +145,7 @@ public class RBPredicateExpression extends RBExpression {
 			throw new TypeModeError(e, this);
 		}
 	}
-
+	
 	public RBExpression convertToMode(ModeCheckContext context, 
 	boolean rearrange) throws TypeModeError {
 		ModeCheckContext resultContext = (ModeCheckContext) context.clone();

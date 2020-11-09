@@ -58,7 +58,7 @@ public class ValidatorComponent extends RBComponent {
 		return comp.typecheck(predinfos);
 	}
 
-	public RBComponent convertToNormalForm() {
+	public RBComponent convertToNormalForm() throws TypeModeError {
 		checkValid();
 		return new ValidatorComponent(comp.convertToNormalForm(), validator);
 	}

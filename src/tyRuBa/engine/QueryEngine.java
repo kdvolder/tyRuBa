@@ -281,7 +281,7 @@ public abstract class QueryEngine {
 	}
 
 	public Type findType(String name) throws TypeModeError {
-		TypeConstructor tc = findTypeConst(name);
+		TypeConstructor tc = findTypeConst(name, 0);
 		return tc.apply(Factory.makeTupleType(), false);
 	}
 
