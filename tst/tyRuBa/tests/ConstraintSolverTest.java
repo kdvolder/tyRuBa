@@ -1,17 +1,17 @@
 package tyRuBa.tests;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 import tyRuBa.engine.RBVariable;
 import tyRuBa.modes.Factory;
 import tyRuBa.modes.ListType;
 import tyRuBa.modes.TVar;
 import tyRuBa.modes.Type;
+import tyRuBa.modes.ConstraintSolver;
 import tyRuBa.modes.TypeEnv;
 import tyRuBa.modes.TypeModeError;
-
-import static org.junit.Assert.fail;
 
 /**
  * Tests for the ConstraintSolver component.
@@ -23,7 +23,7 @@ public class ConstraintSolverTest {
 
 	@Test public void emptySolverSolvesToEmptyTypeEnv() throws TypeModeError {
 		TypeEnv env = Factory.makeConstraintSolver().solve();
-		assertTrue("Empty solver should produce empty TypeEnv", env.isEmpty());
+		assertTrue(env.isEmpty(), "Empty solver should produce empty TypeEnv");
 	}
 	
 	@Test public void singleTypeConstraintSolvesToBoundType() throws TypeModeError {
@@ -35,7 +35,7 @@ public class ConstraintSolverTest {
 			.solve();
 		
 		Type solvedType = env.get(var);
-		assertEquals("Subtype constraint should narrow to the bound type", intType, solvedType);
+		assertEquals(intType, solvedType, "Subtype constraint should narrow to the bound type");
 	}
 	
 	@Test public void twoSubtypeConstraintsNarrowsToMostSpecific() throws TypeModeError {
@@ -49,7 +49,7 @@ public class ConstraintSolverTest {
 			.solve();
 		
 		Type solvedType = env.get(var);
-		assertEquals("Two subtype constraints should narrow to the most specific (Integer)", intType, solvedType);
+		assertEquals(intType, solvedType, "Two subtype constraints should narrow to the most specific (Integer)");
 	}
 	
 	@Test public void twoSupertypeConstraintsNarrowsToMostGeneral() throws TypeModeError {
@@ -63,39 +63,37 @@ public class ConstraintSolverTest {
 			.solve();
 		
 		Type solvedType = env.get(var);
-		assertEquals("Two supertype constraints should narrow to the most general (Number)", numType, solvedType);
+		assertEquals(numType, solvedType, "Two supertype constraints should narrow to the most general (Number)");
 	}
 	
-	@Test public void incompatibleSubtypeConstraintsThrowTypeModeError() throws TypeModeError {
+	@Test public void incompatibleSubtypeConstraintsThrowTypeModeError() {
 		RBVariable var = RBVariable.make("?a");
 		Type intType = Type.integer;
 		Type strType = Factory.makeJavaType(String.class);
 		
-		try {
+		TypeModeError error = assertThrows(TypeModeError.class, () ->
 			Factory.makeConstraintSolver()
 				.assertSubtypeOf(var, intType)
 				.assertSubtypeOf(var, strType)
-				.solve();
-			fail("Expected TypeModeError for incompatible constraints");
-		} catch (TypeModeError e) {
-			// Expected
-		}
+				.solve()
+		);
+		
+		assertEquals("Incompatible types: Integer<>, String<>", error.getMessage());
 	}
 	
-	@Test public void supertypeOfNumberPlusSubtypeOfIntegerIsIncompatible() throws TypeModeError {
+	@Test public void supertypeOfNumberPlusSubtypeOfIntegerIsIncompatible() {
 		RBVariable var = RBVariable.make("?a");
 		Type numType = Factory.makeJavaType(Number.class);
 		Type intType = Type.integer;
 		
-		try {
+		TypeModeError error = assertThrows(TypeModeError.class, () ->
 			Factory.makeConstraintSolver()
 				.assertSuperTypeOf(var, numType)
 				.assertSubtypeOf(var, intType)
-				.solve();
-			fail("Expected TypeModeError for incompatible constraints");
-		} catch (TypeModeError e) {
-			// Expected — no type is both a supertype of Number and a subtype of Integer
-		}
+				.solve()
+		);
+		
+		assertEquals("Incompatible constraints: Number<> <: Integer<>", error.getMessage());
 	}
 	
 	@Test public void intersectingListsWithTypeVarDoesNotMutateTypeVar() throws TypeModeError {
@@ -105,21 +103,21 @@ public class ConstraintSolverTest {
 		TVar tVar = Factory.makeTVar("T");
 		RBVariable x = RBVariable.make("?x");
 		
-		tyRuBa.modes.ConstraintSolver solver = Factory.makeConstraintSolver();
+		ConstraintSolver solver = Factory.makeConstraintSolver();
 		solver.assertSubtypeOf(x, ListType.make(tVar));
 		solver.assertSubtypeOf(x, ListType.make(Type.string));
 		
 		// Before solve: the constraint should be recorded in the solver's store
-		assertTrue("Solver should record constraint on T before solve", solver.isConstrained(tVar));
+		assertTrue(solver.isConstrained(tVar), "Solver should record constraint on T before solve");
 		
 		TypeEnv env = solver.solve();
 		
 		// ?x should be narrowed to [*]<String>
 		Type solvedX = env.get(x);
-		assertEquals("?x should be narrowed to list of strings", ListType.make(Type.string), solvedX);
+		assertEquals(solvedX, ListType.make(Type.string), "?x should be narrowed to list of strings");
 		
 		// After solve: the solver still knows T's constraint
-		assertTrue("Solver should still record constraint on T after solve", solver.isConstrained(tVar));
+		assertTrue(solver.isConstrained(tVar), "Solver should still record constraint on T after solve");
 	}
 	
 	@Test public void intersectingNestedListsWithTypeVarNarrowsInnerArg() throws TypeModeError {
@@ -134,20 +132,20 @@ public class ConstraintSolverTest {
 		Type outerList2 = ListType.make(innerList2);
 		
 		RBVariable x = RBVariable.make("?x");
-		tyRuBa.modes.ConstraintSolver solver = Factory.makeConstraintSolver();
+		ConstraintSolver solver = Factory.makeConstraintSolver();
 		solver.assertSubtypeOf(x, outerList1);
 		solver.assertSubtypeOf(x, outerList2);
 		
 		// Before solve: the constraint should be recorded in the solver's store
-		assertTrue("Solver should record constraint on T before solve", solver.isConstrained(tVar));
+		assertTrue(solver.isConstrained(tVar), "Solver should record constraint on T before solve");
 		
 		TypeEnv env = solver.solve();
 		
 		// ?x should be narrowed to [*]<[*]<String>>
 		Type solvedX = env.get(x);
-		assertEquals("?x should be narrowed to list of lists of strings", outerList2, solvedX);
+		assertEquals(solvedX, outerList2, "?x should be narrowed to list of lists of strings");
 		
 		// After solve: the solver still knows T's constraint
-		assertTrue("Solver should still record constraint on T after solve", solver.isConstrained(tVar));
+		assertTrue(solver.isConstrained(tVar), "Solver should still record constraint on T after solve");
 	}
 }

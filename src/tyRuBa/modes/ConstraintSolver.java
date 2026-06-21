@@ -114,7 +114,7 @@ public class ConstraintSolver {
 			if (lower != null) {
 				// Both bounds
 				if (!lower.isSubTypeOf(upper, null)) {
-					throw new TypeModeError("Incompatible constraints on " + tvar + ": " + lower + " <: ?" + tvar + " <: " + upper);
+					throw new TypeModeError("Incompatible constraints: " + lower + " <: " + upper);
 				}
 				solvedType = upper.intersect(lower);
 			} else {
