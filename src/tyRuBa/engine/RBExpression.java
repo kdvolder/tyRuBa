@@ -39,7 +39,7 @@ public abstract class RBExpression implements Cloneable {
 		RBExpression converted = convertToNormalForm();
 		TypeEnv resultEnv = null;
 		if (typeCheck) 
-			resultEnv = converted.typecheck(engine.rulebase(), Factory.makeTypeEnv());
+			resultEnv = converted.typecheckWithConstraintSolver(engine.rulebase());
 		else
 			resultEnv = converted.fakecheck(engine.rulebase(), Factory.makeTypeEnv());
 		RBExpression result =
@@ -118,6 +118,11 @@ public abstract class RBExpression implements Cloneable {
 	
 	public abstract TypeEnv typecheck(PredInfoProvider predinfo, TypeEnv startEnv)
 	throws TypeModeError;
+	
+	public TypeEnv typecheckWithConstraintSolver(PredInfoProvider predinfo)
+	throws TypeModeError {
+		throw new UnsupportedOperationException("Not yet implemented: typecheckWithConstraintSolver");
+	}
 
 	public final RBExpression convertToMode(ModeCheckContext context)
 	throws TypeModeError {
