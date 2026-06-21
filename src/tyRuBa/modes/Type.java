@@ -29,11 +29,33 @@ abstract public class Type implements Cloneable, Serializable {
 	 *  once */
 	public abstract Type clone(Map varRenamings);
 
+	/**
+	 * @deprecated Use {@link #union(Type, ConstraintSolver)} instead. The old
+	 * API is unaware of any type constraints already existing on type variables
+	 * tracked by the ConstraintSolver.
+	 */
+	@Deprecated
 	public abstract Type union(Type other) throws TypeModeError;
 	
+	/**
+	 * @deprecated Use {@link #intersect(Type, ConstraintSolver)} instead. The old
+	 * API is unaware of any type constraints already existing on type variables
+	 * tracked by the ConstraintSolver.
+	 */
+	@Deprecated
 	public abstract Type intersect(Type other) throws TypeModeError;
 	
 	public Type intersect(Type other, ConstraintSolver solver) throws TypeModeError {
+		throw new UnsupportedOperationException("not yet implemented: " + this.getClass().getName());
+	}
+	
+	/**
+	 * @deprecated Use {@link #intersect(Type, ConstraintSolver)} instead. The old
+	 * API is unaware of any type constraints already existing on type variables
+	 * tracked by the ConstraintSolver.
+	 */
+	@Deprecated
+	public Type union(Type other, ConstraintSolver solver) throws TypeModeError {
 		throw new UnsupportedOperationException("not yet implemented: " + this.getClass().getName());
 	}
 	
