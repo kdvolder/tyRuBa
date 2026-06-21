@@ -39,6 +39,10 @@ public class Factory {
 		return new TVar(name);
 	}
 	
+	static public ConstraintSolver makeConstraintSolver() {
+		return ConstraintSolver.make();
+	}
+	
 	static public PredicateMode makePredicateMode(BindingList paramModes,
 	Mode mode) {
 		return makePredicateMode(paramModes, mode, true);

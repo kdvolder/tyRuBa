@@ -33,6 +33,10 @@ abstract public class Type implements Cloneable, Serializable {
 	
 	public abstract Type intersect(Type other) throws TypeModeError;
 	
+	public Type intersect(Type other, ConstraintSolver solver) throws TypeModeError {
+		throw new UnsupportedOperationException("not yet implemented: " + this.getClass().getName());
+	}
+	
 	/** return the smallest super type of this and other */
 //	abstract Type lowerBound(Type other) throws TypeModeError;
 

@@ -49,7 +49,8 @@ public class TVar extends Type {
 		return me.name;
 	}
 	
-	private void setContents(Type other) {
+	/** Package-visible so ConstraintSolver can bind TVars during solve() */
+	void setContents(Type other) {
 		content = other;
 	}
 

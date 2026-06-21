@@ -66,30 +66,37 @@ Each `PredInfo` contains:
 
 ## Replacing the Black Box
 
-The contract stays the same:
-- Same inputs: AST, predicate info, starting TypeEnv
-- Same output: TypeEnv (or throws `TypeModeError`)
-- Same side effects: none
+We replace `TypeEnv` with `ConstraintSolver`.
 
-**What changes inside:**
-- Instead of `argType.intersect(predType[i])` for each arg, collect constraints
-- At the end, solve constraints and return narrowed `TypeEnv`
+**New signature:**
+```java
+TypeEnv typecheck(PredInfoProvider predinfo, ConstraintSolver solver)
+```
+
+**Pass it in, get it back out:**
+```java
+// Conjunction (RBConjunction.typecheck)
+solver = solver.addConstraint(...);
+solver = left.typecheck(predinfo, solver);  // solver comes back changed
+solver = right.typecheck(predinfo, solver); // solver comes back changed
+return solver.solve();  // only at the top level
+```
+
+**`solve()` is a terminal operation.** Call it exactly once, from the caller of the top-level `typecheck()`. Never during traversal. This ensures we never lose constraints by prematurely collapsing the constraint system into a single solution.
 
 **What doesn't change:**
-- `RBExpression.typecheck()` signature
-- `prepareForRunning()` doesn't need to change
+- `RBExpression.typecheck()` still returns `TypeEnv`
+- `prepareForRunning()` doesn't need to change (it just calls `typecheck()` and gets back a `TypeEnv`)
 - The rest of the code doesn't need to know
 
 ## API Changes Needed
 
-Only two methods need to change:
+1. **Replace `TypeEnv` with `ConstraintSolver`**
+   - `ConstraintSolver` accumulates constraints (type bounds + equalities)
+   - `ConstraintSolver.solve()` returns a `TypeEnv` at the end
 
-1. **`Type.intersect(Type other)`**
-   - Currently: Equality unification, throws on failure
-   - New: Constraint solving, narrows the range of possibilities
-
-2. **`Type.checkEqualTypes(Type other, boolean grow)`**
-   - Currently: HM-style equality unification with "growable" hack
-   - New: Subtype constraint collection
+2. **`Type.intersect(Type other)` and `Type.checkEqualTypes()`**
+   - No longer called from `typecheck()`
+   - May still be needed for `ConstraintSolver.union()` / `intersect()` internally
 
 Everything else stays the same. The rest of the code calls `typecheck()` and gets back a `TypeEnv`. It doesn't care how that `TypeEnv` was computed.

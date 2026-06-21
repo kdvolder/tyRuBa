@@ -154,6 +154,29 @@ public final class TupleType extends Type {
 		}
 	}
 
+	public Type intersect(Type tother, ConstraintSolver solver) throws TypeModeError {
+		check(tother instanceof TupleType, this, tother);
+		TupleType other = (TupleType) tother;
+		check(other.size() == size(), this, other);
+		TupleType result = Factory.makeTupleType();
+		for (int i = 0; i < size(); i++) {
+			Type t1 = get(i);
+			Type t2 = other.get(i);
+			if (t1 instanceof TVar) {
+				TVar tvar = (TVar) t1;
+				solver.assertSubtypeOf(tvar, t2);
+				result.add(t2);
+			} else if (t2 instanceof TVar) {
+				TVar tvar = (TVar) t2;
+				solver.assertSubtypeOf(tvar, t1);
+				result.add(t1);
+			} else {
+				result.add(t1.intersect(t2, solver));
+			}
+		}
+		return result;
+	}
+	
 	public Type intersect(Type tother) throws TypeModeError {
 		if (tother instanceof TVar) {
 			return tother.intersect(this);

@@ -224,6 +224,22 @@ public class CompositeType extends BoundaryType {
 		}
 	}
 	
+	public Type intersect(Type other, ConstraintSolver solver) throws TypeModeError {
+		check(other instanceof CompositeType, this, other);
+		CompositeType cother = (CompositeType) other;
+		TypeConstructor otherTypeConst = cother.typeConst;
+		if (typeConst.equals(otherTypeConst)) {
+			TupleType resultArg = (TupleType) args.intersect(cother.args, solver);
+			return typeConst.apply(resultArg, false);
+		} else if (otherTypeConst.isSuperTypeOf(typeConst)) {
+			return cother.intersect(this, solver);
+		} else if (typeConst.isSuperTypeOf(otherTypeConst)) {
+			return cother;
+		} else {
+			throw new TypeModeError("Incompatible types: " + this + ", " + other);
+		}
+	}
+	
 	public boolean hasOverlapWith(Type other) {
 		if (other instanceof TVar || other instanceof GrowableType) {
 			return other.hasOverlapWith(this);
