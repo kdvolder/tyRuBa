@@ -125,7 +125,7 @@ public abstract class RBExpression implements Cloneable {
 	
 	protected ConstraintSolver typecheckWithConstraintSolver(PredInfoProvider predinfo, ConstraintSolver solver)
 	throws TypeModeError {
-		throw new UnsupportedOperationException("Not yet implemented: typecheckWithConstraintSolver");
+		throw new UnsupportedOperationException("Not yet implemented: typecheckWithConstraintSolver: "+this.getClass());
 	}
 	
 	public abstract TypeEnv typecheck(PredInfoProvider predinfo, TypeEnv startEnv)
