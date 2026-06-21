@@ -121,4 +121,33 @@ public class ConstraintSolverTest {
 		// After solve: the solver still knows T's constraint
 		assertTrue("Solver should still record constraint on T after solve", solver.isConstrained(tVar));
 	}
+	
+	@Test public void intersectingNestedListsWithTypeVarNarrowsInnerArg() throws TypeModeError {
+		// Scenario: ?x is a list of lists whose inner element type is unknown (T).
+		// Then we learn ?x is also a list of lists of strings.
+		// The solver should narrow ?x to [*]<[*]<String>> and record T <: String.
+		TVar tVar = Factory.makeTVar("T");
+		Type innerList1 = ListType.make(tVar);
+		Type outerList1 = ListType.make(innerList1);
+		
+		Type innerList2 = ListType.make(Type.string);
+		Type outerList2 = ListType.make(innerList2);
+		
+		RBVariable x = RBVariable.make("?x");
+		tyRuBa.modes.ConstraintSolver solver = Factory.makeConstraintSolver();
+		solver.assertSubtypeOf(x, outerList1);
+		solver.assertSubtypeOf(x, outerList2);
+		
+		// Before solve: the constraint should be recorded in the solver's store
+		assertTrue("Solver should record constraint on T before solve", solver.isConstrained(tVar));
+		
+		TypeEnv env = solver.solve();
+		
+		// ?x should be narrowed to [*]<[*]<String>>
+		Type solvedX = env.get(x);
+		assertEquals("?x should be narrowed to list of lists of strings", outerList2, solvedX);
+		
+		// After solve: the solver still knows T's constraint
+		assertTrue("Solver should still record constraint on T after solve", solver.isConstrained(tVar));
+	}
 }

@@ -6,7 +6,12 @@ import java.util.Map;
  * A GrowableType is a type that is allowed to "grow". I.e. like a typevariable
  * who's range is determined by a BoundaryType from which it can change to one
  * of its supertypes.
+ * 
+ * @deprecated GrowableTypes are a legacy hack for retrofitting subtyping into
+ * HM unification. The new ConstraintSolver-based type checker replaces the
+ * growing-type model with constraint solving and shrinking ranges.
  */
+@Deprecated
 public class GrowableType extends Type {
 	
 	private BoundaryType lowerBound;
