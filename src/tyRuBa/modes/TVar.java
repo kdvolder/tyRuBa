@@ -125,10 +125,21 @@ public class TVar extends Type {
 		}
 	}
 
+	/**
+	 * @deprecated The new ConstraintSolver-based type checker does not use
+	 * mutable TVar state. A TVar's constraints are tracked by the solver's
+	 * maps, not by whether the TVar's contents field is null.
+	 */
+	@Deprecated
 	public boolean isFree() {
 		return getContents() == null;
 	}
 
+	/**
+	 * @deprecated The new ConstraintSolver-based type checker does not use
+	 * this. Constraint propagation is handled by the solver.
+	 */
+	@Deprecated
 	public boolean isFreeFor(TVar var) {
 		TVar me = derefTVar();
 		if (!me.isFree()) {
