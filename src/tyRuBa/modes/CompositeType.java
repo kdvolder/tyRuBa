@@ -184,6 +184,68 @@ public class CompositeType extends BoundaryType {
 		}
 	}
 
+	public Type union(Type other, ConstraintSolver solver) throws TypeModeError {
+		if (Type.object.equals(this)) {
+			return other;
+		} else if (other instanceof TVar || other instanceof GrowableType) {
+			return other.union(this, solver);
+		} else if (Type.object.equals(other)) {
+			return this;
+		} else {
+			check(other instanceof CompositeType, this, other);
+			CompositeType cother = (CompositeType) other;
+			TypeConstructor otherTypeConst = cother.typeConst;
+			if (this.equals(other)) {
+				return this;
+			} else if (typeConst.equals(otherTypeConst)) {
+				TupleType resultArg = (TupleType) args.union(cother.args, solver);
+				return typeConst.apply(resultArg, false);
+			} else if (otherTypeConst.isSuperTypeOf(typeConst)) {
+				check(!isStrict(), this, other);
+				Map params = new HashMap();
+				for (int i = 0; i < typeConst.getTypeArity(); i++) {
+					params.put(typeConst.getParameterName(i), args.get(i));
+				}
+				TupleType resultArg = Factory.makeTupleType();
+				for (int i = 0; i < cother.typeConst.getTypeArity(); i++) {
+					String currName = cother.typeConst.getParameterName(i);
+					Type paramValue = (Type) params.get(currName);
+					if (paramValue != null) {
+						resultArg.add(paramValue.union(cother.args.get(i), solver));
+					} else {
+						resultArg.add(cother.args.get(i));
+					}
+				}
+				return otherTypeConst.apply(resultArg, false);
+			} else if (typeConst.isSuperTypeOf(otherTypeConst)) {
+				return cother.union(this, solver);
+			} else {
+				check(!isStrict(), this, other);
+				check(!cother.isStrict(), this, other);
+				TypeConstructor superTypeConst = typeConst.union(otherTypeConst);
+				Map params = new HashMap();
+				for (int i = 0; i < typeConst.getTypeArity(); i++) {
+					params.put(typeConst.getParameterName(i), args.get(i));
+				}
+				for (int i = 0; i < otherTypeConst.getTypeArity(); i++) {
+					String currName = otherTypeConst.getParameterName(i);
+					Type paramValue = (Type) params.get(currName);
+					if (paramValue == null) {
+						params.put(currName, cother.args.get(i));
+					} else {
+						params.put(currName, paramValue.union(cother.args.get(i), solver));
+					}
+				}
+				TupleType resultArg = Factory.makeTupleType();
+				for (int i = 0; i < superTypeConst.getTypeArity(); i++) {
+					String currName = superTypeConst.getParameterName(i);
+					resultArg.add((Type) params.get(currName));
+				}
+				return superTypeConst.apply(resultArg, false);
+			}
+		}
+	}
+
 	public Type intersect(Type other) throws TypeModeError {
 		if (Type.object.equals(this)) {
 			return other;
