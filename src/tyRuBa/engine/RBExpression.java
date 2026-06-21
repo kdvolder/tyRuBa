@@ -12,6 +12,7 @@ import tyRuBa.engine.visitor.CollectVarsVisitor;
 import tyRuBa.engine.visitor.CopyVisitor;
 import tyRuBa.engine.visitor.ExpressionVisitor;
 import tyRuBa.engine.visitor.SubstituteVisitor;
+import tyRuBa.modes.ConstraintSolver;
 import tyRuBa.modes.ConstructorType;
 import tyRuBa.modes.ErrorMode;
 import tyRuBa.modes.Factory;
@@ -39,7 +40,7 @@ public abstract class RBExpression implements Cloneable {
 		RBExpression converted = convertToNormalForm();
 		TypeEnv resultEnv = null;
 		if (typeCheck) 
-			resultEnv = converted.typecheckWithConstraintSolver(engine.rulebase());
+			resultEnv = converted.typecheckStart(engine.rulebase());
 		else
 			resultEnv = converted.fakecheck(engine.rulebase(), Factory.makeTypeEnv());
 		RBExpression result =
@@ -116,13 +117,19 @@ public abstract class RBExpression implements Cloneable {
         }
 	}
 	
-	public abstract TypeEnv typecheck(PredInfoProvider predinfo, TypeEnv startEnv)
-	throws TypeModeError;
+	public final TypeEnv typecheckStart(PredInfoProvider predinfo)
+	throws TypeModeError {
+		ConstraintSolver result = typecheckWithConstraintSolver(predinfo, Factory.makeConstraintSolver());
+		return result.solve();
+	}
 	
-	public TypeEnv typecheckWithConstraintSolver(PredInfoProvider predinfo)
+	protected ConstraintSolver typecheckWithConstraintSolver(PredInfoProvider predinfo, ConstraintSolver solver)
 	throws TypeModeError {
 		throw new UnsupportedOperationException("Not yet implemented: typecheckWithConstraintSolver");
 	}
+	
+	public abstract TypeEnv typecheck(PredInfoProvider predinfo, TypeEnv startEnv)
+	throws TypeModeError;
 
 	public final RBExpression convertToMode(ModeCheckContext context)
 	throws TypeModeError {
