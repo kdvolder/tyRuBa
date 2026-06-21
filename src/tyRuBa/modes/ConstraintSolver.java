@@ -62,7 +62,7 @@ public class ConstraintSolver {
 	public ConstraintSolver assertSuperTypeOf(TVar t, Type u) throws TypeModeError {
 		Type existing = lowerBounds.get(t);
 		if (existing != null) {
-			lowerBounds.put(t, existing.union(u));
+			lowerBounds.put(t, existing.union(u, this));
 		} else {
 			lowerBounds.put(t, u);
 		}
