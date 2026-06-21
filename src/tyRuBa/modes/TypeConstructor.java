@@ -18,6 +18,23 @@ public abstract class TypeConstructor {
     
     public static TypeConstructor theAny = Factory.makeTypeConstructor(Object.class);
     
+    /**
+     * Apply this type constructor to the given arguments.
+     * <p>
+     * This is the preferred API. Strictness is determined by the type
+     * constructor itself (e.g. Java types are always strict).
+     */
+    public Type apply(TupleType args) {
+        return new CompositeType(this, false, args);
+    }
+
+    /**
+     * @deprecated Use {@link #apply(TupleType)} instead. The 'growable'
+     * parameter was part of the legacy HM-unification-based type system.
+     * The new ConstraintSolver-based checker uses shrinking ranges instead
+     * of growing types.
+     */
+    @Deprecated
     public Type apply(TupleType args, boolean growable) {
         if (growable) { 
             return new GrowableType(new CompositeType(this, false, args));
@@ -25,7 +42,13 @@ public abstract class TypeConstructor {
             return new CompositeType(this, false, args);
         }
     }
-    
+
+    /**
+     * @deprecated Strict types (= prefixed with '=') are a broken concept.
+     * The parser still parses them but they are not supported by the new
+     * ConstraintSolver-based type checker.
+     */
+    @Deprecated
     public Type applyStrict(TupleType args, boolean growable) {
         if (growable) { 
             return new GrowableType(new CompositeType(this, true, args));

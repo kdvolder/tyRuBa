@@ -30,7 +30,13 @@ public class Factory {
 	static public Type makeAtomicType(TypeConstructor typeConstructor) {
 		return typeConstructor.apply(Factory.makeTupleType(), false);
 	}
-	
+
+	/**
+	 * @deprecated Sub-atomic (growable) types are a legacy concept from the
+	 * HM-unification-based type system. The new ConstraintSolver-based checker
+	 * does not support them.
+	 */
+	@Deprecated
 	public static Type makeSubAtomicType(TypeConstructor typeConstructor) {
 		return typeConstructor.apply(Factory.makeTupleType(), true);
 	}
