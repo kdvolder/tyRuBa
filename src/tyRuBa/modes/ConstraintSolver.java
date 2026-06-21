@@ -104,34 +104,33 @@ public class ConstraintSolver {
 	public TypeEnv solve() throws TypeModeError {
 		TypeEnv env = Factory.makeTypeEnv();
 		
-		// Solve each TVar constraint
-		for (Map.Entry<TVar, Type> entry : upperBounds.entrySet()) {
-			TVar tvar = entry.getKey();
-			Type upper = entry.getValue();
-			Type lower = lowerBounds.get(tvar);
-			
-			Type solvedType;
-			if (lower != null) {
-				// Both bounds
-				if (!lower.isSubTypeOf(upper, null)) {
-					throw new TypeModeError("Incompatible constraints: " + lower + " <: " + upper);
-				}
-				solvedType = upper.intersect(lower);
-			} else {
-				solvedType = upper;
-			}
-			
-			// Bind the TVar to its solved type
-			if (tvar.isFree()) {
-				tvar.setContents(solvedType);
-			}
-		}
-		
 		// Map RBVariables to their solved types
 		for (Map.Entry<RBVariable, TVar> entry : rbVarToTVar.entrySet()) {
 			RBVariable x = entry.getKey();
 			TVar tvar = entry.getValue();
-			env.put(x, tvar.isFree() ? tvar : tvar.getContents());
+			
+			Type upper = upperBounds.get(tvar);
+			Type lower = lowerBounds.get(tvar);
+			
+			Type solvedType;
+			if (upper != null && lower != null) {
+				// Both bounds: must be compatible, intersect them
+				if (!lower.isSubTypeOf(upper, null)) {
+					throw new TypeModeError("Incompatible constraints: " + lower + " <: " + upper);
+				}
+				solvedType = upper.intersect(lower);
+			} else if (upper != null) {
+				// Only upper bound
+				solvedType = upper;
+			} else if (lower != null) {
+				// Only lower bound
+				solvedType = lower;
+			} else {
+				// No constraints: most general type
+				solvedType = Type.object;
+			}
+			
+			env.put(x, solvedType);
 		}
 		
 		return env;
