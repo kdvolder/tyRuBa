@@ -120,6 +120,29 @@ public class ConstraintSolverTest {
 		assertTrue(solver.isConstrained(tVar), "Solver should still record constraint on T after solve");
 	}
 	
+	/**
+	 * TODO: occurs-check.
+	 * A constraint like ?x <: [?x] (a list whose element type is itself)
+	 * should be rejected. Without an occurs-check the solver will either
+	 * loop infinitely or produce an infinite type.
+	 * 
+	 * Expected: TypeModeError when asserting a type variable as a subtype
+	 * (or supertype) of a type that contains itself.
+	 */
+	@Test public void occursCheck_rejectsX_isSubtypeOfListContainingX() {
+		TVar x = Factory.makeTVar("x");
+		Type listOfX = ListType.make(x);
+		
+		// Currently this either loops infinitely or silently accepts
+		// the cyclic constraint. It should throw TypeModeError.
+		// assertThrows(TypeModeError.class, () ->
+		//     Factory.makeConstraintSolver()
+		//         .assertSubtypeOf(x, listOfX)
+		//         .solve()
+		// );
+		fail("occurs-check not yet implemented");
+	}
+
 	@Test public void intersectingNestedListsWithTypeVarNarrowsInnerArg() throws TypeModeError {
 		// Scenario: ?x is a list of lists whose inner element type is unknown (T).
 		// Then we learn ?x is also a list of lists of strings.
