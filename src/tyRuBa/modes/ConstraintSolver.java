@@ -53,18 +53,12 @@ public class ConstraintSolver {
 	
 	private ConstraintSolver _assertSubtypeOf(Type sub, Type supr) throws TypeModeError {
 		if (sub instanceof TVar) {
-			TVar tvar = ((TVar)sub).derefTVar();
-			if (!tvar.isFree()) {
-				return _assertSubtypeOf(tvar.getContents(), supr);
-			}
-			return _recordUpperBound(tvar, supr);
+			// In the new world TVars are never mutated/bound via content.
+			// They are tracked solely by the solver's constraint maps.
+			return _recordUpperBound((TVar)sub, supr);
 		}
 		if (supr instanceof TVar) {
-			TVar tvar = ((TVar)supr).derefTVar();
-			if (!tvar.isFree()) {
-				return _assertSubtypeOf(sub, tvar.getContents());
-			}
-			return _recordLowerBound(tvar, sub);
+			return _recordLowerBound((TVar)supr, sub);
 		}
 		
 		if (sub instanceof CompositeType && supr instanceof CompositeType) {

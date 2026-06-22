@@ -118,7 +118,16 @@ public class TVar extends Type {
 		}
 	}
 
-	/** Package-visible for use by ConstraintSolver */
+	/**
+	 * @deprecated In the old HM-unification world, TVars were mutated:
+	 * when a type was inferred, the solver would set {@code content} to
+	 * the inferred type, effectively "binding" the variable in place.
+	 * {@code derefTVar()} followed the chain of bound TVars to find the
+	 * final concrete type. This mutation model is incompatible with the
+	 * new ConstraintSolver, which records constraints in its own maps
+	 * without ever modifying the TVar. The solver walks the type tree
+	 * directly; it never needs to dereference a bound TVar.
+	 */
 	@Deprecated
 	TVar derefTVar() {
 		if (content!=null && content instanceof TVar) {
@@ -129,9 +138,17 @@ public class TVar extends Type {
 	}
 
 	/**
-	 * @deprecated The new ConstraintSolver-based type checker does not use
-	 * mutable TVar state. A TVar's constraints are tracked by the solver's
-	 * maps, not by whether the TVar's contents field is null.
+	 * @deprecated In the old HM-unification world, a TVar was "free" if
+	 * its {@code content} field was null — meaning it had not yet been
+	 * bound to an inferred type. Binding happened by mutation: setting
+	 * {@code content} to the inferred type.
+	 *
+	 * In the new ConstraintSolver world, TVars are immutable. They are
+	 * never mutated to record their type; instead, constraints are stored
+	 * in the solver's {@code upperBounds}/{@code lowerBounds} maps. A TVar
+	 * is always "free" in the mutation sense because nothing ever writes
+	 * to its {@code content} field. The solver does the binding by
+	 * intersecting constraints, not by mutating state.
 	 */
 	@Deprecated
 	public boolean isFree() {
@@ -139,8 +156,16 @@ public class TVar extends Type {
 	}
 
 	/**
-	 * @deprecated The new ConstraintSolver-based type checker does not use
-	 * this. Constraint propagation is handled by the solver.
+	 * @deprecated In the old HM-unification world, {@code isFreeFor} was
+	 * used to detect and prevent the "occurs check" — a TVar could not
+	 * be unified with a type that contained itself (to avoid infinite
+	 * types). This was enforced by mutating the TVar's state during
+	 * unification.
+	 *
+	 * The ConstraintSolver has no need for this check: it records
+	 * constraints declaratively rather than performing in-place
+	 * unification, and infinite types arise naturally from cyclic
+	 * constraint graphs rather than from mutation artifacts.
 	 */
 	@Deprecated
 	public boolean isFreeFor(TVar var) {
