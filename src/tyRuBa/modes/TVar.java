@@ -117,7 +117,8 @@ public class TVar extends Type {
 		}
 	}
 
-	private TVar derefTVar() {
+	/** Package-visible for use by ConstraintSolver */
+	TVar derefTVar() {
 		if (content!=null && content instanceof TVar) {
 			return ((TVar)content).derefTVar();
 		} else {

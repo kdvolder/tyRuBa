@@ -160,7 +160,7 @@ public class RBPredicateExpression extends RBExpression {
 
 				for (int i = 0; i < getNumArgs(); i++) {
 					Type argType = getArgAt(i).getType(myEnv);
-					argType.intersect(predType.get(i), solver);
+					solver.assertSubtypeOf(argType, predType.get(i));
 				}
 				return solver;
 			}

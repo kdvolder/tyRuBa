@@ -6,32 +6,34 @@ import java.util.Map;
  * A GrowableType is a type that is allowed to "grow". I.e. like a typevariable
  * who's range is determined by a BoundaryType from which it can change to one
  * of its supertypes.
- * 
+ *
  * @deprecated GrowableTypes are a legacy hack for retrofitting subtyping into
  * HM unification. The new ConstraintSolver-based type checker replaces the
  * growing-type model with constraint solving and shrinking ranges.
  */
 @Deprecated
 public class GrowableType extends Type {
-	
+
 	private BoundaryType lowerBound;
 	private BoundaryType upperBound;
 
 	public GrowableType(BoundaryType lowerBound) {
 		this.lowerBound = lowerBound;
 		this.upperBound = lowerBound;
+		throw new UnsupportedOperationException("Kaka");
 	}
-	
+
 	private GrowableType(BoundaryType lowerBound, BoundaryType upperBound) {
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;
+		throw new UnsupportedOperationException("Kaka");
 	}
-	
+
 	public int hashCode() {
-		return lowerBound.hashCode() + 
+		return lowerBound.hashCode() +
 		  13 * (upperBound.hashCode());
 	}
-	
+
 	public boolean equals(Object other) {
 		if (! (other instanceof GrowableType)) {
 			return false;
@@ -41,7 +43,7 @@ public class GrowableType extends Type {
 				&& upperBound.equals(sother.upperBound);
 		}
 	}
-	
+
 	public String toString() {
 		return lowerBound.toString();
 	}
@@ -106,7 +108,7 @@ public class GrowableType extends Type {
 					(BoundaryType) upperBound.union(other));
 		}
 	}
-	
+
 //	Type lowerBound(Type other) throws TypeModeError {
 //		return lowerBound.lowerBound(other);
 //	}
@@ -121,7 +123,7 @@ public class GrowableType extends Type {
 	}
 
 	public Type union(Type other) throws TypeModeError {
-		if (other instanceof TVar) 
+		if (other instanceof TVar)
 			return other.union(this);
 		else if (other instanceof BoundaryType) {
 			BoundaryType b_other = (BoundaryType)other;

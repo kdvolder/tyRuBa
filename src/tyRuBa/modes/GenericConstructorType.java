@@ -60,7 +60,7 @@ public class GenericConstructorType extends ConstructorType implements Serializa
 		CompositeType iresult = (CompositeType)result.clone(renamings);
 		//TODO: This is not quite correct but just for now...                      
         argType.checkEqualTypes(iargs);
-		return iresult.getTypeConstructor().apply(iresult.getArgs(), true); 
+		return iresult.getTypeConstructor().apply(iresult.getArgs(), false); 
 	}
 
     public boolean equals(Object other) {

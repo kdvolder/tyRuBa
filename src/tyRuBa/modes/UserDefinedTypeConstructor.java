@@ -11,7 +11,8 @@ import tyRuBa.engine.MetaBase;
 public class UserDefinedTypeConstructor extends TypeConstructor implements Serializable {
 	
 	private String name;
-	private TypeConstructor superConst = null;
+	/** Package-visible for use by ConstraintSolver */
+	TypeConstructor superConst = null;
 	private Type representedBy;
 	private TVar[] parameters;
 	boolean initialized = false;
