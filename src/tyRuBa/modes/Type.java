@@ -12,14 +12,26 @@ abstract public class Type implements Cloneable, Serializable {
 	public static final Type number = Factory.makeJavaType(Number.class);
 	public static final Type object = Factory.makeJavaType(Object.class);	
 
-	/** check if this type is equal to other, if not, throw TypeError */
+	/**
+	 * @see #checkEqualTypes(Type, boolean)
+	 */
+	@Deprecated
 	public void checkEqualTypes(Type other) throws TypeModeError {
 		checkEqualTypes(other, true);
 	}
 
-	/** check if this type is equal to other, if not, throw TypeError
-	 *  if grow is true, than SubAtomicType and SubCompositeType can grow
+	/**
+	 * @deprecated Legacy HM-unification method. In the old world this was the
+	 * universal hammer for expressing type constraints — subtype, supertype,
+	 * and true equality were all expressed as equality unification, resolved
+	 * by letting subatomic types grow toward a common type. The {@code grow}
+	 * parameter controlled whether growth was allowed (subtype constraint)
+	 * or not (strict equality).
+	 * <p>
+	 * The replacement depends on the original intent of each call site. See
+	 * each call site for guidance on which constraint to use.
 	 */
+	@Deprecated
 	public abstract void checkEqualTypes(Type other, boolean grow) throws TypeModeError;
 	
 	/** return true if this contains reference to var */

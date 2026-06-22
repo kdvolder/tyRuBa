@@ -16,6 +16,7 @@ import tyRuBa.modes.Factory;
 import tyRuBa.modes.Mode;
 import tyRuBa.modes.ModeCheckContext;
 import tyRuBa.modes.Multiplicity;
+import tyRuBa.modes.ConstraintSolver;
 import tyRuBa.modes.PredInfo;
 import tyRuBa.modes.PredInfoProvider;
 import tyRuBa.modes.Type;
@@ -140,6 +141,28 @@ public class RBPredicateExpression extends RBExpression {
 					Type intersection = argType.intersect(predType.get(i));
 				}
 				return startEnv.intersect(myEnv);
+			}
+		} catch (TypeModeError e) {
+			throw new TypeModeError(e, this);
+		}
+	}
+	
+	public ConstraintSolver typecheckWithConstraintSolver(PredInfoProvider predinfo, ConstraintSolver solver)
+	throws TypeModeError {
+		try {
+			PredicateIdentifier pred = getPredId();
+			PredInfo pInfo = predinfo.getPredInfo(pred);
+			if (pInfo == null) {
+				throw new TypeModeError("Unknown predicate " + pred);
+			} else {
+				TupleType predType = pInfo.getTypeList();
+				TypeEnv myEnv = Factory.makeTypeEnv();
+
+				for (int i = 0; i < getNumArgs(); i++) {
+					Type argType = getArgAt(i).getType(myEnv);
+					argType.intersect(predType.get(i), solver);
+				}
+				return solver;
 			}
 		} catch (TypeModeError e) {
 			throw new TypeModeError(e, this);

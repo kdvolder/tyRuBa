@@ -37,7 +37,9 @@ public abstract class TypeConstructor {
     @Deprecated
     public Type apply(TupleType args, boolean growable) {
         if (growable) { 
-            return new GrowableType(new CompositeType(this, false, args));
+            throw new UnsupportedOperationException(
+                "Growable types are deprecated. Use plain CompositeType with ConstraintSolver for constraint accumulation."); 
+//            return new GrowableType(new CompositeType(this, false, args));
         } else {
             return new CompositeType(this, false, args);
         }
