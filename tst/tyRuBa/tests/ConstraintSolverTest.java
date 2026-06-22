@@ -121,26 +121,37 @@ public class ConstraintSolverTest {
 	}
 	
 	/**
-	 * TODO: occurs-check.
-	 * A constraint like ?x <: [?x] (a list whose element type is itself)
-	 * should be rejected. Without an occurs-check the solver will either
-	 * loop infinitely or produce an infinite type.
+	 * Occurs-check: a type variable must not appear inside its own bound.
 	 * 
-	 * Expected: TypeModeError when asserting a type variable as a subtype
-	 * (or supertype) of a type that contains itself.
+	 * Both directions are rejected because they produce infinite types:
+	 * - ?x <: [?x]  → upper bound is a list containing ?x itself
+	 * - [?x] <: ?x  → lower bound is a list containing ?x itself
+	 * 
+	 * Without this check the solver would silently accept self-referential
+	 * types like List(List(List(...))) which have no finite representation.
 	 */
-	@Test public void occursCheck_rejectsX_isSubtypeOfListContainingX() {
+	@Test public void occursCheck_rejectsTVarSubtypeOfListContainingItself() {
 		TVar x = Factory.makeTVar("x");
 		Type listOfX = ListType.make(x);
 		
-		// Currently this either loops infinitely or silently accepts
-		// the cyclic constraint. It should throw TypeModeError.
-		// assertThrows(TypeModeError.class, () ->
-		//     Factory.makeConstraintSolver()
-		//         .assertSubtypeOf(x, listOfX)
-		//         .solve()
-		// );
-		fail("occurs-check not yet implemented");
+		TypeModeError error = assertThrows(TypeModeError.class, () ->
+			Factory.makeConstraintSolver()
+				.assertSubtypeOf(x, listOfX)
+				.solve()
+		);
+		assertTrue(error.getMessage().contains("occurs"));
+	}
+	
+	@Test public void occursCheck_rejectsListContainingTVarSubtypeOfTVar() {
+		TVar x = Factory.makeTVar("x");
+		Type listOfX = ListType.make(x);
+		
+		TypeModeError error = assertThrows(TypeModeError.class, () ->
+			Factory.makeConstraintSolver()
+				.assertSubtypeOf(listOfX, x)
+				.solve()
+		);
+		assertTrue(error.getMessage().contains("occurs"));
 	}
 
 	@Test public void intersectingNestedListsWithTypeVarNarrowsInnerArg() throws TypeModeError {
