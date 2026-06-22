@@ -48,35 +48,25 @@ public class ConstraintSolver {
 	 * Walks both types in parallel, recording constraints on any TVars found.
 	 */
 	public ConstraintSolver assertSubtypeOf(Type sub, Type supr) throws TypeModeError {
-		_assertSubtypeOf(sub, supr);
-		return this;
+		return _assertSubtypeOf(sub, supr);
 	}
 	
-	private void _assertSubtypeOf(Type sub, Type supr) throws TypeModeError {
-		// Dereference TVars to their contents
+	private ConstraintSolver _assertSubtypeOf(Type sub, Type supr) throws TypeModeError {
 		if (sub instanceof TVar) {
 			TVar tvar = ((TVar)sub).derefTVar();
 			if (!tvar.isFree()) {
-				_assertSubtypeOf(tvar.getContents(), supr);
-				return;
+				return _assertSubtypeOf(tvar.getContents(), supr);
 			}
-			// Free TVar <: Type → record upper bound
-			_recordUpperBound(tvar, supr);
-			return;
+			return _recordUpperBound(tvar, supr);
 		}
 		if (supr instanceof TVar) {
 			TVar tvar = ((TVar)supr).derefTVar();
 			if (!tvar.isFree()) {
-				_assertSubtypeOf(sub, tvar.getContents());
-				return;
+				return _assertSubtypeOf(sub, tvar.getContents());
 			}
-			// sub is concrete, supr is free TVar → record LOWER bound
-			// (sub must be a subtype of tvar, so tvar must be a supertype of sub)
-			_recordLowerBound(tvar, sub);
-			return;
+			return _recordLowerBound(tvar, sub);
 		}
 		
-		// Both are non-TVar types
 		if (sub instanceof CompositeType && supr instanceof CompositeType) {
 			CompositeType compSub = (CompositeType) sub;
 			CompositeType compSupr = (CompositeType) supr;
@@ -86,18 +76,12 @@ public class ConstraintSolver {
 				for (int i = 0; i < subArgs.size(); i++) {
 					_assertSubtypeOf(subArgs.get(i), suprArgs.get(i));
 				}
+				return this;
 			} else {
-				// Different constructors: check if sub's constructor
-				// is a subtype of supr's constructor (via supertype chain)
 				if (compSupr.getTypeConstructor().isSuperTypeOf(compSub.getTypeConstructor())) {
-					// sub is a subtype of supr by constructor hierarchy
-					// No additional constraint needed
-				} else {
-					// Not a subtype by hierarchy: record constraint on any TVars in sub
-					if (sub instanceof TVar) {
-						_recordUpperBound((TVar)sub, supr);
-					}
+					return this;
 				}
+				throw new TypeModeError("Incompatible types: " + sub + ", " + supr);
 			}
 		} else if (sub instanceof TupleType && supr instanceof TupleType) {
 			TupleType subArgs = (TupleType) sub;
@@ -105,31 +89,32 @@ public class ConstraintSolver {
 			for (int i = 0; i < subArgs.size(); i++) {
 				_assertSubtypeOf(subArgs.get(i), suprArgs.get(i));
 			}
-		} else {
-			// Unhandled type combination — this is a gap in the solver
-			// that needs to be filled in as it's encountered.
-			throw new UnsupportedOperationException(
-				"_assertSubtypeOf unhandled: " + sub.getClass().getSimpleName()
-				+ " <: " + supr.getClass().getSimpleName());
+			return this;
 		}
+		
+		throw new UnsupportedOperationException(
+			"_assertSubtypeOf unhandled: " + sub.getClass().getSimpleName()
+			+ " <: " + supr.getClass().getSimpleName());
 	}
 	
-	private void _recordUpperBound(TVar tvar, Type bound) throws TypeModeError {
+	private ConstraintSolver _recordUpperBound(TVar tvar, Type bound) throws TypeModeError {
 		Type existing = upperBounds.get(tvar);
 		if (existing != null) {
 			upperBounds.put(tvar, existing.intersect(bound, this));
 		} else {
 			upperBounds.put(tvar, bound);
 		}
+		return this;
 	}
 	
-	private void _recordLowerBound(TVar tvar, Type bound) throws TypeModeError {
+	private ConstraintSolver _recordLowerBound(TVar tvar, Type bound) throws TypeModeError {
 		Type existing = lowerBounds.get(tvar);
 		if (existing != null) {
 			lowerBounds.put(tvar, existing.union(bound, this));
 		} else {
 			lowerBounds.put(tvar, bound);
 		}
+		return this;
 	}
 	
 	/**

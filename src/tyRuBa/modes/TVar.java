@@ -7,12 +7,12 @@ package tyRuBa.modes;
 
 import java.util.Map;
 
-/** 
+/**
  * A TVar is any unknown type.  Once the type of a TVar is known, the TVar is
- * treated like the type. 
+ * treated like the type.
  */
 public class TVar extends Type {
-	
+
 	private Type content;
 	static private int ctr = 1;
 	private int id = ++ctr;
@@ -27,6 +27,7 @@ public class TVar extends Type {
 	/** This gets what a typevariable is bound to, the type returned is guaranteed
 	 * to be not a TVar! Returns null, if this variable is not bound.
 	 */
+	@Deprecated
 	public Type getContents() {
 		TVar me = derefTVar();
 		if (me.content==null)
@@ -39,7 +40,7 @@ public class TVar extends Type {
 		TVar me = derefTVar();
 		if (me.isFree()) {
 			return "?" + me.getName() + "_" + me.id;
-		} else { 
+		} else {
 			return me.getContents().toString();
 		}
 	}
@@ -48,7 +49,7 @@ public class TVar extends Type {
 		TVar me = derefTVar();
 		return me.name;
 	}
-	
+
 	/** Package-visible so ConstraintSolver can bind TVars during solve() */
 	void setContents(Type other) {
 		content = other;
@@ -62,7 +63,7 @@ public class TVar extends Type {
 			TVar otherVar = ((TVar)other).derefTVar();
 			if (me.isFree())
 				if (!(otherVar.isFreeFor(this))) {
-					throw new TypeModeError("Recursion in inferred type " + this + " & " 
+					throw new TypeModeError("Recursion in inferred type " + this + " & "
 						+ otherVar);
 				}
 				else {
@@ -70,21 +71,21 @@ public class TVar extends Type {
 				}
 			else if (otherVar.isFree()){
 				if (!(me.isFreeFor(otherVar))) {
-					throw new TypeModeError("Recursion in inferred type " + this + " & " 
+					throw new TypeModeError("Recursion in inferred type " + this + " & "
 						+ otherVar);
 				}
 				else {
 					otherVar.setContents(me);
 				}
 			}
-			else {// both not free 
+			else {// both not free
 				me.content.checkEqualTypes(otherVar.content);
 				me.setContents(otherVar);
 //				otherVar.setContents(shrunkType);
 			}
 		} else if (me.isFree()) {
 			if (!(other.isFreeFor(this))) {
-				throw new TypeModeError("Recursion in inferred type " + this + " & " 
+				throw new TypeModeError("Recursion in inferred type " + this + " & "
 					+ other);
 			}
 			else
@@ -93,7 +94,7 @@ public class TVar extends Type {
 			me.content.checkEqualTypes(other);
 		}
 	}
-	
+
 	public boolean isSubTypeOf(Type declared, Map renamings) {
 		TVar me = derefTVar();
 		if (!me.isFree()) {
@@ -102,7 +103,7 @@ public class TVar extends Type {
 			return Type.object.equals(declared);
 		} else {
 			TVar vdeclared = ((TVar)declared).derefTVar();
-			
+
 			if (!vdeclared.isFree())
 				return false;
 			else {
@@ -118,6 +119,7 @@ public class TVar extends Type {
 	}
 
 	/** Package-visible for use by ConstraintSolver */
+	@Deprecated
 	TVar derefTVar() {
 		if (content!=null && content instanceof TVar) {
 			return ((TVar)content).derefTVar();
@@ -157,8 +159,8 @@ public class TVar extends Type {
 			return clone;
 		else {
 			clone = new TVar(me.getName());
-			clone.setContents(me.content==null ? 
-			                    null : me.content.clone(varRenamings)); 
+			clone.setContents(me.content==null ?
+			                    null : me.content.clone(varRenamings));
 			varRenamings.put(me,clone);
 			return clone;
 		}
@@ -187,7 +189,7 @@ public class TVar extends Type {
 //		}
 //	}
 
-	
+
 	public boolean equals(Object other) {
 		if (!(other instanceof TVar))
 			return false;
@@ -195,13 +197,13 @@ public class TVar extends Type {
 			return this.derefTVar()==((TVar)other).derefTVar();
 		}
 	}
-	
+
 	public int hashCode() {
 		TVar aliasOfMe = this.derefTVar();
-		if (aliasOfMe==this) 
+		if (aliasOfMe==this)
 			return super.hashCode();
 		else
-			return aliasOfMe.hashCode();		
+			return aliasOfMe.hashCode();
 	}
 
 	public Type intersect(Type other) throws TypeModeError {
@@ -217,7 +219,7 @@ public class TVar extends Type {
 			return other;
 		}
 	}
-	
+
 	public boolean hasOverlapWith(Type other) {
 		TVar me = derefTVar();
 		if (!me.isFree()) {
@@ -240,14 +242,14 @@ public class TVar extends Type {
 			return null;
 		}
 	}
-	
-	
+
+
 
     /* (non-Javadoc)
      * @see tyRuBa.modes.Type#javaEquivalent()
      */
     public Class javaEquivalent() throws TypeModeError {
-                
+
         Type contents = getContents();
         if (contents != null) {
             return contents.javaEquivalent();
