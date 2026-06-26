@@ -191,6 +191,13 @@ public class TVar extends Type {
 		}
 	}
 
+	public Type union(Type other, ConstraintSolver solver) throws TypeModeError {
+		// In the new world TVars are never mutated. A TVar's union
+		// with any type is just that type — the TVar is a placeholder
+		// resolved by the solver's constraint maps.
+		return other;
+	}
+
 	public Type union(Type other) throws TypeModeError {
 		TVar me = derefTVar();
 		if (!me.isFree()) {
