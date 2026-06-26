@@ -6,6 +6,7 @@ import java.util.Vector;
 import tyRuBa.engine.compilation.CompilationContext;
 import tyRuBa.engine.compilation.Compiled;
 import tyRuBa.engine.visitor.ExpressionVisitor;
+import tyRuBa.modes.ConstraintSolver;
 import tyRuBa.modes.ErrorMode;
 import tyRuBa.modes.Factory;
 import tyRuBa.modes.Mode;
@@ -57,6 +58,16 @@ public class RBConjunction extends RBCompoundExpression {
 			}
 		}
 		return resultEnv;
+	}
+
+	public ConstraintSolver typecheckWithConstraintSolver(
+			PredInfoProvider predinfo, ConstraintSolver solver)
+	throws TypeModeError {
+		for (int i = 0; i < getNumSubexps(); i++) {
+			solver = getSubexp(i)
+				.typecheckWithConstraintSolver(predinfo, solver);
+		}
+		return solver;
 	}
 
 	public RBExpression convertToMode(ModeCheckContext context,
