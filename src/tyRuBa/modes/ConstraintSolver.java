@@ -101,7 +101,7 @@ public class ConstraintSolver {
 		return this;
 	}
 	
-	private ConstraintSolver _recordLowerBound(TVar tvar, Type bound) throws TypeModeError {
+	ConstraintSolver _recordLowerBound(TVar tvar, Type bound) throws TypeModeError {
 		Type existing = lowerBounds.get(tvar);
 		if (existing != null) {
 			lowerBounds.put(tvar, existing.union(bound, this));

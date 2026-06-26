@@ -192,9 +192,11 @@ public class TVar extends Type {
 	}
 
 	public Type union(Type other, ConstraintSolver solver) throws TypeModeError {
-		// In the new world TVars are never mutated. A TVar's union
-		// with any type is just that type — the TVar is a placeholder
-		// resolved by the solver's constraint maps.
+		// Union of a TVar with another type: the TVar must be a supertype
+		// of `other`. Record this as a lower bound on the TVar via the
+		// solver. Return `other` — the actual resolved type comes from
+		// solve(), but `other` serves as the union placeholder.
+		solver._recordLowerBound(this, other);
 		return other;
 	}
 
