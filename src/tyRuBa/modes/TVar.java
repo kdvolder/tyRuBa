@@ -5,6 +5,8 @@
 \*****************************************************************/
 package tyRuBa.modes;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -192,12 +194,13 @@ public class TVar extends Type {
 	}
 
 	public Type union(Type other, ConstraintSolver solver) throws TypeModeError {
-		// Union of a TVar with another type: the TVar must be a supertype
-		// of `other`. Record this as a lower bound on the TVar via the
-		// solver. Return `other` — the actual resolved type comes from
-		// solve(), but `other` serves as the union placeholder.
-		solver._recordLowerBound(this, other);
-		return other;
+		// The union of a TVar with another type is the union of both.
+		// We create a UnionType — the TVar itself is a valid element
+		// of the union even though it's unresolved.
+		List<Type> types = new ArrayList<>();
+		types.add(this);
+		types.add(other);
+		return UnionType.make(types);
 	}
 
 	public Type union(Type other) throws TypeModeError {
