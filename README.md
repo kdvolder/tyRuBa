@@ -5,26 +5,26 @@ TyRuba's former home is here http://tyruba.sourceforge.net/ documentation
 for the language still lives there for now.  There are some more documentation 
 files there, describing the actual logic language.
 
-##NEW IN RELEASE 8.0.0
+## NEW IN RELEASE 8.0.0
 
   Removed 'strict' typing. The concept seemed broken and annoying. Predicates that 'expect'
   certain types of values will no simply 'fail' in the usual way when passed values of
   the 'wrong type'. I.e. the predicates are simply considered to be 'false' on these
   values and they are filtered from the query result.
 
-##NEW IN RELEASE 7.4.1
+## NEW IN RELEASE 7.4.1
 
   TyRuBa now provides a jar that contains all of its dependencies for a somewhat 
   easier 'download and run' experience. 
 
-##NEW IN RELEASE 7.4
+## NEW IN RELEASE 7.4
 
   Essentially, this is just the 7.3 release with few changes to 
   remove the cobwebs from a code base that hasn't been looked at in years.
   The main goal for this release was to get things setup with a proper
   CI process resulting in builds properly publishing artefacts to maven central. 
 
-##NEW IN RELEASE 7.3
+## NEW IN RELEASE 7.3
 
   Bugfixes, in particular one bugfix having to do with TyRuBa very inconsiderately
   closing System.out or System.err when its done. This really didn't seem to
@@ -32,7 +32,7 @@ files there, describing the actual logic language.
   operation. However, apparantly it may cause some problems for people on other
   platforms who may experience trouble using those streams afterwards. 
 
-##NEW IN RELEASE 7.2 (internal release only)
+## NEW IN RELEASE 7.2 (internal release only)
 
   Commandline options: -benchmark -cachesize -dbdir
   
@@ -42,12 +42,12 @@ files there, describing the actual logic language.
   
   Bug fixes.
 
-##NEW IN RELEASE 7.1
+## NEW IN RELEASE 7.1
 
   Lots' of optimizations, refactorings, bug fixes has been going on since release
   6.1. The backend was basically completely reimplemented.
 
-##NEW IN RELEASE 6.1  
+## NEW IN RELEASE 6.1  
 
   (note release 6.0 was never made public because of too many problems with the
   new disk-based factbase implementation)
@@ -77,7 +77,7 @@ files there, describing the actual logic language.
        Factbases can be made persistent between runs of the query engine.
         (The API for doing this right now is not yet clearly doumented or stable)
 
-##BUILDING:
+## BUILDING:
 
 With ant:
 
@@ -90,7 +90,7 @@ Eclipse with the following steps:
  - Right-click build.xml and select "Run As >> Ant Build"
  - Find the compiled jar at `build/tyruba.jar`
 
-##RUNNING:
+## RUNNING:
 
 To run the command-line application:
 
@@ -106,13 +106,13 @@ If you did all that, you should be able to run tyruba from the commandline
 by invoking the tyruba command. See below for a description of commandline
 options and syntax.
 
-##COMMANDLINE INTERFACE
+## COMMANDLINE INTERFACE
 
 "tyruba" ["-noinit"] ("-silent" | "-nocache" | "-i" | "-o" filename | filename)*
 
 This will start the tyruba logic engine.  
 
-##INITFILES
+## INITFILES
 
 Before starting to process the commandline, tyruba starts by reading a file
 called initfile.rub.  This file is packaged with tyruba in its jar file. 
@@ -122,7 +122,7 @@ lib/.  If you edit them you must rebuild the .jar file or your changes
 won't be taking effect.  There is documentation on some of the basic
 predicates at http://tyruba.sourceforge.net.
 
-##COMMANDLINE PROCESSING
+## COMMANDLINE PROCESSING
 
 After reading the initfile, the commandline is read from left to
 right. Options and filenames are processed directly, in that order
@@ -140,7 +140,7 @@ For more information about using tyruba, how to write logic rules and
 facts etc. Go see the TyRuBa tutorial/manual file. (Manual is not
 complete at this time)
 
-##COMMANDLINE OPTIONS
+## COMMANDLINE OPTIONS
 
  -noinit 
 
@@ -252,7 +252,7 @@ complete at this time)
      reporting progress or forcing gc in between the tests.
      Results are recorded and reported at the end of the entire testrun.
 
-##INCLUDE FILES
+## INCLUDE FILES
 
 Any file loaded by tyruba may contain #include directives. They look like
 
@@ -262,7 +262,7 @@ The filename is interpreted relative to the file in which the include
 directive is encountered. #include directives in -i mode are not
 supported currently.
 
-##TYRUBA WHILE RUNNING
+## TYRUBA WHILE RUNNING
 
 Tyruba will print some strange characters while running. There are four
 different ones: ".", "o", "H" and "@". What the heck is that? :-)
@@ -369,7 +369,7 @@ to implement more sophisticated strategies. So far, the need for more
 sophisticated cache management has not been felt as something worht 
 spending the effort. 
 
-##CREDITS 
+## CREDITS 
 
  1) Third party source code:
   
