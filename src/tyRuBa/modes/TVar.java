@@ -5,8 +5,6 @@
 \*****************************************************************/
 package tyRuBa.modes;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -197,10 +195,7 @@ public class TVar extends Type {
 		// The union of a TVar with another type is the union of both.
 		// We create a UnionType — the TVar itself is a valid element
 		// of the union even though it's unresolved.
-		List<Type> types = new ArrayList<>();
-		types.add(this);
-		types.add(other);
-		return UnionType.make(types);
+		return UnionType.make(this, other);
 	}
 
 	public Type union(Type other) throws TypeModeError {

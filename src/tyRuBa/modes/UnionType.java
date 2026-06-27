@@ -1,9 +1,11 @@
 package tyRuBa.modes;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents the union (LUB) of two or more types.
@@ -16,50 +18,59 @@ import java.util.Map;
  * constraint solving directly. It is the exact result of a union
  * operation, regardless of whether its operands are fully resolved.
  *
- * Invariants maintained by {@link #make(List)}:
- * - At least 2 elements (throws if 0 or 1)
+ * Invariants maintained by {@link #make(Type, Type)}:
+ * - At least 2 elements (reduces to single type if only one remains)
  * - No element is itself a UnionType (flattening)
+ * - Order does not matter (elements stored in a Set)
  */
 public class UnionType extends Type {
 
-	private List<Type> elements;
+	private Set<Type> elements = new HashSet<Type>();
 
 	/**
-	 * Construct a union type from a list of types.
+	 * Construct a union type from two types.
 	 *
 	 * Enforces invariants:
-	 * - 0 elements → TypeModeError
-	 * - 1 element → returns that element directly
-	 * - 2+ elements → flattens nested unions
+	 * - If both types are the same → returns that type
+	 * - If one is a UnionType → flattens its elements
+	 * - If one subtypes the other → returns the supertype
+	 * - Otherwise → creates a new UnionType with both types
 	 *
-	 * @param types the types to union
-	 * @return a UnionType, or the single type if only one is given
-	 * @throws TypeModeError if types is empty
+	 * @param t1 first type
+	 * @param t2 second type
+	 * @return a UnionType, or the single type if only one is needed
+	 * @throws TypeModeError if types are incompatible
 	 */
-	public static Type make(List<Type> types) throws TypeModeError {
-		if (types.isEmpty()) {
-			throw new TypeModeError("Cannot create union of zero types");
+	public static Type make(Type t1, Type t2) throws TypeModeError {
+		if (t1.equals(t2)) {
+			return t1;
 		}
-		if (types.size() == 1) {
-			return types.get(0);
+		// t1.isSuperTypeOf(t2) is equivalent to !t2.isSubTypeOf(t1)
+		if (!t2.isSubTypeOf(t1, new java.util.HashMap<>())) {
+			return t1;
 		}
-		// Flatten: extract all non-union elements
-		List<Type> flat = new ArrayList<>();
-		for (Type t : types) {
-			if (t instanceof UnionType) {
-				UnionType ut = (UnionType) t;
-				flat.addAll(ut.elements);
-			} else {
-				flat.add(t);
-			}
+		if (!t1.isSubTypeOf(t2, new java.util.HashMap<>())) {
+			return t2;
+		}
+		// Flatten: extract all non-union elements from both sides
+		Set<Type> flat = new HashSet<Type>();
+		if (t1 instanceof UnionType) {
+			flat.addAll(((UnionType) t1).elements);
+		} else {
+			flat.add(t1);
+		}
+		if (t2 instanceof UnionType) {
+			flat.addAll(((UnionType) t2).elements);
+		} else {
+			flat.add(t2);
 		}
 		if (flat.size() == 1) {
-			return flat.get(0);
+			return flat.iterator().next();
 		}
 		return new UnionType(flat);
 	}
 
-	private UnionType(List<Type> elements) {
+	private UnionType(Set<Type> elements) {
 		this.elements = elements;
 	}
 
@@ -82,7 +93,7 @@ public class UnionType extends Type {
 
 	@Override
 	public Type clone(Map varRenamings) {
-		List<Type> cloned = new ArrayList<>();
+		Set<Type> cloned = new HashSet<Type>();
 		for (Type t : elements) {
 			cloned.add(t.clone(varRenamings));
 		}
@@ -97,11 +108,12 @@ public class UnionType extends Type {
 	@Override
 	public Type union(Type other, ConstraintSolver solver) throws TypeModeError {
 		// (A1|A2|...) ∪ B = (A1∪B) | (A2∪B) | ...
-		List<Type> results = new ArrayList<>();
+		Type result = null;
 		for (Type t : elements) {
-			results.add(t.union(other, solver));
+			Type u = t.union(other, solver);
+			result = (result == null) ? u : make(result, u);
 		}
-		return UnionType.make(results);
+		return result;
 	}
 
 	@Override
@@ -112,11 +124,14 @@ public class UnionType extends Type {
 	@Override
 	public Type intersect(Type other, ConstraintSolver solver) throws TypeModeError {
 		// (A1|A2|...) ∩ B = (A1∩B) | (A2∩B) | ...
-		List<Type> results = new ArrayList<>();
+		Set<Type> results = new HashSet<Type>();
 		for (Type t : elements) {
 			results.add(t.intersect(other, solver));
 		}
-		return UnionType.make(results);
+		if (results.size() == 1) {
+			return results.iterator().next();
+		}
+		return new UnionType(results);
 	}
 
 	@Override
@@ -141,6 +156,7 @@ public class UnionType extends Type {
 		return false;
 	}
 
+	@Override
 	public Type getParamType(String currName, Type repAs) {
 		throw new UnsupportedOperationException("UnionType.getParamType is not supported");
 	}
@@ -166,10 +182,17 @@ public class UnionType extends Type {
 
 	@Override
 	public String toString() {
+		List<Type> sorted = new ArrayList<Type>(elements);
+		// Sort for consistent output (sets don't guarantee order)
+		java.util.Collections.sort(sorted, new java.util.Comparator<Type>() {
+			public int compare(Type a, Type b) {
+				return a.toString().compareTo(b.toString());
+			}
+		});
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < elements.size(); i++) {
+		for (int i = 0; i < sorted.size(); i++) {
 			if (i > 0) sb.append("|");
-			sb.append(elements.get(i).toString());
+			sb.append(sorted.get(i).toString());
 		}
 		return sb.toString();
 	}
