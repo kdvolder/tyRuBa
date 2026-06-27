@@ -49,12 +49,10 @@ public class ConstraintSolver {
 	 */
 	public ConstraintSolver assertSubtypeOf(Type sub, Type supr) throws TypeModeError {
 		if (sub instanceof TVar) {
-			// In the new world TVars are never mutated/bound via content.
-			// They are tracked solely by the solver's constraint maps.
-			return _recordUpperBound((TVar)sub, supr);
+			return assertSubtypeOf((TVar)sub, supr);
 		}
 		if (supr instanceof TVar) {
-			return _recordLowerBound((TVar)supr, sub);
+			return assertSuperTypeOf((TVar)supr, sub);
 		}
 		
 		if (sub instanceof CompositeType && supr instanceof CompositeType) {
@@ -87,22 +85,30 @@ public class ConstraintSolver {
 			+ " <: " + supr.getClass().getSimpleName());
 	}
 	
-	private ConstraintSolver _recordUpperBound(TVar tvar, Type bound) throws TypeModeError {
+	/**
+	 * Assert constraint: tvar is a subtype of t.
+	 * Records an upper bound on tvar: tvar ⊑ t.
+	 */
+	ConstraintSolver assertSubtypeOf(TVar tvar, Type t) throws TypeModeError {
 		Type existing = upperBounds.get(tvar);
 		if (existing != null) {
-			upperBounds.put(tvar, existing.intersect(bound, this));
+			upperBounds.put(tvar, existing.intersect(t, this));
 		} else {
-			upperBounds.put(tvar, bound);
+			upperBounds.put(tvar, t);
 		}
 		return this;
 	}
 	
-	ConstraintSolver _recordLowerBound(TVar tvar, Type bound) throws TypeModeError {
+	/**
+	 * Assert constraint: tvar is a supertype of t.
+	 * Records a lower bound on tvar: tvar ⊒ t.
+	 */
+	ConstraintSolver assertSuperTypeOf(TVar tvar, Type t) throws TypeModeError {
 		Type existing = lowerBounds.get(tvar);
 		if (existing != null) {
-			lowerBounds.put(tvar, existing.union(bound, this));
+			lowerBounds.put(tvar, existing.union(t, this));
 		} else {
-			lowerBounds.put(tvar, bound);
+			lowerBounds.put(tvar, t);
 		}
 		return this;
 	}
