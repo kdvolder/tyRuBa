@@ -48,10 +48,6 @@ public class ConstraintSolver {
 	 * Walks both types in parallel, recording constraints on any TVars found.
 	 */
 	public ConstraintSolver assertSubtypeOf(Type sub, Type supr) throws TypeModeError {
-		return _assertSubtypeOf(sub, supr);
-	}
-	
-	private ConstraintSolver _assertSubtypeOf(Type sub, Type supr) throws TypeModeError {
 		if (sub instanceof TVar) {
 			// In the new world TVars are never mutated/bound via content.
 			// They are tracked solely by the solver's constraint maps.
@@ -68,7 +64,7 @@ public class ConstraintSolver {
 				TupleType subArgs = compSub.getArgs();
 				TupleType suprArgs = compSupr.getArgs();
 				for (int i = 0; i < subArgs.size(); i++) {
-					_assertSubtypeOf(subArgs.get(i), suprArgs.get(i));
+					assertSubtypeOf(subArgs.get(i), suprArgs.get(i));
 				}
 				return this;
 			} else {
@@ -81,13 +77,13 @@ public class ConstraintSolver {
 			TupleType subArgs = (TupleType) sub;
 			TupleType suprArgs = (TupleType) supr;
 			for (int i = 0; i < subArgs.size(); i++) {
-				_assertSubtypeOf(subArgs.get(i), suprArgs.get(i));
+				assertSubtypeOf(subArgs.get(i), suprArgs.get(i));
 			}
 			return this;
 		}
 		
 		throw new UnsupportedOperationException(
-			"_assertSubtypeOf unhandled: " + sub.getClass().getSimpleName()
+			"assertSubtypeOf unhandled: " + sub.getClass().getSimpleName()
 			+ " <: " + supr.getClass().getSimpleName());
 	}
 	
