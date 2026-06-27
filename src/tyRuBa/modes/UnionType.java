@@ -100,13 +100,7 @@ public class UnionType extends Type {
 
 	@Override
 	public Type union(Type other, ConstraintSolver solver) throws TypeModeError {
-		// (A1|A2|...) ∪ B = (A1∪B) | (A2∪B) | ...
-		Type result = null;
-		for (Type t : elements) {
-			Type u = t.union(other, solver);
-			result = (result == null) ? u : make(result, u);
-		}
-		return result;
+		return UnionType.make(this, other);
 	}
 
 	@Override
