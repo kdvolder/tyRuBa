@@ -119,7 +119,7 @@ abstract public class Type implements Cloneable, Serializable {
 	 * graph rather than just the type structure.
 	 */
 	public boolean contains(TVar tvar, ConstraintSolver solver) {
-		return false;
+		throw new UnsupportedOperationException("not yet implemented: " + this.getClass().getName());
 	}
 
 }
