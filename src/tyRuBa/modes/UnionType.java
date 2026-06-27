@@ -111,14 +111,34 @@ public class UnionType extends Type {
 	@Override
 	public Type intersect(Type other, ConstraintSolver solver) throws TypeModeError {
 		// (A1|A2|...) ∩ B = (A1∩B) | (A2∩B) | ...
+		// Individual element intersections may be empty (throw TypeModeError).
+		// Only throw if the entire union is eliminated.
 		Set<Type> results = new HashSet<Type>();
 		for (Type t : elements) {
-			results.add(t.intersect(other, solver));
+			try {
+				Type i = t.intersect(other, solver);
+				if (i instanceof UnionType) {
+					// Flatten: extract nested union elements
+					results.addAll(((UnionType) i).elements);
+				} else {
+					results.add(i);
+				}
+			} catch (TypeModeError e) {
+				// This branch is eliminated (empty intersection), continue
+			}
+		}
+		if (results.isEmpty()) {
+			throw new TypeModeError("Incompatible types: " + this + ", " + other);
 		}
 		if (results.size() == 1) {
 			return results.iterator().next();
 		}
-		return new UnionType(results);
+		// Use UnionType.make iteratively to maintain flattening invariant
+		Type result = null;
+		for (Type t : results) {
+			result = (result == null) ? t : UnionType.make(result, t);
+		}
+		return result;
 	}
 
 	@Override
