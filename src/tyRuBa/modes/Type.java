@@ -112,4 +112,14 @@ abstract public class Type implements Cloneable, Serializable {
 
 	public abstract Type makeStrict();
 
+	/**
+	 * Check if a TVar occurs in this type structure, resolving
+	 * constrained TVars through the solver's constraint maps.
+	 * This is a proper occurs check that follows the constraint
+	 * graph rather than just the type structure.
+	 */
+	public boolean contains(TVar tvar, ConstraintSolver solver) {
+		return false;
+	}
+
 }

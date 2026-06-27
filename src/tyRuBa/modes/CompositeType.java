@@ -304,6 +304,11 @@ public class CompositeType extends BoundaryType {
 		return strict;
 	}
 
+	@Override
+	public boolean contains(TVar tvar, ConstraintSolver solver) {
+		return args.contains(tvar, solver);
+	}
+
 	public Type makeStrict() {
 		return new CompositeType(typeConst,true,(TupleType) args.makeStrict());
 	}

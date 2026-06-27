@@ -88,8 +88,12 @@ public class ConstraintSolver {
 	/**
 	 * Assert constraint: tvar is a subtype of t.
 	 * Records an upper bound on tvar: tvar ⊑ t.
+	 * Rejects if tvar occurs inside t (cyclic constraint).
 	 */
 	ConstraintSolver assertSubtypeOf(TVar tvar, Type t) throws TypeModeError {
+		if (t.contains(tvar, this)) {
+			throw new TypeModeError("Occurs check failed: " + tvar + " occurs in " + t);
+		}
 		Type existing = upperBounds.get(tvar);
 		if (existing != null) {
 			upperBounds.put(tvar, existing.intersect(t, this));
@@ -102,8 +106,12 @@ public class ConstraintSolver {
 	/**
 	 * Assert constraint: tvar is a supertype of t.
 	 * Records a lower bound on tvar: tvar ⊒ t.
+	 * Rejects if tvar occurs inside t (cyclic constraint).
 	 */
 	ConstraintSolver assertSuperTypeOf(TVar tvar, Type t) throws TypeModeError {
+		if (t.contains(tvar, this)) {
+			throw new TypeModeError("Occurs check failed: " + tvar + " occurs in " + t);
+		}
 		Type existing = lowerBounds.get(tvar);
 		if (existing != null) {
 			lowerBounds.put(tvar, existing.union(t, this));
@@ -192,6 +200,20 @@ public class ConstraintSolver {
 	 */
 	public boolean isConstrained(TVar tvar) {
 		return upperBounds.containsKey(tvar) || lowerBounds.containsKey(tvar);
+	}
+
+	/**
+	 * Get the upper bound for a TVar, if any.
+	 */
+	Type getUpperBound(TVar tvar) {
+		return upperBounds.get(tvar);
+	}
+
+	/**
+	 * Get the lower bound for a TVar, if any.
+	 */
+	Type getLowerBound(TVar tvar) {
+		return lowerBounds.get(tvar);
 	}
 
 	/**

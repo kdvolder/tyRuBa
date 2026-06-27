@@ -177,6 +177,21 @@ public class TVar extends Type {
 		}
 	}
 
+	@Override
+	public boolean contains(TVar tvar, ConstraintSolver solver) {
+		if (this == tvar) return true;
+		// If this TVar is constrained, check its bounds for the target TVar
+		Type upper = solver.getUpperBound(this);
+		if (upper != null && upper.contains(tvar, solver)) {
+			return true;
+		}
+		Type lower = solver.getLowerBound(this);
+		if (lower != null && lower.contains(tvar, solver)) {
+			return true;
+		}
+		return false;
+	}
+
 	public Type clone(Map varRenamings) {
 		TVar me = derefTVar();
 		TVar clone = (TVar)varRenamings.get(me);

@@ -311,6 +311,14 @@ public final class TupleType extends Type {
 	}
 
 	@Override
+	public boolean contains(TVar tvar, ConstraintSolver solver) {
+		for (Type t : parts) {
+			if (t.contains(tvar, solver)) return true;
+		}
+		return false;
+	}
+
+	@Override
 	public Type makeStrict() {
 		Type[] newParts = new Type[parts.size()];
 		for (int i = 0; i < newParts.length; i++) {

@@ -175,6 +175,14 @@ public class UnionType extends Type {
 	}
 
 	@Override
+	public boolean contains(TVar tvar, ConstraintSolver solver) {
+		for (Type t : elements) {
+			if (t.contains(tvar, solver)) return true;
+		}
+		return false;
+	}
+
+	@Override
 	public int hashCode() {
 		return elements.hashCode();
 	}
