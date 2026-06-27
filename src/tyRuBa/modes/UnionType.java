@@ -45,13 +45,6 @@ public class UnionType extends Type {
 		if (t1.equals(t2)) {
 			return t1;
 		}
-		// t1.isSuperTypeOf(t2) is equivalent to !t2.isSubTypeOf(t1)
-		if (!t2.isSubTypeOf(t1, new java.util.HashMap<>())) {
-			return t1;
-		}
-		if (!t1.isSubTypeOf(t2, new java.util.HashMap<>())) {
-			return t2;
-		}
 		// Flatten: extract all non-union elements from both sides
 		Set<Type> flat = new HashSet<Type>();
 		if (t1 instanceof UnionType) {
